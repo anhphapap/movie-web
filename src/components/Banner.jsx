@@ -18,12 +18,12 @@ const Banner = ({ movie }) => {
     };
     return (
       <div
-        className="w-full h-screen bg-no-repeat bg-cover bg-center relative"
+        className="w-full min-w-min h-screen bg-no-repeat bg-cover bg-center relative"
         style={bg}
       >
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
         <div className="px-14 grid grid-cols-2 gap-4 h-full">
-          <div className="flex flex-col justify-center h-full space-y-3">
+          <div className="flex flex-col justify-center h-full z-10 space-y-3">
             <h1 className="uppercase text-9xl font-bold italic text-red-600 truncate">
               {movie.movie.origin_name}
             </h1>

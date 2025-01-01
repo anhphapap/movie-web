@@ -9,7 +9,7 @@ import MovieList from "./components/MovieList";
 
 library.add(fas, fab, far);
 
-var movie = [];
+var movie = {};
 export const fetchDetailsMovie = async (slug) => {
   const options = {
     method: "GET",

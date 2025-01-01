@@ -6,6 +6,25 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Needflex</title>
+  <style>
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    .ReactModal__Overlay {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.7) !important;
+      z-index: 9999;
+      overflow-y: auto;
+    }
+
+    .ReactModal__Content {
+      border: 0 !important;
+      border-radius: 0.5rem !important;
+    }
+  </style>
 </head>
 
 <body className="bg-[#141414]">
