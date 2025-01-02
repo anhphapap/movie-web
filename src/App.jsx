@@ -6,10 +6,11 @@ import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Banner from "./components/Banner";
 import MovieList from "./components/MovieList";
+import MovieModal from "./components/MovieModal";
 
 library.add(fas, fab, far);
 
-var movie = {};
+var banner = {};
 export const fetchDetailsMovie = async (slug) => {
   const options = {
     method: "GET",
@@ -30,6 +31,24 @@ export const fetchDetailsMovie = async (slug) => {
 
 function App() {
   const [movies, setMovies] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+
+  const openModal = (slug) => {
+    document.body.classList.add("modal-open");
+    var currentMovie = fetchDetailsMovie(slug);
+    currentMovie.then((res) => {
+      currentMovie = res;
+      setModalContent(currentMovie);
+    });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    document.body.classList.remove("modal-open");
+    setIsModalOpen(false);
+    setModalContent(null);
+  };
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -45,6 +64,13 @@ function App() {
         try {
           var response = await fetch(url, options);
           var data = await response.json();
+          if (i == 1) {
+            banner = data.items[0].slug;
+            banner = fetchDetailsMovie(banner);
+            banner.then((res) => {
+              banner = res;
+            });
+          }
           if (data.items && Array.isArray(data.items)) {
             data.items.map((item) => {
               movies.push(item);
@@ -59,20 +85,25 @@ function App() {
     fetchMovies();
   }, []);
 
-  useEffect(() => {
-    if (movies.length > 0) {
-      movie = fetchDetailsMovie(movies[0].slug);
-      movie.then((res) => {
-        movie = res;
-      });
-    }
-  }, [movies]);
-
   return (
-    <div className="bg-[#141414]">
+    <div className="bg-[#141414] overflow-x-hidden">
       <Header />
-      <Banner movie={movie} />
-      <MovieList data={movies.slice(0, 23)} />
+      <Banner movie={banner} openModal={openModal} />
+      <MovieList
+        data={movies.slice(0, 23)}
+        nameList={"Mới cập nhập"}
+        openModal={openModal}
+      />
+      <MovieList
+        data={movies.slice(24, 47)}
+        nameList={"Mới cập nhập"}
+        closeModal={closeModal}
+      />
+      <MovieModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        modal={modalContent}
+      />
     </div>
   );
 }
