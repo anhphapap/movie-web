@@ -2,9 +2,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const Header = () => {
   return (
-    <div className="py-5 px-14 bg-gradient-to-b from-black/80 to-black/0 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
+    <div className="py-5 px-[3%] bg-gradient-to-b from-black/90 to-black/0 flex items-center justify-between fixed top-0 left-0 right-0 z-50">
       <div className="flex items-center space-x-4">
-        <img src="./public/logo.png" className="h-[30px] mr-6"></img>
+        <img
+          src="./public/logo.png"
+          className="w-[15%] mr-[2.5%] object-cover"
+        ></img>
         <nav className="flex items-center space-x-4">
           <a href="#" className="text-white hover:opacity-80">
             Trang chủ

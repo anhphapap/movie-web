@@ -35,7 +35,6 @@ function App() {
   const [modalContent, setModalContent] = useState(null);
 
   const openModal = (slug) => {
-    document.body.classList.add("modal-open");
     var currentMovie = fetchDetailsMovie(slug);
     currentMovie.then((res) => {
       currentMovie = res;
@@ -45,7 +44,6 @@ function App() {
   };
 
   const closeModal = () => {
-    document.body.classList.remove("modal-open");
     setIsModalOpen(false);
     setModalContent(null);
   };
@@ -86,9 +84,15 @@ function App() {
   }, []);
 
   return (
-    <div className="bg-[#141414] overflow-x-hidden">
+    <div className="bg-[#141414] overflow-x-hidden text-xs lg:text-lg 2xl:text-2xl">
       <Header />
       <Banner movie={banner} openModal={openModal} />
+      <MovieList
+        data={movies.slice(0, 10)}
+        nameList={"Top 10 lượt xem"}
+        openModal={openModal}
+        type={"top"}
+      />
       <MovieList
         data={movies.slice(0, 23)}
         nameList={"Mới cập nhập"}
@@ -97,7 +101,7 @@ function App() {
       <MovieList
         data={movies.slice(24, 47)}
         nameList={"Mới cập nhập"}
-        closeModal={closeModal}
+        openModal={openModal}
       />
       <MovieModal
         isOpen={isModalOpen}

@@ -7,10 +7,6 @@
   <link rel="shortcut icon" href="https://assets.nflxext.com/ffe/siteui/common/icons/nficon2016.ico">
   <title>Needflex</title>
   <style>
-    body.modal-open {
-      overflow: hidden;
-    }
-
     .ReactModal__Overlay {
       position: fixed;
       width: 100vw;
@@ -18,6 +14,7 @@
       background-color: rgba(0, 0, 0, 0.7) !important;
       z-index: 9999;
       overflow-y: auto;
+      overscroll-behavior: none;
     }
 
     .ReactModal__Content {
