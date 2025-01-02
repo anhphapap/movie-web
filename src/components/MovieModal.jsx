@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { fetchDetailsMovie } from "../App";
 
 const customStyles = {
   content: {
@@ -29,7 +28,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[80%] xl:w-[70%] 2xl:w-[50%] outline-none"
+      className="w-[80%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col w-full rounded-lg">
         <div
@@ -53,15 +52,21 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                   className="absolute top-0 left-0 w-full h-full"
                   target="_blank"
                 ></a>
-              )) || (
-                <a
-                  href={modal.movie.trailer_url}
-                  className="absolute top-0 left-0 w-full h-full"
-                  target="_blank"
-                ></a>
-              )}
-              <button className="px-7 py-2 font-semibold text-lg text-black flex items-center space-x-2">
-                <FontAwesomeIcon icon="fa-solid fa-play" size="xl" />
+              )) ||
+                (modal.movie.trailer_url != "" && (
+                  <a
+                    href={modal.movie.trailer_url}
+                    className="absolute top-0 left-0 w-full h-full"
+                    target="_blank"
+                  ></a>
+                )) || (
+                  <a
+                    href="#"
+                    className="absolute top-0 left-0 w-full h-full"
+                  ></a>
+                )}
+              <button className="px-7 py-2 font-semibold text-black flex items-center space-x-2">
+                <FontAwesomeIcon icon="fa-solid fa-play" />
                 <span>Phát</span>
               </button>
             </div>
@@ -73,9 +78,9 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             </button>
           </div>
         </div>
-        <div className="flex flex-col p-10 space-y-10">
-          <div className="flex items-start space-x-5">
-            <div className="flex flex-col space-y-6 w-3/4">
+        <div className="flex flex-col p-[5%] space-y-10">
+          <div className="flex items-start space-x-[3%]">
+            <div className="flex flex-col space-y-4 w-[70%]">
               <div className="flex flex-col space-y-3">
                 <div className="flex items-center justify-start space-x-2 opacity-70">
                   <span className="lowercase">{modal.movie.year}</span>
@@ -90,15 +95,17 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                   </span>
                 </div>
               </div>
-              <h1 className="text-4xl font-bold">{modal.movie.name}</h1>
+              <h1 className="text-3xl lg:text-4xl font-bold text-ellipsis overflow-hidden line-clamp-1">
+                {modal.movie.name}
+              </h1>
               <div
                 dangerouslySetInnerHTML={{
                   __html: modal.movie.content,
                 }}
-                className="text-lg text-white text-ellipsis overflow-hidden max-h-28"
+                className="text-white text-ellipsis overflow-hidden line-clamp-4"
               />
             </div>
-            <div className="flex flex-col space-y-3 text-base">
+            <div className="flex flex-col space-y-3">
               {modal.movie.director[0] != "" && (
                 <div>
                   <span className="opacity-50">Diễn viên: </span>
@@ -153,7 +160,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                         className="absolute top-0 left-0 w-full h-full"
                         target="_blank"
                       ></a>
-                      <button className="py-2 font-semibold text-lg text-center w-full">
+                      <button className="py-2 font-semibold text-center w-full">
                         {item.name}
                       </button>
                     </div>

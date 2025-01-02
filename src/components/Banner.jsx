@@ -1,6 +1,5 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import MovieList from "./MovieList";
 
 const Banner = ({ movie, openModal }) => {
   if (!movie?.movie?.name) {
@@ -40,13 +39,19 @@ const Banner = ({ movie, openModal }) => {
                     className="absolute top-0 left-0 w-full h-full"
                     target="_blank"
                   ></a>
-                )) || (
-                  <a
-                    href={movie.movie.trailer_url}
-                    className="absolute top-0 left-0 w-full h-full"
-                    target="_blank"
-                  ></a>
-                )}
+                )) ||
+                  (movie.movie.trailer_url != "" && (
+                    <a
+                      href={movie.movie.trailer_url}
+                      className="absolute top-0 left-0 w-full h-full"
+                      target="_blank"
+                    ></a>
+                  )) || (
+                    <a
+                      href="#"
+                      className="absolute top-0 left-0 w-full h-full"
+                    ></a>
+                  )}
                 <button className="px-7 py-2 font-semibold flex items-center justify-center space-x-2">
                   <FontAwesomeIcon icon="fa-solid fa-play" />
                   <span>Phát</span>

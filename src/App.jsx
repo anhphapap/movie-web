@@ -84,22 +84,22 @@ function App() {
   }, []);
 
   return (
-    <div className="bg-[#141414] overflow-x-hidden text-xs lg:text-lg 2xl:text-2xl">
+    <div className="bg-[#141414] overflow-x-hidden text-xs lg:text-lg 2xl:text-2xl select-none outline-none ">
       <Header />
       <Banner movie={banner} openModal={openModal} />
       <MovieList
-        data={movies.slice(0, 10)}
+        data={movies.slice(49, 59)}
         nameList={"Top 10 lượt xem"}
         openModal={openModal}
         type={"top"}
       />
       <MovieList
-        data={movies.slice(0, 23)}
+        data={movies.slice(0, 24)}
         nameList={"Mới cập nhập"}
         openModal={openModal}
       />
       <MovieList
-        data={movies.slice(24, 47)}
+        data={movies.slice(25, 48)}
         nameList={"Mới cập nhập"}
         openModal={openModal}
       />
