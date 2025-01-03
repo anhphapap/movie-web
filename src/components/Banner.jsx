@@ -1,8 +1,35 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
-const Banner = ({ movie, openModal }) => {
-  if (!movie?.movie?.name) {
+const Banner = ({ openModal }) => {
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchMovie = async () => {
+      setLoading(true);
+      try {
+        const listResponse = await axios.get(
+          `https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1`
+        );
+        const movieList = listResponse.data.items || [];
+
+        const detailResponse = await axios.get(
+          `https://ophim1.com/phim/${movieList[0].slug}`
+        );
+        setMovie(detailResponse.data);
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+      }
+      setLoading(false);
+    };
+
+    fetchMovie();
+  }, []);
+
+  if (loading) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
         <FontAwesomeIcon
@@ -13,13 +40,10 @@ const Banner = ({ movie, openModal }) => {
       </div>
     );
   } else {
-    const bg = {
-      backgroundImage: `url(${movie.movie.poster_url})`,
-    };
     return (
       <div
-        className="p-[3%] w-full aspect-video xl:aspect-[8/3] bg-no-repeat bg-cover bg-center relative"
-        style={bg}
+        className="p-[3%] w-full aspect-video xl:aspect-[8/3] bg-no-repeat bg-cover bg-top relative"
+        style={{ backgroundImage: `url(${movie.movie.poster_url})` }}
       >
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
         <div className="flex h-full">
@@ -29,7 +53,7 @@ const Banner = ({ movie, openModal }) => {
             </h1>
             <div
               dangerouslySetInnerHTML={{ __html: movie.movie.content }}
-              className=" text-white truncate text-wrap line-clamp-4"
+              className=" text-white truncate line-clamp-4 text-pretty"
             />
             <div className="flex items-start space-x-3">
               <div className="relative rounded bg-white hover:bg-white/80">
@@ -75,7 +99,7 @@ const Banner = ({ movie, openModal }) => {
 };
 
 Banner.propTypes = {
-  movie: PropTypes.object,
+  openModal: PropTypes.func.isRequired,
 };
 
 export default Banner;

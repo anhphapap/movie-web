@@ -95,24 +95,24 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                   </span>
                 </div>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-ellipsis overflow-hidden line-clamp-1">
+              <h1 className="text-3xl lg:text-4xl font-bold">
                 {modal.movie.name}
               </h1>
               <div
                 dangerouslySetInnerHTML={{
                   __html: modal.movie.content,
                 }}
-                className="text-white text-ellipsis overflow-hidden line-clamp-4"
+                className="text-white text-pretty"
               />
             </div>
-            <div className="flex flex-col space-y-3">
-              {modal.movie.director[0] != "" && (
+            <div className="flex flex-col space-y-3 w-[30%]">
+              {modal.movie.actor[0] != "" && (
                 <div>
                   <span className="opacity-50">Diễn viên: </span>
-                  {modal.movie.director.map((director, index) => (
+                  {modal.movie.actor.map((actor, index) => (
                     <span>
-                      {director}
-                      {index !== modal.movie.director.length - 1 && (
+                      {actor}
+                      {index !== modal.movie.actor.length - 1 && (
                         <span>, </span>
                       )}
                     </span>
