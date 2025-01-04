@@ -50,7 +50,7 @@ function App() {
         type={"list"}
         country={""}
         category={"Kinh Dị"}
-        size={12}
+        size={10}
       />
       <MovieList
         nameList={"Sắp ra mắt"}
@@ -58,7 +58,7 @@ function App() {
         type={"trailer"}
         country={""}
         category={""}
-        size={12}
+        size={10}
       />
       <MovieModal
         isOpen={isModalOpen}

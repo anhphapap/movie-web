@@ -29,7 +29,7 @@ const Banner = ({ openModal }) => {
     fetchMovie();
   }, []);
 
-  if (loading) {
+  if (loading || !movie) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
         <FontAwesomeIcon
@@ -41,12 +41,13 @@ const Banner = ({ openModal }) => {
     );
   } else {
     return (
-      <div
-        className="p-[3%] w-full aspect-video xl:aspect-[8/3] bg-no-repeat bg-cover bg-top relative"
-        style={{ backgroundImage: `url(${movie.movie.poster_url})` }}
-      >
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
-        <div className="flex h-full">
+      <div className="p-[3%] relative w-screen">
+        <img
+          src={movie.movie.poster_url}
+          className="absolute top-0 left-0 w-full aspect-video bg-no-repeat bg-cover bg-top"
+        ></img>
+        <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
+        <div className="flex w-full aspect-[16/6]">
           <div className="flex flex-col justify-end h-full z-10 space-y-3 w-2/3 xl:w-1/2">
             <h1 className="uppercase text-5xl lg:text-8xl 2xl:text-9xl font-bold italic text-red-600 truncate text-wrap line-clamp-2">
               {movie.movie.origin_name}
@@ -76,14 +77,14 @@ const Banner = ({ openModal }) => {
                       className="absolute top-0 left-0 w-full h-full"
                     ></a>
                   )}
-                <button className="px-7 py-2 font-semibold flex items-center justify-center space-x-2">
+                <button className="py-2 lg:py-5 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
                   <FontAwesomeIcon icon="fa-solid fa-play" />
                   <span>Phát</span>
                 </button>
               </div>
               <div className="relative rounded bg-white/30 hover:bg-white/20">
                 <button
-                  className="px-7 py-2 text-white font-semibold flex items-center justify-center space-x-2"
+                  className="py-2 lg:py-5 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
                   onClick={() => openModal(movie.movie.slug)}
                 >
                   <FontAwesomeIcon icon="fa-solid fa-circle-info" />

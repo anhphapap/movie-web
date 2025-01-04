@@ -28,22 +28,13 @@ const Header = () => {
           : "bg-gradient-to-b from-black/70 to-transparent text-white"
       }`}
     >
-      <div className="flex items-center space-x-4">
-        <img
-          src="https://fontmeme.com/permalink/250103/fda9dcbfaff7ae0df8c9c8a6609816d0.png"
-          className="w-[25%] mr-[2.5%] object-cover"
-        ></img>
-        <nav className="flex items-center space-x-4">
-          <a href="#" className="text-white hover:opacity-80">
-            Trang chủ
-          </a>
-          <a href="#" className="text-white hover:opacity-80">
-            Phim bộ
-          </a>
-          <a href="#" className="text-white hover:opacity-80">
-            Phim lẻ
-          </a>
-        </nav>
+      <div className="w-[10%]">
+        <a href="/">
+          <img
+            src="https://fontmeme.com/permalink/250103/fda9dcbfaff7ae0df8c9c8a6609816d0.png"
+            className="object-cover h-full"
+          ></img>
+        </a>
       </div>
       <div className="flex items-center space-x-4">
         <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />

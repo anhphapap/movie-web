@@ -39,13 +39,13 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
         >
           <div className="absolute top-3 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
           <button
-            className="aspect-square w-7 rounded-full bg-black absolute right-3 top-3 z-10"
+            className="aspect-square w-7 rounded-full bg-black absolute right-3 top-3 z-10 flex items-center justify-center"
             onClick={onClose}
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" />
           </button>
-          <div className="flex space-x-2 absolute left-10 bottom-10">
-            <div className="relative rounded bg-white hover:bg-white/80">
+          <div className="flex space-x-2 absolute left-[5%] bottom-[5%]">
+            <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center">
               {(modal.episodes[0].server_data[0].link_embed != "" && (
                 <a
                   href={modal.episodes[0].server_data[0].link_embed}
@@ -65,15 +65,15 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                     className="absolute top-0 left-0 w-full h-full"
                   ></a>
                 )}
-              <button className="px-7 py-2 font-semibold text-black flex items-center space-x-2">
+              <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                 <FontAwesomeIcon icon="fa-solid fa-play" />
                 <span>Phát</span>
               </button>
             </div>
-            <button className="aspect-square w-11 rounded-full bg-transparent border-2">
+            <button className="p-2 sm:p-3 lg:p-5 h-full rounded-full bg-transparent border-2 flex items-center justify-center">
               <FontAwesomeIcon icon="fa-solid fa-plus" />
             </button>
-            <button className="aspect-square w-11 rounded-full bg-transparent border-2">
+            <button className="p-2 sm:p-3 lg:p-5 h-full rounded-full bg-transparent border-2 flex items-center justify-center">
               <FontAwesomeIcon icon="fa-regular fa-heart" />
             </button>
           </div>
@@ -110,7 +110,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 <div>
                   <span className="opacity-50">Diễn viên: </span>
                   {modal.movie.actor.map((actor, index) => (
-                    <span>
+                    <span key={index}>
                       {actor}
                       {index !== modal.movie.actor.length - 1 && (
                         <span>, </span>
@@ -122,7 +122,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
               <div>
                 <span className="opacity-50">Quốc gia: </span>
                 {modal.movie.country.map((country, index) => (
-                  <span>
+                  <span key={index}>
                     {country.name}
                     {index !== modal.movie.country.length - 1 && (
                       <span>, </span>
@@ -133,7 +133,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
               <div>
                 <span className="opacity-50">Thể loại: </span>
                 {modal.movie.category.map((category, index) => (
-                  <span>
+                  <span key={index}>
                     {category.name}
                     {index !== modal.movie.category.length - 1 && (
                       <span>, </span>
@@ -153,8 +153,11 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                   </span>
                 </div>
                 <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
-                  {modal.episodes[0].server_data.map((item) => (
-                    <div className="relative rounded bg-[#242424] hover:bg-opacity-70">
+                  {modal.episodes[0].server_data.map((item, index) => (
+                    <div
+                      className="relative rounded bg-[#242424] hover:bg-opacity-70"
+                      key={index}
+                    >
                       <a
                         href={item.link_embed}
                         className="absolute top-0 left-0 w-full h-full"
