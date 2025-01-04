@@ -3,7 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState, useEffect } from "react";
 
-const Banner = ({ openModal }) => {
+const Banner = ({
+  openModal,
+  type_slug = "/danh-sach/phim-moi-cap-nhat",
+  type = "",
+}) => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -12,12 +16,12 @@ const Banner = ({ openModal }) => {
       setLoading(true);
       try {
         const listResponse = await axios.get(
-          `https://ophim1.com/danh-sach/phim-moi-cap-nhat?page=1`
+          `${import.meta.env.VITE_API_LIST}${type_slug}?&type=${type}&page=1`
         );
-        const movieList = listResponse.data.items || [];
+        const movieList = listResponse.data.data.items[0] || null;
 
         const detailResponse = await axios.get(
-          `https://ophim1.com/phim/${movieList[0].slug}`
+          `${import.meta.env.VITE_API_DETAILS}${movieList.slug}`
         );
         setMovie(detailResponse.data);
       } catch (error) {
@@ -77,14 +81,14 @@ const Banner = ({ openModal }) => {
                       className="absolute top-0 left-0 w-full h-full"
                     ></a>
                   )}
-                <button className="py-2 lg:py-5 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
+                <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
                   <FontAwesomeIcon icon="fa-solid fa-play" />
                   <span>Phát</span>
                 </button>
               </div>
               <div className="relative rounded bg-white/30 hover:bg-white/20">
                 <button
-                  className="py-2 lg:py-5 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
+                  className="py-2 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
                   onClick={() => openModal(movie.movie.slug)}
                 >
                   <FontAwesomeIcon icon="fa-solid fa-circle-info" />

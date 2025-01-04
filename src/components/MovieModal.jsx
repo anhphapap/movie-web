@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const customStyles = {
   content: {
     position: "absolute",
-    top: "5%",
+    top: "4%",
     left: "50%",
     bottom: "auto",
     transform: "translate(-50%)",
@@ -28,7 +28,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[80%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+      className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col w-full rounded-lg">
         <div
@@ -84,6 +84,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
               <div className="flex flex-col space-y-3">
                 <div className="flex items-center justify-start space-x-2 opacity-70">
                   <span className="lowercase">{modal.movie.year}</span>
+                  <span className="lowercase">{modal.movie.view}</span>
                   <span className="lowercase">{modal.movie.time}</span>
                   <span className="px-1 border-[1px] text-xs rounded font-bold">
                     {modal.movie.quality}
@@ -95,9 +96,14 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                   </span>
                 </div>
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold">
-                {modal.movie.name}
-              </h1>
+              <div>
+                <h1 className="text-3xl lg:text-4xl font-bold">
+                  {modal.movie.name}
+                </h1>
+                <span className="font-light opacity-70">
+                  <i>({modal.movie.origin_name})</i>
+                </span>
+              </div>
               <div
                 dangerouslySetInnerHTML={{
                   __html: modal.movie.content,
@@ -140,6 +146,14 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                     )}
                   </span>
                 ))}
+              </div>
+              <div>
+                <span className="opacity-50">Ngày cập nhật: </span>
+                <span>
+                  {new Date(modal.movie.modified.time).toLocaleDateString(
+                    "vi-VN"
+                  )}
+                </span>
               </div>
             </div>
           </div>
