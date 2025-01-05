@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Link } from "react-router-dom";
 
 const customStyles = {
   content: {
@@ -47,28 +48,22 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           <div className="flex space-x-2 absolute left-[5%] bottom-[5%]">
             <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center">
               {(modal.episodes[0].server_data[0].link_embed != "" && (
-                <a
-                  href={modal.episodes[0].server_data[0].link_embed}
-                  className="absolute top-0 left-0 w-full h-full"
-                  target="_blank"
-                ></a>
-              )) ||
-                (modal.movie.trailer_url != "" && (
-                  <a
-                    href={modal.movie.trailer_url}
-                    className="absolute top-0 left-0 w-full h-full"
-                    target="_blank"
-                  ></a>
-                )) || (
-                  <a
-                    href="#"
-                    className="absolute top-0 left-0 w-full h-full"
-                  ></a>
-                )}
-              <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
-                <FontAwesomeIcon icon="fa-solid fa-play" />
-                <span>Phát</span>
-              </button>
+                <Link
+                  to={`/watch/${modal.movie.slug}/${0}`}
+                  key={modal.movie._id + 0}
+                  onClick={onClose}
+                >
+                  <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                    <FontAwesomeIcon icon="fa-solid fa-play" />
+                    <span>Phát</span>
+                  </button>
+                </Link>
+              )) || (
+                <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                  <FontAwesomeIcon icon="fa-solid fa-bell" />
+                  <span>Nhắc tôi</span>
+                </button>
+              )}
             </div>
             <button className="p-2 sm:p-3 lg:p-5 h-full rounded-full bg-transparent border-2 flex items-center justify-center">
               <FontAwesomeIcon icon="fa-solid fa-plus" />
@@ -168,19 +163,16 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 </div>
                 <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
                   {modal.episodes[0].server_data.map((item, index) => (
-                    <div
+                    <Link
+                      to={`/watch/${modal.movie.slug}/${index}`}
                       className="relative rounded bg-[#242424] hover:bg-opacity-70"
-                      key={index}
+                      key={modal.movie._id + index}
+                      onClick={onClose}
                     >
-                      <a
-                        href={item.link_embed}
-                        className="absolute top-0 left-0 w-full h-full"
-                        target="_blank"
-                      ></a>
                       <button className="py-2 font-semibold text-center w-full">
                         {item.name}
                       </button>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

@@ -12,6 +12,8 @@ import MovieList from "./components/MovieList";
 import SearchPage from "./pages/SearchPage";
 import axios from "axios";
 import Header from "./components/Header";
+import WatchPage from "./pages/WatchPage";
+import Footer from "./components/Footer";
 
 library.add(fas, fab, far);
 
@@ -37,161 +39,166 @@ function App() {
       <Router>
         <>
           <Header />
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <MainLayout openModal={openModal}>
-                  <MovieCarousel
-                    nameList={"Top 10 phim bộ"}
-                    openModal={openModal}
-                    typeList={"top"}
-                    type_slug={"danh-sach/phim-bo"}
-                    sort_field={"view"}
-                    year={"2024,2025"}
-                    size={10}
-                  />
-                  <MovieCarousel
-                    nameList={"Mới trên Needflex"}
-                    openModal={openModal}
-                    typeList={"list"}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Hàn Quốc"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    country={"han-quoc"}
-                  />
-                  <MovieCarousel
-                    nameList={"Top 10 phim lẻ"}
-                    openModal={openModal}
-                    typeList={"top"}
-                    type_slug={"danh-sach/phim-le"}
-                    sort_field={"view"}
-                    year={"2024,2025"}
-                    size={10}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Kinh Dị"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    category={"kinh-di"}
-                  />
-                  <MovieCarousel
-                    nameList={"Sắp ra mắt"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
-                  />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/phim-bo"
-              element={
-                <MainLayout
-                  type={"series"}
-                  type_slug={"/danh-sach/phim-bo"}
-                  openModal={openModal}
-                >
-                  <MovieCarousel
-                    nameList={"Top 10 phim bộ"}
-                    openModal={openModal}
-                    typeList={"top"}
-                    type_slug={"danh-sach/phim-bo"}
-                    sort_field={"view"}
-                    year={"2024,2025"}
-                    size={10}
-                  />
-                  <MovieCarousel
-                    nameList={"Mới trên Needflex"}
-                    openModal={openModal}
-                    type_slug={"danh-sach/phim-bo"}
-                    typeList={"list"}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Hàn Quốc"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-bo"}
-                    country={"han-quoc"}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Hành Động"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-bo"}
-                    category={"hanh-dong"}
-                  />
-                  <MovieCarousel
-                    nameList={"Sắp ra mắt"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
-                    type={"series"}
-                  />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/phim-le"
-              element={
-                <MainLayout
-                  type={"single"}
-                  type_slug={"/danh-sach/phim-le"}
-                  openModal={openModal}
-                >
-                  <MovieCarousel
-                    nameList={"Top 10 phim lẻ"}
-                    openModal={openModal}
-                    typeList={"top"}
-                    type_slug={"danh-sach/phim-le"}
-                    sort_field={"view"}
-                    year={"2024,2025"}
-                    size={10}
-                  />
-                  <MovieCarousel
-                    nameList={"Mới trên Needflex"}
-                    openModal={openModal}
-                    type_slug={"danh-sach/phim-le"}
-                    typeList={"list"}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Hàn Quốc"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-le"}
-                    country={"han-quoc"}
-                  />
-                  <MovieCarousel
-                    nameList={"Phim Hành Động"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-le"}
-                    category={"hanh-dong"}
-                  />
-                  <MovieCarousel
-                    nameList={"Sắp ra mắt"}
-                    openModal={openModal}
-                    typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
-                    type={"single"}
-                  />
-                </MainLayout>
-              }
-            />
-            <Route
-              path="/search"
-              element={<SearchPage openModal={openModal}></SearchPage>}
-            />
-          </Routes>
+          <MovieModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            modal={modalContent}
+          />
         </>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <MainLayout openModal={openModal}>
+                <MovieCarousel
+                  nameList={"Top 10 phim bộ"}
+                  openModal={openModal}
+                  typeList={"top"}
+                  type_slug={"danh-sach/phim-bo"}
+                  sort_field={"view"}
+                  year={"2024,2025"}
+                  size={10}
+                />
+                <MovieCarousel
+                  nameList={"Mới trên Needflex"}
+                  openModal={openModal}
+                  typeList={"list"}
+                />
+                <MovieCarousel
+                  nameList={"Phim Hàn Quốc"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  country={"han-quoc"}
+                />
+                <MovieCarousel
+                  nameList={"Top 10 phim lẻ"}
+                  openModal={openModal}
+                  typeList={"top"}
+                  type_slug={"danh-sach/phim-le"}
+                  sort_field={"view"}
+                  year={"2024,2025"}
+                  size={10}
+                />
+                <MovieCarousel
+                  nameList={"Phim Kinh Dị"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  category={"kinh-di"}
+                />
+                <MovieCarousel
+                  nameList={"Sắp ra mắt"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-sap-chieu"}
+                />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/phim-bo"
+            element={
+              <MainLayout
+                type={"series"}
+                type_slug={"/danh-sach/phim-bo"}
+                openModal={openModal}
+              >
+                <MovieCarousel
+                  nameList={"Top 10 phim bộ"}
+                  openModal={openModal}
+                  typeList={"top"}
+                  type_slug={"danh-sach/phim-bo"}
+                  sort_field={"view"}
+                  year={"2024,2025"}
+                  size={10}
+                />
+                <MovieCarousel
+                  nameList={"Mới trên Needflex"}
+                  openModal={openModal}
+                  type_slug={"danh-sach/phim-bo"}
+                  typeList={"list"}
+                />
+                <MovieCarousel
+                  nameList={"Phim Hàn Quốc"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-bo"}
+                  country={"han-quoc"}
+                />
+                <MovieCarousel
+                  nameList={"Phim Hành Động"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-bo"}
+                  category={"hanh-dong"}
+                />
+                <MovieCarousel
+                  nameList={"Sắp ra mắt"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-sap-chieu"}
+                  type={"series"}
+                />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/phim-le"
+            element={
+              <MainLayout
+                type={"single"}
+                type_slug={"/danh-sach/phim-le"}
+                openModal={openModal}
+              >
+                <MovieCarousel
+                  nameList={"Top 10 phim lẻ"}
+                  openModal={openModal}
+                  typeList={"top"}
+                  type_slug={"danh-sach/phim-le"}
+                  sort_field={"view"}
+                  year={"2024,2025"}
+                  size={10}
+                />
+                <MovieCarousel
+                  nameList={"Mới trên Needflex"}
+                  openModal={openModal}
+                  type_slug={"danh-sach/phim-le"}
+                  typeList={"list"}
+                />
+                <MovieCarousel
+                  nameList={"Phim Hàn Quốc"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-le"}
+                  country={"han-quoc"}
+                />
+                <MovieCarousel
+                  nameList={"Phim Hành Động"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-le"}
+                  category={"hanh-dong"}
+                />
+                <MovieCarousel
+                  nameList={"Sắp ra mắt"}
+                  openModal={openModal}
+                  typeList={"list"}
+                  type_slug={"danh-sach/phim-sap-chieu"}
+                  type={"single"}
+                />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/search"
+            element={<SearchPage openModal={openModal}></SearchPage>}
+          />
+          <Route
+            path="/watch/:movieSlug/:episode"
+            element={<WatchPage onClose={closeModal} />}
+          />
+        </Routes>
+        <Footer />
       </Router>
-      <MovieModal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        modal={modalContent}
-      />
     </div>
   );
 }

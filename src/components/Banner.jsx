@@ -2,6 +2,7 @@ import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const Banner = ({
   openModal,
@@ -63,28 +64,21 @@ const Banner = ({
             <div className="flex items-start space-x-3">
               <div className="relative rounded bg-white hover:bg-white/80">
                 {(movie.episodes[0].server_data[0].link_embed != "" && (
-                  <a
-                    href={movie.episodes[0].server_data[0].link_embed}
-                    className="absolute top-0 left-0 w-full h-full"
-                    target="_blank"
-                  ></a>
-                )) ||
-                  (movie.movie.trailer_url != "" && (
-                    <a
-                      href={movie.movie.trailer_url}
-                      className="absolute top-0 left-0 w-full h-full"
-                      target="_blank"
-                    ></a>
-                  )) || (
-                    <a
-                      href="#"
-                      className="absolute top-0 left-0 w-full h-full"
-                    ></a>
-                  )}
-                <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
-                  <FontAwesomeIcon icon="fa-solid fa-play" />
-                  <span>Phát</span>
-                </button>
+                  <Link
+                    to={`/watch/${movie.movie.slug}/${0}`}
+                    key={movie.movie._id + 0}
+                  >
+                    <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
+                      <FontAwesomeIcon icon="fa-solid fa-play" />
+                      <span>Phát</span>
+                    </button>
+                  </Link>
+                )) || (
+                  <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
+                    <FontAwesomeIcon icon="fa-solid fa-bell" />
+                    <span>Nhắc tôi</span>
+                  </button>
+                )}
               </div>
               <div className="relative rounded bg-white/30 hover:bg-white/20">
                 <button
