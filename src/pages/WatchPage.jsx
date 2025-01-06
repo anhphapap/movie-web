@@ -38,11 +38,11 @@ const WatchPage = () => {
     );
   return (
     <div className="min-h-screen text-white relative">
-      <div className="relative w-full h-screen bg-black">
+      <div className="relative w-screen bg-black aspect-video">
         <iframe
           src={movie.episodes[0].server_data[episode].link_embed}
           title={`${movie.movie.name} - Tập ${movie.episodes[0].server_data[episode].name}`}
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute top-0 left-0 w-full aspect-video"
           allowFullScreen
         />
       </div>

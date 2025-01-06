@@ -38,7 +38,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             backgroundImage: `url(${modal.movie.poster_url})`,
           }}
         >
-          <div className="absolute top-3 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
           <button
             className="aspect-square w-7 rounded-full bg-black absolute right-3 top-3 z-10 flex items-center justify-center"
             onClick={onClose}
@@ -76,20 +76,36 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
         <div className="flex flex-col p-[5%] space-y-10">
           <div className="flex items-start space-x-[3%]">
             <div className="flex flex-col space-y-4 w-[70%]">
-              <div className="flex flex-col space-y-3">
-                <div className="flex items-center justify-start space-x-2 opacity-70">
-                  <span className="lowercase">{modal.movie.year}</span>
-                  <span className="lowercase">{modal.movie.view}</span>
-                  <span className="lowercase">{modal.movie.time}</span>
-                  <span className="px-1 border-[1px] text-xs rounded font-bold">
-                    {modal.movie.quality}
-                  </span>
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between opacity-70">
+                  <div className="flex space-x-2 items-center">
+                    <span className="lowercase">{modal.movie.year}</span>
+                    <span className="lowercase">{modal.movie.time}</span>
+                    <span className="px-1 border-[1px] text-xs rounded font-bold">
+                      {modal.movie.quality}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="lowercase">{modal.movie.view}</span>
+                    <FontAwesomeIcon icon="fa-regular fa-eye" />
+                  </div>
                 </div>
-                <div>
-                  <span className="px-2 py-1 border-[1px] rounded-sm">
-                    {modal.movie.episode_current}
-                  </span>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="px-2 py-1 border-[1px] rounded-sm">
+                      {modal.movie.episode_current}
+                    </span>
+                  </div>
                 </div>
+                {modal.movie.tmdb.vote_count > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
+                      className="h-4 lg:h-6"
+                    ></img>
+                    <span>{modal.movie.tmdb.vote_average.toFixed(1)}</span>
+                  </div>
+                )}
               </div>
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold">
@@ -155,7 +171,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           {modal.movie.type != "single" &&
             modal.episodes[0].server_data[0].link_embed != "" && (
               <div className="flex flex-col space-y-5">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold">Tập</span>
                   <span className="px-3 py-1 font-semibold uppercase border-[1px] opacity-70 rounded bg-[#242424]">
                     {modal.movie.lang}
