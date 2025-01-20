@@ -54,7 +54,7 @@ function App() {
                   typeList={"top"}
                   type_slug={"danh-sach/phim-bo"}
                   sort_field={"view"}
-                  year={"2024,2025"}
+                  year={2025}
                   size={10}
                 />
                 <MovieCarousel
@@ -74,7 +74,7 @@ function App() {
                   typeList={"top"}
                   type_slug={"danh-sach/phim-le"}
                   sort_field={"view"}
-                  year={"2024,2025"}
+                  year={2025}
                   size={10}
                 />
                 <MovieCarousel
@@ -106,7 +106,7 @@ function App() {
                   typeList={"top"}
                   type_slug={"danh-sach/phim-bo"}
                   sort_field={"view"}
-                  year={"2024,2025"}
+                  year={2025}
                   size={10}
                 />
                 <MovieCarousel
@@ -153,7 +153,7 @@ function App() {
                   typeList={"top"}
                   type_slug={"danh-sach/phim-le"}
                   sort_field={"view"}
-                  year={"2024,2025"}
+                  year={2025}
                   size={10}
                 />
                 <MovieCarousel

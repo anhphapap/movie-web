@@ -94,16 +94,21 @@ const MovieCarousel = ({
     const fetchMovies = async () => {
       setLoading(true);
       var page = 1;
+      var totalPage = 1;
       var movieList = [];
 
       try {
-        while (movieList.length < size) {
+        while (movieList.length < size && page <= totalPage) {
           var listResponse = await axios.get(
             `${
               import.meta.env.VITE_API_LIST
             }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
           );
           var currentList = listResponse.data.data.items || [];
+          totalPage = parseInt(
+            listResponse.data.data.params.pagination.totalItems /
+              listResponse.data.data.params.pagination.totalItemsPerPage
+          );
           movieList = movieList.concat(currentList);
           page++;
         }
@@ -184,7 +189,7 @@ const MovieCarousel = ({
   } else {
     if (typeList === "top") {
       return (
-        <div className="my-8 relative">
+        <div className="my-8 relative bg-transparent">
           <h2 className="text-white font-bold mb-3 px-[3%]">{nameList}</h2>
           <Carousel
             responsive={responsive}
@@ -235,10 +240,10 @@ const MovieCarousel = ({
           customDot={<CustomDot />}
           showDots={true}
           renderDotsOutside={true}
-          dotListClass="absolute top-5 !right-[4%] !left-auto "
+          dotListClass="absolute top-5 !right-[4%] !left-auto"
           className="px-[3%]"
         >
-          {movies.map((item) => (
+          {movies.map((item, index) => (
             <div
               className="aspect-video bg-cover rounded-md group cursor-pointer mr-[3%] relative"
               style={{
