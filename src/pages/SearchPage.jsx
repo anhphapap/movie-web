@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MovieList from "../components/MovieList";
 import MainLayout from "../layouts/MainLayout";
+import Header from "../components/Header";
 
 const SearchPage = ({ openModal }) => {
   const [searchParams] = useSearchParams();

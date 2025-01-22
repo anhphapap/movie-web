@@ -127,7 +127,7 @@ const MovieCarousel = ({
     if (typeList === "top") {
       return (
         <div className="my-8 relative animate-pulse">
-          <h2 className="text-white font-bold mb-3 mx-[3%] rounded tex">
+          <h2 className="text-white font-semibold mb-3 mx-[3%] rounded tex">
             {nameList}
           </h2>
           <Carousel
@@ -190,7 +190,7 @@ const MovieCarousel = ({
     if (typeList === "top") {
       return (
         <div className="my-8 relative bg-transparent">
-          <h2 className="text-white font-bold mb-3 px-[3%]">{nameList}</h2>
+          <h2 className="text-white font-semibold mb-3 px-[3%]">{nameList}</h2>
           <Carousel
             responsive={responsive}
             centerMode={true}
@@ -231,7 +231,7 @@ const MovieCarousel = ({
     }
     return (
       <div className="my-8 relative">
-        <h2 className="text-white font-bold mb-3 px-[3%]">{nameList}</h2>
+        <h2 className="text-white font-semibold mb-3 px-[3%]">{nameList}</h2>
         <Carousel
           responsive={responsive}
           centerMode={true}

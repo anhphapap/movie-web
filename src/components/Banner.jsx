@@ -8,6 +8,7 @@ const Banner = ({
   openModal,
   type_slug = "/danh-sach/phim-moi-cap-nhat",
   type = "",
+  filter = false,
 }) => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,7 +47,11 @@ const Banner = ({
     );
   } else {
     return (
-      <div className="p-[3%] relative w-screen">
+      <div
+        className={`p-[3%] relative w-screen ${
+          filter && "mt-[10%] sm:mt-[8%] md:mt-[4%]"
+        }`}
+      >
         <img
           src={movie.movie.poster_url}
           className="absolute top-0 left-0 w-full aspect-video bg-no-repeat bg-cover bg-top"

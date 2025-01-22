@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const MovieList = ({
   openModal,
-  type_slug = "danh-sach/phim-moi-cap-nhat",
+  type_slug = "phim-moi-cap-nhat",
   sort_field = "modified.time",
   country = "",
   category = "",
@@ -27,7 +27,7 @@ const MovieList = ({
       if (!search)
         api = `${
           import.meta.env.VITE_API_LIST
-        }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}`;
+        }danh-sach/${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}`;
       else {
         const encodedQuery = keyword.trim().replace(/ /g, "+");
         api = `${
