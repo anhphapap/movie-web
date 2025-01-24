@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import NetflixSearch from "./Search";
 import FilterNavbar from "./FilterNavbar";
 
-const Header = ({ filter = false }) => {
+const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -29,9 +29,9 @@ const Header = ({ filter = false }) => {
       <div
         className={`flex items-center justify-between py-4 px-[3%] transition-all duration-500 ease-linear text-white ${
           filter
-            ? "bg-[#080808]"
+            ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : isScrolled
-            ? "bg-[#080808]"
+            ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : "bg-gradient-to-b from-black/70 to-transparent"
         }`}
       >
@@ -58,7 +58,7 @@ const Header = ({ filter = false }) => {
           <NetflixSearch />
         </div>
       </div>
-      {filter && <FilterNavbar />}
+      {filter && <FilterNavbar type_slug={type_slug.slice(1)} />}
     </div>
   );
 };

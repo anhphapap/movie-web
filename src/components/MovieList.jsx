@@ -17,6 +17,7 @@ const MovieList = ({
 }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [titleHead, setTitleHead] = useState("");
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -38,6 +39,7 @@ const MovieList = ({
         while (movieList.length < size) {
           var listResponse = await axios.get(`${api}&page=${page}`);
           var currentList = listResponse.data.data.items || [];
+          setTitleHead(listResponse.data.data.seoOnPage.titleHead);
           movieList = movieList.concat(currentList);
           if (
             page >=
@@ -54,7 +56,7 @@ const MovieList = ({
       setLoading(false);
     };
     fetchMovies();
-  }, [keyword, type_slug]);
+  }, [keyword, type_slug, country, category, year, sort_field]);
   if (loading) {
     return (
       <div className="w-screen h-screen flex items-center justify-center">
@@ -67,15 +69,18 @@ const MovieList = ({
     );
   }
   return (
-    <div className="text-white text-3xl mt-[8%] px-[3%]">
-      {(search && movies.length == 0 && (
-        <h1>Không tìm thấy bộ phim nào !</h1>
-      )) || (
-        <h1>
-          <span className="opacity-50">Kết quả tìm kiếm: </span>
-          {keyword}
-        </h1>
-      )}
+    <div className="text-white text-3xl mt-[10%] px-[3%]">
+      {(movies.length == 0 && <h1>Không tìm thấy bộ phim nào !</h1>) ||
+        (search && (
+          <h1>
+            <span className="opacity-50">Kết quả tìm kiếm: </span>
+            {keyword}
+          </h1>
+        )) || (
+          <h1>
+            <span className="opacity-50">{titleHead} </span>
+          </h1>
+        )}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mt-5">
         {movies.map((item) => (
           <div

@@ -1,14 +1,24 @@
 import { useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const NetflixSearch = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const previousPath = useRef(null);
 
   const handleSearch = (searchTerm) => {
-    if (searchTerm.trim()) {
+    if (searchTerm.trim() === "") {
+      if (previousPath.current) {
+        navigate(previousPath.current);
+        previousPath.current = null;
+      }
+    } else {
+      if (!previousPath.current) {
+        previousPath.current = location.pathname + location.search;
+      }
       navigate(`/search?q=${searchTerm}`);
     }
   };

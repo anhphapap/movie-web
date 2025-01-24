@@ -17,6 +17,7 @@ import axios from "axios";
 import Header from "./components/Header";
 import WatchPage from "./pages/WatchPage";
 import Footer from "./components/Footer";
+import FilterPage from "./pages/FilterPage";
 
 library.add(fas, fab, far);
 
@@ -27,7 +28,13 @@ const AppLayout = ({ children }) => {
 
   return (
     <div>
-      <Header filter={pathsWithFilter.includes(useLocation().pathname)} />
+      <Header
+        filter={
+          pathsWithFilter.includes(useLocation().pathname) ||
+          useLocation().pathname.startsWith("/filter")
+        }
+        type_slug={useLocation().pathname}
+      />
       {children}
     </div>
   );
@@ -209,6 +216,10 @@ function App() {
             <Route
               path="/watch/:movieSlug/:episode"
               element={<WatchPage onClose={closeModal} />}
+            />
+            <Route
+              path="/filter/:typeSlug"
+              element={<FilterPage openModal={openModal} />}
             />
           </Routes>
         </AppLayout>
