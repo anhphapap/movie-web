@@ -8,6 +8,8 @@ const Banner = ({
   openModal,
   type_slug = "/danh-sach/phim-moi-cap-nhat",
   type = "",
+  sort_field = "view",
+  year = 2025,
   filter = false,
 }) => {
   const [movie, setMovie] = useState(null);
@@ -18,7 +20,9 @@ const Banner = ({
       setLoading(true);
       try {
         const listResponse = await axios.get(
-          `${import.meta.env.VITE_API_LIST}${type_slug}?&type=${type}&page=1`
+          `${
+            import.meta.env.VITE_API_LIST
+          }${type_slug}?&type=${type}&page=1&sort_field=${sort_field}&year=${year}`
         );
         const movieList = listResponse.data.data.items[0] || null;
 
@@ -47,14 +51,10 @@ const Banner = ({
     );
   } else {
     return (
-      <div
-        className={`p-[3%] relative w-screen ${
-          filter && "mt-[10%] sm:mt-[8%] md:mt-[4%]"
-        }`}
-      >
+      <div className={`p-[3%] relative w-screen ${filter && "mt-12"}`}>
         <img
           src={movie.movie.poster_url}
-          className="absolute top-0 left-0 w-full aspect-video bg-no-repeat bg-cover bg-top"
+          className={`absolute top-0 left-0 w-full aspect-video bg-no-repeat bg-cover bg-top`}
         ></img>
         <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
         <div className="flex w-full aspect-[16/6]">

@@ -34,6 +34,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
             ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : "bg-gradient-to-b from-black/70 to-transparent"
         }`}
+        id="header"
       >
         <div className="flex items-center space-x-4 justify-start flex-shrink-1">
           <a href="/" className="mr-[2.5%] w-[20%] mt-1">
@@ -51,6 +52,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </a>
             <a href="/phim-le" className="text-white hover:opacity-80">
               Phim lẻ
+            </a>
+            <a href="/donate" className="text-white hover:opacity-80">
+              Donate
             </a>
           </nav>
         </div>

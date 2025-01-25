@@ -18,6 +18,7 @@ import Header from "./components/Header";
 import WatchPage from "./pages/WatchPage";
 import Footer from "./components/Footer";
 import FilterPage from "./pages/FilterPage";
+import DonatePage from "./pages/DonatePage";
 
 library.add(fas, fab, far);
 
@@ -58,7 +59,7 @@ function App() {
   };
 
   return (
-    <div className="bg-[#141414] overflow-x-hidden text-xs lg:text-lg 2xl:text-2xl select-none outline-none min-h-screen">
+    <div className="bg-[#141414] overflow-x-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
       <Router>
         <MovieModal
           isOpen={isModalOpen}
@@ -122,6 +123,7 @@ function App() {
                   type={"series"}
                   type_slug={"/danh-sach/phim-bo"}
                   openModal={openModal}
+                  filter={true}
                 >
                   <MovieCarousel
                     nameList={"Top 10 phim bộ"}
@@ -169,6 +171,7 @@ function App() {
                   type={"single"}
                   type_slug={"/danh-sach/phim-le"}
                   openModal={openModal}
+                  filter={true}
                 >
                   <MovieCarousel
                     nameList={"Top 10 phim lẻ"}
@@ -221,6 +224,7 @@ function App() {
               path="/filter/:typeSlug"
               element={<FilterPage openModal={openModal} />}
             />
+            <Route path="/donate" element={<DonatePage></DonatePage>} />
           </Routes>
         </AppLayout>
         <Footer />
