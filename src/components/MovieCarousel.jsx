@@ -45,7 +45,7 @@ const CustomDot = ({ onClick, active }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-3 h-[2px] mx-[2px] rounded-full transition-all ${
+      className={`w-[14px] h-[2px] mx-[0.5px] rounded-full transition-all ${
         active ? "bg-white" : "bg-gray-500"
       }`}
     ></button>
@@ -127,7 +127,7 @@ const MovieCarousel = ({
     if (typeList === "top") {
       return (
         <div className="my-8 relative animate-pulse">
-          <h2 className="text-white font-bold mb-3 mx-[3%] rounded tex">
+          <h2 className="text-white font-bold mb-3 mx-[3%] rounded">
             {nameList}
           </h2>
           <Carousel
@@ -231,7 +231,13 @@ const MovieCarousel = ({
     }
     return (
       <div className="my-8 relative">
-        <h2 className="text-white font-bold mb-3 px-[3%]">{nameList}</h2>
+        <div className="group cursor-pointer text-white font-bold px-[3%]">
+          <span className="mb-3 pr-2">{nameList}</span>
+          <span className="opacity-0 text-xs group-hover:opacity-70 transition-all ease-in-out duration-500">
+            Xem tất cả{" "}
+            <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
+          </span>
+        </div>
         <Carousel
           responsive={responsive}
           centerMode={true}

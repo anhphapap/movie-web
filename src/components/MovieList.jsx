@@ -96,17 +96,6 @@ const MovieList = ({
     fetchMovies();
   }, [keyword, type_slug, country, category, year, sort_field]);
 
-  if (loading) {
-    return (
-      <div className="w-screen h-screen flex items-center justify-center">
-        <FontAwesomeIcon
-          icon="fa-solid fa-spinner"
-          size="2xl"
-          className="animate-spin text-white"
-        />
-      </div>
-    );
-  }
   return (
     <div className="text-white mt-36 px-[3%]">
       {(movies.length == 0 && <h1>Không tìm thấy bộ phim nào !</h1>) || (
@@ -136,6 +125,15 @@ const MovieList = ({
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="flex items-center justify-center">
+            <FontAwesomeIcon
+              icon="fa-solid fa-spinner"
+              size="2xl"
+              className="animate-spin text-white"
+            />
+          </div>
+        )}
       </div>
     </div>
   );

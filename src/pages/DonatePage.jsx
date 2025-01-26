@@ -26,7 +26,7 @@ function DonatePage() {
       <h1 className="text-2xl sm:text-4xl font-bold">Donate</h1>
       <p>
         Để ủng hộ website & sử dụng tính năng VIP mode cho phim, hãy donate cho
-        trang web.
+        trang web
       </p>
       {(createdQR && (
         <>
