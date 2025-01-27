@@ -121,7 +121,9 @@ const MovieList = ({
             key={item._id}
           >
             <div className="absolute top-0 left-0 w-full rounded-md h-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-white">
-              <div className="font-bold text-center">{item.name}</div>
+              <div className="font-bold text-center truncate line-clamp-2 text-pretty">
+                {item.name}
+              </div>
             </div>
           </div>
         ))}

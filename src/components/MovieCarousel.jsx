@@ -79,7 +79,8 @@ const MovieCarousel = ({
   nameList,
   typeList = "list",
   openModal,
-  type_slug = "danh-sach/phim-moi-cap-nhat",
+  openList,
+  type_slug = "phim-moi-cap-nhat",
   sort_field = "modified.time",
   country = "",
   category = "",
@@ -102,7 +103,7 @@ const MovieCarousel = ({
           var listResponse = await axios.get(
             `${
               import.meta.env.VITE_API_LIST
-            }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
+            }danh-sach/${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
           );
           var currentList = listResponse.data.data.items || [];
           totalPage = parseInt(
@@ -216,7 +217,9 @@ const MovieCarousel = ({
                 />
                 <div className="aspect-[2/3] h-full relative">
                   <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center p-2 text-white">
-                    <div className=" font-bold text-center">{item.name}</div>
+                    <div className=" font-bold text-center truncate line-clamp-4 text-pretty">
+                      {item.name}
+                    </div>
                   </div>
                   <img
                     src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
@@ -231,9 +234,14 @@ const MovieCarousel = ({
     }
     return (
       <div className="my-8 relative">
-        <div className="group cursor-pointer text-white font-bold px-[3%]">
-          <span className="mb-3 pr-2">{nameList}</span>
-          <span className="opacity-0 text-xs group-hover:opacity-70 transition-all ease-in-out duration-500">
+        <div
+          className="group cursor-pointer text-white font-bold px-[3%] mb-3 inline-block"
+          onClick={() => openList({ type_slug, country, category })}
+        >
+          <span className="pr-2 group-hover:opacity-70 transition-all ease-in-out duration-300">
+            {nameList}
+          </span>
+          <span className="opacity-0 text-xs group-hover:opacity-70 transition-all ease-in-out duration-300">
             Xem tất cả{" "}
             <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
           </span>
@@ -261,7 +269,9 @@ const MovieCarousel = ({
               key={item._id}
             >
               <div className="absolute top-0 left-0 w-full rounded-md h-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-white">
-                <div className=" font-bold text-center">{item.name}</div>
+                <div className=" font-bold text-center truncate line-clamp-2 text-pretty">
+                  {item.name}
+                </div>
               </div>
             </div>
           ))}

@@ -40,7 +40,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
         >
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
           <button
-            className="aspect-square w-7 rounded-full bg-black absolute right-3 top-3 z-10 flex items-center justify-center"
+            className="aspect-square w-7 rounded-full bg-[#141414] absolute right-3 top-3 z-10 flex items-center justify-center"
             onClick={onClose}
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" />

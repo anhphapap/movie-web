@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const listCategory = [
+export const listCategory = [
   { name: "Hành Động", value: "hanh-dong" },
   { name: "Tình Cảm", value: "tinh-cam" },
   { name: "Hài Hước", value: "hai-huoc" },
@@ -27,7 +27,7 @@ const listCategory = [
   { name: "Phim 18+", value: "phim-18" },
 ];
 
-const listType = [
+export const listType = [
   { name: "Phim Bộ", value: "phim-bo" },
   { name: "Phim Lẻ", value: "phim-le" },
   { name: "Phim Mới", value: "phim-moi" },
@@ -42,13 +42,13 @@ const listType = [
   { name: "Subteam", value: "subteam" },
 ];
 
-const listSortField = [
+export const listSortField = [
   { name: "Thời gian cập nhật", value: "modified.time" },
   { name: "Thời gian đăng", value: "_id" },
   { name: "Năm sản xuất", value: "year" },
 ];
 
-const listCountry = [
+export const listCountry = [
   { name: "Hàn Quốc", value: "han-quoc" },
   { name: "Trung Quốc", value: "trung-quoc" },
   { name: "Nhật Bản", value: "nhat-ban" },

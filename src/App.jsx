@@ -19,6 +19,7 @@ import WatchPage from "./pages/WatchPage";
 import Footer from "./components/Footer";
 import FilterPage from "./pages/FilterPage";
 import DonatePage from "./pages/DonatePage";
+import ListModal from "./components/ListModal";
 
 library.add(fas, fab, far);
 
@@ -44,6 +45,8 @@ const AppLayout = ({ children }) => {
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
+  const [isListOpen, setIsListOpen] = useState(false);
+  const [listContent, setListContent] = useState(null);
 
   const openModal = async (slug) => {
     const currentMovie = await axios.get(
@@ -58,6 +61,21 @@ function App() {
     setModalContent(null);
   };
 
+  const openList = async ({ type_slug, country, category }) => {
+    const currentList = await axios.get(
+      `${
+        import.meta.env.VITE_API_LIST
+      }danh-sach/${type_slug}?sort_field=modified.time&category=${category}&country=${country}`
+    );
+    setListContent(currentList.data.data.items);
+    setIsListOpen(true);
+  };
+
+  const closeList = () => {
+    setIsListOpen(false);
+    setListContent(null);
+  };
+
   return (
     <div className="bg-[#141414] overflow-x-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
       <Router>
@@ -65,6 +83,12 @@ function App() {
           isOpen={isModalOpen}
           onClose={closeModal}
           modal={modalContent}
+        />
+        <ListModal
+          isOpen={isListOpen}
+          onClose={closeList}
+          movies={listContent}
+          openModal={openModal}
         />
         <AppLayout>
           <Routes>
@@ -76,7 +100,7 @@ function App() {
                     nameList={"Top 10 phim bộ"}
                     openModal={openModal}
                     typeList={"top"}
-                    type_slug={"danh-sach/phim-bo"}
+                    type_slug={"phim-bo"}
                     sort_field={"view"}
                     year={2025}
                     size={10}
@@ -84,19 +108,23 @@ function App() {
                   <MovieCarousel
                     nameList={"Mới trên Needflex"}
                     openModal={openModal}
+                    openList={openList}
+                    type_slug="phim-moi"
                     typeList={"list"}
                   />
                   <MovieCarousel
                     nameList={"Phim Hàn Quốc"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
                     country={"han-quoc"}
                   />
                   <MovieCarousel
                     nameList={"Top 10 phim lẻ"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"top"}
-                    type_slug={"danh-sach/phim-le"}
+                    type_slug={"phim-le"}
                     sort_field={"view"}
                     year={2025}
                     size={10}
@@ -104,14 +132,16 @@ function App() {
                   <MovieCarousel
                     nameList={"Phim Kinh Dị"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
                     category={"kinh-di"}
                   />
                   <MovieCarousel
                     nameList={"Sắp ra mắt"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
+                    type_slug={"phim-sap-chieu"}
                   />
                 </MainLayout>
               }
@@ -123,13 +153,15 @@ function App() {
                   type={"series"}
                   type_slug={"/danh-sach/phim-bo"}
                   openModal={openModal}
+                  openList={openList}
                   filter={true}
                 >
                   <MovieCarousel
                     nameList={"Top 10 phim bộ"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"top"}
-                    type_slug={"danh-sach/phim-bo"}
+                    type_slug={"phim-bo"}
                     sort_field={"view"}
                     year={2025}
                     size={10}
@@ -137,28 +169,32 @@ function App() {
                   <MovieCarousel
                     nameList={"Mới trên Needflex"}
                     openModal={openModal}
-                    type_slug={"danh-sach/phim-bo"}
+                    openList={openList}
+                    type_slug={"phim-bo"}
                     typeList={"list"}
                   />
                   <MovieCarousel
                     nameList={"Phim Hàn Quốc"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-bo"}
+                    type_slug={"phim-bo"}
                     country={"han-quoc"}
                   />
                   <MovieCarousel
                     nameList={"Phim Hành Động"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-bo"}
+                    type_slug={"phim-bo"}
                     category={"hanh-dong"}
                   />
                   <MovieCarousel
                     nameList={"Sắp ra mắt"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
+                    type_slug={"phim-sap-chieu"}
                     type={"series"}
                   />
                 </MainLayout>
@@ -171,13 +207,15 @@ function App() {
                   type={"single"}
                   type_slug={"/danh-sach/phim-le"}
                   openModal={openModal}
+                  openList={openList}
                   filter={true}
                 >
                   <MovieCarousel
                     nameList={"Top 10 phim lẻ"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"top"}
-                    type_slug={"danh-sach/phim-le"}
+                    type_slug={"phim-le"}
                     sort_field={"view"}
                     year={2025}
                     size={10}
@@ -185,28 +223,32 @@ function App() {
                   <MovieCarousel
                     nameList={"Mới trên Needflex"}
                     openModal={openModal}
-                    type_slug={"danh-sach/phim-le"}
+                    openList={openList}
+                    type_slug={"phim-le"}
                     typeList={"list"}
                   />
                   <MovieCarousel
                     nameList={"Phim Hàn Quốc"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-le"}
+                    type_slug={"phim-le"}
                     country={"han-quoc"}
                   />
                   <MovieCarousel
                     nameList={"Phim Hành Động"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-le"}
+                    type_slug={"phim-le"}
                     category={"hanh-dong"}
                   />
                   <MovieCarousel
                     nameList={"Sắp ra mắt"}
                     openModal={openModal}
+                    openList={openList}
                     typeList={"list"}
-                    type_slug={"danh-sach/phim-sap-chieu"}
+                    type_slug={"phim-sap-chieu"}
                     type={"single"}
                   />
                 </MainLayout>
