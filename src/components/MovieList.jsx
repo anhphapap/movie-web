@@ -27,7 +27,7 @@ const MovieList = ({
     if (!search) {
       api = `${
         import.meta.env.VITE_API_LIST
-      }danh-sach/${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}`;
+      }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}`;
     } else {
       const encodedQuery = keyword.trim().replace(/ /g, "+");
       api = `${import.meta.env.VITE_API_SEARCH}keyword=${encodedQuery}`;

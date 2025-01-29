@@ -6,8 +6,7 @@ import { Link } from "react-router-dom";
 
 const Banner = ({
   openModal,
-  type_slug = "/danh-sach/phim-moi-cap-nhat",
-  type = "",
+  type_slug = "phim-moi-cap-nhat",
   sort_field = "view",
   year = 2025,
   filter = false,
@@ -22,7 +21,7 @@ const Banner = ({
         const listResponse = await axios.get(
           `${
             import.meta.env.VITE_API_LIST
-          }${type_slug}?&type=${type}&page=1&sort_field=${sort_field}&year=${year}`
+          }${type_slug}?&page=1&sort_field=${sort_field}&year=${year}`
         );
         const movieList = listResponse.data.data.items[0] || null;
 

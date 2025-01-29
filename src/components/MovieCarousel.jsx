@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState, useEffect } from "react";
+import { listCategory, listCountry, listType } from "../utils/data";
 
 const tops = [
   '<svg width="100%" height="100%" viewBox="-30 0 70 154" ><path stroke="#595959" stroke-linejoin="square" stroke-width="4" d="M35.377 152H72V2.538L2 19.362v30.341l33.377-8.459V152z"></path></svg>',
@@ -76,7 +77,6 @@ const responsive = {
 };
 
 const MovieCarousel = ({
-  nameList,
   typeList = "list",
   openModal,
   openList,
@@ -90,6 +90,16 @@ const MovieCarousel = ({
 }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  var nameList = "";
+  if (typeList === "top") {
+    nameList =
+      "Top 10 " + listType.find((item) => item.value === type_slug).name;
+  } else
+    nameList =
+      "Phim " +
+      listCategory.find((item) => item.value === category).name +
+      " " +
+      listCountry.find((item) => item.value === country).name;
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -103,7 +113,7 @@ const MovieCarousel = ({
           var listResponse = await axios.get(
             `${
               import.meta.env.VITE_API_LIST
-            }danh-sach/${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
+            }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
           );
           var currentList = listResponse.data.data.items || [];
           totalPage = parseInt(
@@ -122,6 +132,8 @@ const MovieCarousel = ({
 
     fetchMovies();
   }, [type_slug]);
+
+  if (movies.length < 10) return null;
 
   if (loading) {
     const range = Array.from({ length: 10 }, (_, index) => index);
