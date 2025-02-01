@@ -86,7 +86,6 @@ const MovieCarousel = ({
   category = "",
   year = "",
   size = 24,
-  type = "",
 }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -113,7 +112,7 @@ const MovieCarousel = ({
           var listResponse = await axios.get(
             `${
               import.meta.env.VITE_API_LIST
-            }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}&page=${page}`
+            }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&page=${page}`
           );
           var currentList = listResponse.data.data.items || [];
           totalPage = parseInt(
@@ -248,7 +247,7 @@ const MovieCarousel = ({
       <div className="my-8 relative">
         <div
           className="group cursor-pointer text-white font-bold px-[3%] mb-3 inline-block"
-          onClick={() => openList({ type_slug, country, category })}
+          onClick={() => openList({ type_slug, country, category, nameList })}
         >
           <span className="pr-2 group-hover:opacity-70 transition-all ease-in-out duration-300">
             {nameList}

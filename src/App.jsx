@@ -9,7 +9,6 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import MovieCarousel from "./components/MovieCarousel";
 import MovieModal from "./components/MovieModal";
 import MainLayout from "./layouts/MainLayout";
 import SearchPage from "./pages/SearchPage";
@@ -48,7 +47,7 @@ function App() {
   const [modalContent, setModalContent] = useState(null);
   const [isListOpen, setIsListOpen] = useState(false);
   const [listContent, setListContent] = useState(null);
-  randomList("/phim-bo");
+  const [nameList, setNameList] = useState("");
 
   const openModal = async (slug) => {
     const currentMovie = await axios.get(
@@ -63,12 +62,13 @@ function App() {
     setModalContent(null);
   };
 
-  const openList = async ({ type_slug, country, category }) => {
+  const openList = async ({ type_slug, country, category, nameList }) => {
     const currentList = await axios.get(
       `${
         import.meta.env.VITE_API_LIST
-      } ${type_slug}?sort_field=modified.time&category=${category}&country=${country}`
+      } ${type_slug}?sort_field=modified.time&category=${category}&country=${country}&year=&page=1`
     );
+    setNameList(nameList);
     setListContent(currentList.data.data.items);
     setIsListOpen(true);
   };
@@ -91,6 +91,7 @@ function App() {
           onClose={closeList}
           movies={listContent}
           openModal={openModal}
+          nameList={nameList}
         />
         <AppLayout>
           <Routes>

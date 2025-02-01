@@ -8,19 +8,28 @@ const NetflixSearch = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const previousPath = useRef(null);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
-  const handleSearch = (searchTerm) => {
-    if (searchTerm.trim() === "") {
-      if (previousPath.current) {
-        navigate(previousPath.current);
-        previousPath.current = null;
+  const handleChange = (event) => {
+    const searchTerm = event.target.value;
+
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    const newTimeout = setTimeout(() => {
+      if (searchTerm.trim() === "") {
+        if (previousPath.current) {
+          navigate(previousPath.current);
+          previousPath.current = null;
+        }
+      } else {
+        if (!previousPath.current) {
+          previousPath.current = location.pathname + location.search;
+        }
+        navigate(`/search?q=${searchTerm}`);
       }
-    } else {
-      if (!previousPath.current) {
-        previousPath.current = location.pathname + location.search;
-      }
-      navigate(`/search?q=${searchTerm}`);
-    }
+    }, 300);
+
+    setSearchTimeout(newTimeout);
   };
 
   const toggleSearch = () => {
@@ -60,7 +69,7 @@ const NetflixSearch = () => {
             type="text"
             className="bg-black text-white placeholder:text-gray-400 outline-none"
             placeholder="Tên phim..."
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={handleChange}
           ></input>
         </div>
       )}

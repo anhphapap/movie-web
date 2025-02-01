@@ -41,7 +41,7 @@ export const randomList = (location) => {
   }
   listCarousel = [...listCarousel];
   if (location === "/") {
-    [listCarousel[1], listCarousel[3]] = [listCarousel[3], listCarousel[1]];
+    [listCarousel[1], listCarousel[4]] = [listCarousel[4], listCarousel[1]];
   }
   return listCarousel;
 };

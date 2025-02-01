@@ -19,7 +19,7 @@ const customStyles = {
   },
 };
 
-function ListModal({ isOpen, onClose, movies, openModal }) {
+function ListModal({ isOpen, onClose, movies, openModal, nameList }) {
   if (!movies) return null;
   return (
     <Modal
@@ -30,7 +30,7 @@ function ListModal({ isOpen, onClose, movies, openModal }) {
       className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
-        <h1 className="font-extrabold text-5xl my-12">Series Hàn Quốc</h1>
+        <h1 className="font-extrabold text-5xl my-12">{nameList}</h1>
         <div className="w-full">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-x-3 gap-y-14 mt-5">
             {movies.map((item) => (

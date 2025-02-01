@@ -10,7 +10,6 @@ const MovieList = ({
   country = "",
   category = "",
   year = "",
-  type = "",
   search = false,
   keyword = "",
 }) => {
@@ -27,7 +26,7 @@ const MovieList = ({
     if (!search) {
       api = `${
         import.meta.env.VITE_API_LIST
-      }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&type=${type}`;
+      }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`;
     } else {
       const encodedQuery = keyword.trim().replace(/ /g, "+");
       api = `${import.meta.env.VITE_API_SEARCH}keyword=${encodedQuery}`;
