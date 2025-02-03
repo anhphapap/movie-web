@@ -19,7 +19,9 @@ import Footer from "./components/Footer";
 import FilterPage from "./pages/FilterPage";
 import DonatePage from "./pages/DonatePage";
 import ListModal from "./components/ListModal";
-import { randomList } from "./utils/randomList";
+import { AuthContextProvider } from "./context/AuthContext";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
 
 library.add(fas, fab, far);
 
@@ -79,67 +81,73 @@ function App() {
   };
 
   return (
-    <div className="bg-[#141414] overflow-x-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
-      <Router>
-        <MovieModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
-          modal={modalContent}
-        />
-        <ListModal
-          isOpen={isListOpen}
-          onClose={closeList}
-          movies={listContent}
-          openModal={openModal}
-          nameList={nameList}
-        />
-        <AppLayout>
-          <Routes>
-            <Route
-              path="/"
-              element={<MainLayout openList={openList} openModal={openModal} />}
-            />
-            <Route
-              path="/phim-bo"
-              element={
-                <MainLayout
-                  type_slug={"phim-bo"}
-                  openModal={openModal}
-                  openList={openList}
-                  filter={true}
-                />
-              }
-            />
-            <Route
-              path="/phim-le"
-              element={
-                <MainLayout
-                  type_slug={"phim-le"}
-                  openModal={openModal}
-                  openList={openList}
-                  filter={true}
-                />
-              }
-            />
+    <AuthContextProvider>
+      <div className="bg-[#141414] overflow-x-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
+        <Router>
+          <MovieModal
+            isOpen={isModalOpen}
+            onClose={closeModal}
+            modal={modalContent}
+          />
+          <ListModal
+            isOpen={isListOpen}
+            onClose={closeList}
+            movies={listContent}
+            openModal={openModal}
+            nameList={nameList}
+          />
+          <AppLayout>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <MainLayout openList={openList} openModal={openModal} />
+                }
+              />
+              <Route
+                path="/phim-bo"
+                element={
+                  <MainLayout
+                    type_slug={"phim-bo"}
+                    openModal={openModal}
+                    openList={openList}
+                    filter={true}
+                  />
+                }
+              />
+              <Route
+                path="/phim-le"
+                element={
+                  <MainLayout
+                    type_slug={"phim-le"}
+                    openModal={openModal}
+                    openList={openList}
+                    filter={true}
+                  />
+                }
+              />
 
-            <Route
-              path="/search"
-              element={<SearchPage openModal={openModal}></SearchPage>}
-            />
-            <Route
-              path="/watch/:movieSlug/:episode"
-              element={<WatchPage onClose={closeModal} />}
-            />
-            <Route
-              path="/filter/:typeSlug"
-              element={<FilterPage openModal={openModal} />}
-            />
-            <Route path="/donate" element={<DonatePage></DonatePage>} />
-          </Routes>
-        </AppLayout>
-        <Footer />
-      </Router>
-    </div>
+              <Route
+                path="/search"
+                element={<SearchPage openModal={openModal}></SearchPage>}
+              />
+              <Route
+                path="/watch/:movieSlug/:episode"
+                element={<WatchPage onClose={closeModal} />}
+              />
+              <Route
+                path="/filter/:typeSlug"
+                element={<FilterPage openModal={openModal} />}
+              />
+              <Route path="/donate" element={<DonatePage></DonatePage>} />
+              <Route path="/login" element={<LoginPage></LoginPage>} />
+              <Route path="/signup" element={<SignUpPage></SignUpPage>} />
+            </Routes>
+          </AppLayout>
+          <Footer />
+        </Router>
+      </div>
+    </AuthContextProvider>
   );
 }
 

@@ -2,9 +2,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import NetflixSearch from "./Search";
 import FilterNavbar from "./FilterNavbar";
+import { Link } from "react-router-dom";
+import { UserAuth } from "../context/AuthContext";
 
 const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { user, LogOut } = UserAuth();
+
+  const handleLogOut = async () => {
+    try {
+      await LogOut();
+    } catch (error) {
+      alert(error);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,7 +47,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         }`}
         id="header"
       >
-        <div className="flex items-center space-x-4 justify-start flex-shrink-1">
+        <div className="flex items-center space-x-4 justify-start flex-shrink-0">
           <a href="/" className="mr-[2.5%] w-[20%] mt-1">
             <img
               src="https://fontmeme.com/permalink/250104/46a7ee5646a1ff7768a3c2dadc2dba3e.png"
@@ -60,6 +71,59 @@ const Header = ({ filter = false, type_slug = "" }) => {
         </div>
         <div className="flex group">
           <NetflixSearch />
+          {user?.email ? (
+            <div
+              className="relative flex items-center space-x-2 cursor-pointer group"
+              id="dropdownDelayButton"
+              data-dropdown-toggle="dropdownDelay"
+              data-dropdown-delay="500"
+              data-dropdown-trigger="hover"
+            >
+              <img
+                src="https://occ-0-325-395.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABXYofKdCJceEP7pdxcEZ9wt80GsxEyXIbnG_QM8znksNz3JexvRbDLr0_AcNKr2SJtT-MLr1eCOA-e7xlDHsx4Jmmsi5HL8.png?r=1d4"
+                className="aspect-square h-[30px] rounded-sm object-cover inline-block"
+              ></img>
+              <FontAwesomeIcon
+                icon="fa-solid fa-caret-down"
+                color="white"
+                className="group-hover:rotate-180 ease-linear duration-200"
+              />
+              <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36">
+                <ul className="p-3">
+                  <Link to="/account">
+                    <li className="hover:underline space-x-3 mb-3">
+                      <FontAwesomeIcon icon="fa-regular fa-user" />
+                      <span>Tài khoản</span>
+                    </li>
+                  </Link>
+                  <Link to="/donate">
+                    <li className="hover:underline space-x-3 mb-3">
+                      <FontAwesomeIcon icon="fa-regular fa-heart" />
+                      <span>Yêu thích</span>
+                    </li>
+                  </Link>
+                  <Link to="/donate">
+                    <li className="hover:underline space-x-3">
+                      <FontAwesomeIcon icon="fa-solid fa-circle-dollar-to-slot" />
+                      <span>Donate</span>
+                    </li>
+                  </Link>
+                </ul>
+                <div
+                  className="border-t-[1px] py-2 text-center hover:underline"
+                  onClick={handleLogOut}
+                >
+                  Đăng xuất
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Link to={"/login"}>
+              <button className="bg-[#e50914] px-2 py-1 rounded">
+                Đăng nhập
+              </button>
+            </Link>
+          )}
         </div>
       </div>
       {filter && <FilterNavbar type_slug={type_slug.slice(1)} />}

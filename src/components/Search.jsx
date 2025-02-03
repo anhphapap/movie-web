@@ -62,7 +62,7 @@ const NetflixSearch = () => {
       )}
 
       {isSearchOpen && (
-        <div className="absolute left-0 w-64 z-40 border-[1px] border-white px-3 py-1 bg-black flex items-center justify-start space-x-2">
+        <div className="absolute -left-3 w-64 z-40 border-[1px] border-white px-3 py-1 bg-black flex items-center justify-start space-x-2">
           <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
           <input
             ref={inputRef}

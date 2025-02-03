@@ -40,7 +40,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               size={item.size}
               openModal={openModal}
               openList={openList}
-              key={index}
+              key={index + type_slug}
             />
           ) : (
             <MovieCarousel
@@ -50,7 +50,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               category={item.category}
               openList={openList}
               openModal={openModal}
-              key={index}
+              key={index + item.country + item.category}
             />
           )}
         </>
