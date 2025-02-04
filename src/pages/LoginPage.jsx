@@ -9,7 +9,7 @@ function LoginPage() {
   const [checkEmail, setCheckEmail] = useState(true);
   const [password, setPassword] = useState("");
   const [checkPassword, setCheckPassword] = useState(true);
-  const { user, signIn } = UserAuth();
+  const { user, signIn, signInWithGoogle } = UserAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -26,6 +26,16 @@ function LoginPage() {
       } catch {
         toast.error("Mật khẩu hoặc tài khoản chưa chính xác.");
       }
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      navigate("/");
+      toast.success("Đăng nhập thành công.");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -119,7 +129,11 @@ function LoginPage() {
             Đăng nhập
           </button>
           <p className="text-center"> HOẶC </p>
-          <button className="flex items-center justify-center space-x-2 bg-white/20 w-full py-2 rounded hover:bg-white/10 transition-all ease-linear ">
+          <button
+            className="flex items-center justify-center space-x-2 bg-white/20 w-full py-2 rounded hover:bg-white/10 transition-all ease-linear "
+            type="button"
+            onClick={handleGoogleLogin}
+          >
             <img
               src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
               className="w-[30px] object-cover"

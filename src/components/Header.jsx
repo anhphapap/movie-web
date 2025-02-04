@@ -45,7 +45,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
           filter
             ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : isScrolled
-            ? "bg-gradient-to-b from-[#080808] to-[#141414]"
+            ? "bg-[#141414]"
             : "bg-gradient-to-b from-black/70 to-transparent"
         }`}
         id="header"
