@@ -52,7 +52,7 @@ function DonatePage() {
             })}
           </select>
           <button
-            className="bg-black border-[1px] px-2 py-[1px] hover:bg-black/10"
+            className="bg-[#e50914] rounded px-3 py-1 hover:bg-[#e50914]/80 transition-colors ease-linear"
             onClick={handleCreateQR}
           >
             Tạo mã donate

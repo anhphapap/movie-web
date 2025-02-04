@@ -2,16 +2,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import NetflixSearch from "./Search";
 import FilterNavbar from "./FilterNavbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 
 const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, LogOut } = UserAuth();
+  const { user, logOut, loading } = UserAuth();
+  const navigate = useNavigate();
 
   const handleLogOut = async () => {
     try {
-      await LogOut();
+      await logOut();
+      navigate("/");
     } catch (error) {
       alert(error);
     }
@@ -33,6 +35,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
     };
   }, []);
 
+  if (loading) return <></>;
   return (
     <div
       className={`fixed flex flex-col top-0 left-0 right-0 z-50 transition-all duration-500 ease-linear text-sm lg:text-base`}
@@ -81,24 +84,24 @@ const Header = ({ filter = false, type_slug = "" }) => {
             >
               <img
                 src="https://occ-0-325-395.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABXYofKdCJceEP7pdxcEZ9wt80GsxEyXIbnG_QM8znksNz3JexvRbDLr0_AcNKr2SJtT-MLr1eCOA-e7xlDHsx4Jmmsi5HL8.png?r=1d4"
-                className="aspect-square h-[30px] rounded-sm object-cover inline-block"
+                className="aspect-square h-[30px] w-[30px] rounded-sm object-cover inline-block"
               ></img>
               <FontAwesomeIcon
                 icon="fa-solid fa-caret-down"
                 color="white"
                 className="group-hover:rotate-180 ease-linear duration-200"
               />
-              <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36">
+              <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36 border-t-2">
                 <ul className="p-3">
                   <Link to="/account">
                     <li className="hover:underline space-x-3 mb-3">
-                      <FontAwesomeIcon icon="fa-regular fa-user" />
+                      <FontAwesomeIcon icon="fa-solid fa-user" />
                       <span>Tài khoản</span>
                     </li>
                   </Link>
                   <Link to="/donate">
                     <li className="hover:underline space-x-3 mb-3">
-                      <FontAwesomeIcon icon="fa-regular fa-heart" />
+                      <FontAwesomeIcon icon="fa-solid fa-heart" />
                       <span>Yêu thích</span>
                     </li>
                   </Link>
@@ -119,7 +122,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </div>
           ) : (
             <Link to={"/login"}>
-              <button className="bg-[#e50914] px-2 py-1 rounded">
+              <button className="bg-[#e50914] px-2 py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear">
                 Đăng nhập
               </button>
             </Link>

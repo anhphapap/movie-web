@@ -23,6 +23,7 @@
     "react-modal": "^3.16.3",
     "react-multi-carousel": "^2.8.5",
     "react-router-dom": "^7.1.1",
+    "react-toastify": "^11.0.3",
     "video.js": "^8.21.0",
     "videojs-contrib-quality-levels": "^4.1.0",
     "videojs-http-source-selector": "^1.1.6"

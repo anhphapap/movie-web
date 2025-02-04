@@ -22,6 +22,9 @@ import ListModal from "./components/ListModal";
 import { AuthContextProvider } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
+import { ToastContainer } from "react-toastify";
+import AccountPage from "./pages/AccountPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 library.add(fas, fab, far);
 
@@ -96,6 +99,18 @@ function App() {
             openModal={openModal}
             nameList={nameList}
           />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
           <AppLayout>
             <Routes>
               <Route
@@ -139,9 +154,17 @@ function App() {
                 path="/filter/:typeSlug"
                 element={<FilterPage openModal={openModal} />}
               />
-              <Route path="/donate" element={<DonatePage></DonatePage>} />
-              <Route path="/login" element={<LoginPage></LoginPage>} />
-              <Route path="/signup" element={<SignUpPage></SignUpPage>} />
+              <Route path="/donate" element={<DonatePage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/signup" element={<SignUpPage />} />
+              <Route
+                path="/account"
+                element={
+                  <ProtectedRoute>
+                    <AccountPage />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </AppLayout>
           <Footer />

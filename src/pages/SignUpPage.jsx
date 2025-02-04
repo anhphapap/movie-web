@@ -2,46 +2,98 @@ import React, { useState, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function SignUpPage() {
+  const [name, setName] = useState("");
+  const [checkName, setCheckName] = useState(true);
   const [email, setEmail] = useState("");
   const [checkEmail, setCheckEmail] = useState(true);
   const [password, setPassword] = useState("");
   const [checkPassword, setCheckPassword] = useState(true);
-  const { user, SignUp } = UserAuth();
+  const [password2, setPassword2] = useState("");
+  const [checkPassword2, setCheckPassword2] = useState(true);
+  const { user, signUp } = UserAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (email === "" || password === "") {
+    if (
+      email === "" ||
+      password === "" ||
+      name === "" ||
+      password2 === "" ||
+      password != password2
+    ) {
       if (email === "") setCheckEmail(false);
       if (password === "") setCheckPassword(false);
+      if (name === "") setCheckName(false);
+      if (password2 === "") setCheckPassword2(false);
+      if (password !== password2 && checkPassword)
+        toast.error("Mật khẩu xác nhận chưa chính xác.");
     } else if (checkEmail && checkPassword) {
       try {
-        await SignUp(email, password);
+        await signUp(email, password, name);
         navigate("/");
+        toast.success("Đăng ký thành công.");
       } catch (error) {
-        alert(error);
+        if (error.code === "auth/email-already-in-use")
+          toast.error("Email đã được đăng ký trước đó.");
+        else console.log(error);
       }
     }
   };
 
   const handleFocus = (e) => {
-    if (e.target.id === "password") setCheckPassword(true);
-    else setCheckEmail(true);
+    switch (e.target.id) {
+      case "password":
+        setCheckPassword(true);
+        break;
+      case "password2":
+        setCheckPassword2(true);
+        break;
+      case "email":
+        setCheckEmail(true);
+        break;
+      case "name":
+        setCheckName(true);
+        break;
+    }
   };
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
-  const handleBlur = (e) => {
-    if (e.target.id === "password")
-      if (!e.target.checkValidity() || e.target.value.trim().length < 6)
-        setCheckPassword(false);
-      else setPassword(e.target.value.trim());
-    else if (!e.target.checkValidity() || !validateEmail(e.target.value))
-      setCheckEmail(false);
-    else setEmail(e.target.value.trim());
+  const handleChange = (e) => {
+    setCheckEmail(true);
+    setCheckPassword(true);
+    setCheckName(true);
+    setCheckPassword2(true);
+    switch (e.target.id) {
+      case "password": {
+        if (!e.target.checkValidity() || e.target.value.trim().length < 6)
+          setCheckPassword(false);
+        else setPassword(e.target.value.trim());
+        break;
+      }
+      case "password2": {
+        if (!e.target.checkValidity() || e.target.value.trim().length < 6)
+          setCheckPassword2(false);
+        else setPassword2(e.target.value.trim());
+        break;
+      }
+      case "email": {
+        if (!e.target.checkValidity() || !validateEmail(e.target.value))
+          setCheckEmail(false);
+        else setEmail(e.target.value.trim());
+        break;
+      }
+      case "name": {
+        if (e.target.value.trim() === "") setCheckName(false);
+        else setName(e.target.value.trim());
+        break;
+      }
+    }
   };
 
   return (
@@ -55,8 +107,32 @@ function SignUpPage() {
         ></img>
         <div className="hidden sm:block absolute left-0 top-0 w-full h-full bg-black/60 z-10"></div>
 
-        <form className="relative w-full sm:w-[430px] sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10">
+        <form className="relative w-full sm:w-[600px] sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10">
           <h2 className="font-bold text-3xl pb-3">Đăng ký</h2>
+          <div className="relative group">
+            <input
+              type="text"
+              name="floating_name"
+              id="name"
+              className="block px-2 pb-1 pt-4 w-full text-sm text-gray-900 bg-transparent rounded border-[1px] border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
+              required
+              onFocus={handleFocus}
+              onChange={handleChange}
+              onInvalid={(e) => {
+                e.preventDefault();
+              }}
+            />
+            <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-3 scale-75 left-2 top-3 -z-10 origin-[0] peer-focus:start-2 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3">
+              Tên
+            </label>
+            {!checkName && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+                <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
+                <span> Vui lòng nhập tên của bạn.</span>
+              </p>
+            )}
+          </div>
           <div className="relative group">
             <input
               type="email"
@@ -66,7 +142,7 @@ function SignUpPage() {
               placeholder=" "
               required
               onFocus={handleFocus}
-              onBlur={handleBlur}
+              onChange={handleChange}
               onInvalid={(e) => {
                 e.preventDefault();
               }}
@@ -90,7 +166,7 @@ function SignUpPage() {
               placeholder=" "
               required
               onFocus={handleFocus}
-              onBlur={handleBlur}
+              onChange={handleChange}
               onInvalid={(e) => {
                 e.preventDefault();
               }}
@@ -101,7 +177,39 @@ function SignUpPage() {
             {!checkPassword && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                 <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
-                <span> Mật khẩu của bạn phải chứa từ 6 đến 60 ký tự.</span>
+                <span>
+                  {" "}
+                  Mật khẩu của bạn phải chứa từ 6 ký tự trở lên và không chứa
+                  khoảng trắng.
+                </span>
+              </p>
+            )}
+          </div>
+          <div className="relative group">
+            <input
+              type="password"
+              name="floating_password2"
+              id="password2"
+              className="block px-2 pb-1 pt-4 w-full text-sm text-gray-900 bg-transparent rounded border-[1px] border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" "
+              required
+              onFocus={handleFocus}
+              onChange={handleChange}
+              onInvalid={(e) => {
+                e.preventDefault();
+              }}
+            />
+            <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-3 scale-75 left-2 top-3 -z-10 origin-[0] peer-focus:start-2 rtl:peer-focus:translate-x-1/4 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3">
+              Xác nhận mật khẩu
+            </label>
+            {!checkPassword2 && (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-500">
+                <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
+                <span>
+                  {" "}
+                  Mật khẩu của bạn phải chứa từ 6 ký tự trở lên và không chứa
+                  khoảng trắng.
+                </span>
               </p>
             )}
           </div>

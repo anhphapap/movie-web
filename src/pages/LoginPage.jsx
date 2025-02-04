@@ -2,13 +2,14 @@ import React, { useState, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [checkEmail, setCheckEmail] = useState(true);
   const [password, setPassword] = useState("");
   const [checkPassword, setCheckPassword] = useState(true);
-  const { user, SignIn } = UserAuth();
+  const { user, signIn } = UserAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,10 +20,11 @@ function LoginPage() {
       if (password === "") setCheckPassword(false);
     } else if (checkEmail && checkPassword) {
       try {
-        await SignIn(email, password);
+        await signIn(email, password);
         navigate("/");
-      } catch (error) {
-        alert(error);
+        toast.success("Đăng nhập thành công.");
+      } catch {
+        toast.error("Mật khẩu hoặc tài khoản chưa chính xác.");
       }
     }
   };
@@ -34,7 +36,9 @@ function LoginPage() {
 
   const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 
-  const handleBlur = (e) => {
+  const handleChange = (e) => {
+    setCheckEmail(true);
+    setCheckPassword(true);
     if (e.target.id === "password")
       if (!e.target.checkValidity() || e.target.value.trim().length < 6)
         setCheckPassword(false);
@@ -46,7 +50,7 @@ function LoginPage() {
 
   return (
     <>
-      <div className="relative min-h-screen flex items-center sm:items-end justify-center pb-2">
+      <div className="relative min-h-screen flex items-center justify-center pb-2">
         <img
           src={
             "https://assets.nflxext.com/ffe/siteui/vlv3/fb5cb900-0cb6-4728-beb5-579b9af98fdd/web/VN-vi-20250127-TRIFECTA-perspective_46fb4fd1-c238-4c60-a06b-41c9fe968c1b_large.jpg"
@@ -55,7 +59,10 @@ function LoginPage() {
         ></img>
         <div className="hidden sm:block absolute left-0 top-0 w-full h-full bg-black/60 z-10"></div>
 
-        <form className="relative w-full sm:w-[430px] sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10">
+        <form
+          className="relative w-full sm:w-auto sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10"
+          onSubmit={handleSubmit}
+        >
           <h2 className="font-bold text-3xl pb-3">Đăng nhập</h2>
           <div className="relative group">
             <input
@@ -66,7 +73,7 @@ function LoginPage() {
               placeholder=" "
               required
               onFocus={handleFocus}
-              onBlur={handleBlur}
+              onChange={handleChange}
               onInvalid={(e) => {
                 e.preventDefault();
               }}
@@ -90,7 +97,7 @@ function LoginPage() {
               placeholder=" "
               required
               onFocus={handleFocus}
-              onBlur={handleBlur}
+              onChange={handleChange}
               onInvalid={(e) => {
                 e.preventDefault();
               }}
@@ -107,7 +114,6 @@ function LoginPage() {
           </div>
           <button
             type="submit"
-            onClick={handleSubmit}
             className="text-white bg-[#e50914] hover:bg-[#e50914]/80 w-full py-2 rounded transition-all ease-linear"
           >
             Đăng nhập
