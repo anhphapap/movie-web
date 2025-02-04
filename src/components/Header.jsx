@@ -72,7 +72,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </a>
           </nav>
         </div>
-        <div className="flex group">
+        <div className="flex">
           <NetflixSearch />
           {user?.email ? (
             <div
@@ -83,7 +83,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
               data-dropdown-trigger="hover"
             >
               <img
-                src="https://occ-0-325-395.1.nflxso.net/dnm/api/v6/vN7bi_My87NPKvsBoib006Llxzg/AAAABXYofKdCJceEP7pdxcEZ9wt80GsxEyXIbnG_QM8znksNz3JexvRbDLr0_AcNKr2SJtT-MLr1eCOA-e7xlDHsx4Jmmsi5HL8.png?r=1d4"
+                src={user.photoURL}
                 className="aspect-square h-[30px] w-[30px] rounded-sm object-cover inline-block"
               ></img>
               <FontAwesomeIcon

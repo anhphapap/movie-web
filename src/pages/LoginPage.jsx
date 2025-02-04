@@ -35,6 +35,7 @@ function LoginPage() {
       navigate("/");
       toast.success("Đăng nhập thành công.");
     } catch (error) {
+      toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
       console.log(error);
     }
   };

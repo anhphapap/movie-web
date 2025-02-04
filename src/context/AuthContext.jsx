@@ -9,6 +9,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
+import { listAvatar } from "../utils/data";
+
 const AuthContext = createContext();
 
 export function AuthContextProvider({ children }) {
@@ -16,16 +18,23 @@ export function AuthContextProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   async function signUp(email, password, name) {
+    const avatar = listAvatar[Math.floor(Math.random() * listAvatar.length)];
     const newUser = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(newUser.user, { displayName: name });
-    setUser({ ...newUser.user, displayName: name });
+    await updateProfile(newUser.user, { displayName: name, photoURL: avatar });
+    setUser({ ...newUser.user, displayName: name, photoURL: avatar });
     return newUser;
   }
 
   async function signInWithGoogle() {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    setUser(result.user);
+    if (!listAvatar.includes(result.user.photoURL)) {
+      const avatar = listAvatar[Math.floor(Math.random() * listAvatar.length)];
+      await updateProfile(result.user, { photoURL: avatar });
+      setUser({ ...result.user, photoURL: avatar });
+    } else {
+      setUser(result.user);
+    }
     return result;
   }
 
@@ -37,6 +46,11 @@ export function AuthContextProvider({ children }) {
     );
     setUser(userCredential.user);
     return userCredential;
+  }
+
+  async function updateUserProfile(profileData) {
+    await updateProfile(auth.currentUser, profileData);
+    setUser({ ...auth.currentUser });
   }
 
   function logOut() {
@@ -55,7 +69,15 @@ export function AuthContextProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ signUp, signIn, logOut, signInWithGoogle, user, loading }}
+      value={{
+        signUp,
+        signIn,
+        logOut,
+        signInWithGoogle,
+        updateUserProfile,
+        user,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

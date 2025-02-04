@@ -30,7 +30,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
     <>
       <Banner openModal={openModal} type_slug={type_slug} filter={filter} />
       {listInfo.map((item, index) => (
-        <>
+        <div key={`${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
             <MovieCarousel
               typeList={item.typeList}
@@ -40,7 +40,6 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               size={item.size}
               openModal={openModal}
               openList={openList}
-              key={index + type_slug}
             />
           ) : (
             <MovieCarousel
@@ -50,10 +49,9 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               category={item.category}
               openList={openList}
               openModal={openModal}
-              key={index + item.country + item.category}
             />
           )}
-        </>
+        </div>
       ))}
     </>
   );

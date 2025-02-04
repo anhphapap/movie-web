@@ -81,3 +81,26 @@ export const listCountry = [
   { name: "Ả Rập Xê Út", value: "a-rap-xe-ut" },
   { name: "Quốc Gia Khác", value: "quoc-gia-khac" },
 ];
+
+export const listAvatar = [
+  "https://ih0.redbubble.net/image.618379802.1473/flat,1000x1000,075,f.u2.jpg",
+  "https://upload.wikimedia.org/wikipedia/commons/0/0b/Netflix-avatar.png",
+  "https://mir-s3-cdn-cf.behance.net/project_modules/disp/84c20033850498.56ba69ac290ea.png",
+  "https://i.pinimg.com/originals/34/62/d2/3462d27440aa255b1c314ff16f4032b4.png",
+  "https://ih0.redbubble.net/image.618369215.1083/flat,1000x1000,075,f.u2.jpg",
+  "https://img.freepik.com/premium-vector/world-smile-day-template-free-vector_668862-43.jpg?w=2000",
+  "https://wallpapers.com/images/hd/netflix-profile-pictures-1000-x-1000-88wkdmjrorckekha.jpg",
+  "https://i.pinimg.com/474x/c0/8e/6c/c08e6c9595e03202a46a95f66578799f--netflix-girly-things.jpg",
+  "https://i.pinimg.com/474x/fb/8e/8a/fb8e8a96fca2f049334f312086a6e2f6--vini-cata.jpg",
+  "https://mir-s3-cdn-cf.behance.net/project_modules/disp/e70b1333850498.56ba69ac32ae3.png",
+  "https://secure.gravatar.com/avatar/334c7ba02038cbb927ecfc119a8a866d?s=384",
+  "https://avatars.githubusercontent.com/u/4508878?v=4",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwLdXdV6iK8jJ68gYlNACzegdITim31yFUKA&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiSRIlNla0MmNXBSJofMMenqC5UxAQQaiSMg&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMqzpWUwgJWNWIRp7bC8rDZgtju1JQERuP-A&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZGiackbaemHrAPHL7AXhfr-j0fhn3RZVXAQ&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcwUqplWbmtLvmGJEd3EPlCNY1j4PyIjP5Kg&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR3EplfCkREEWGLe9IaI8sEfXSA36awr9Apzw&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwAEjpByBZ_Q63VU3EVbl5i1VqydqWgYr4KA&s",
+  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD6gvzn1GdKNUXEHFYz9x0ZoCq8TCWAXsZwA&s",
+];
