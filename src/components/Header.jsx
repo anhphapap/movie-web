@@ -67,6 +67,11 @@ const Header = ({ filter = false, type_slug = "" }) => {
             <a href="/phim-le" className="text-white hover:opacity-80">
               Phim lẻ
             </a>
+            {user?.email && (
+              <a href="/favourite" className="text-white hover:opacity-80">
+                Danh sách của tôi
+              </a>
+            )}
             <a href="/donate" className="text-white hover:opacity-80">
               Donate
             </a>
@@ -99,7 +104,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                       <span>Tài khoản</span>
                     </li>
                   </Link>
-                  <Link to="/donate">
+                  <Link to="/favourite">
                     <li className="hover:underline space-x-3 mb-3">
                       <FontAwesomeIcon icon="fa-solid fa-heart" />
                       <span>Yêu thích</span>

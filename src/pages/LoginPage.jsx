@@ -119,7 +119,7 @@ function LoginPage() {
             {!checkPassword && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                 <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
-                <span> Mật khẩu của bạn phải chứa từ 6 đến 60 ký tự.</span>
+                <span> Mật khẩu của bạn phải chứa từ 6 ký tự trở lên.</span>
               </p>
             )}
           </div>

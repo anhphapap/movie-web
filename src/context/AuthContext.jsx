@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { listAvatar } from "../utils/data";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
 
@@ -22,19 +23,25 @@ export function AuthContextProvider({ children }) {
     const newUser = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(newUser.user, { displayName: name, photoURL: avatar });
     setUser({ ...newUser.user, displayName: name, photoURL: avatar });
+    setDoc(doc(db, "users", newUser.user.uid), {
+      savedMovies: [],
+    });
     return newUser;
   }
 
   async function signInWithGoogle() {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    if (!listAvatar.includes(result.user.photoURL)) {
-      const avatar = listAvatar[Math.floor(Math.random() * listAvatar.length)];
-      await updateProfile(result.user, { photoURL: avatar });
-      setUser({ ...result.user, photoURL: avatar });
-    } else {
-      setUser(result.user);
+    const userRef = doc(db, "users", result.user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      await setDoc(userRef, {
+        savedMovies: [],
+      });
     }
+
+    setUser(result.user);
     return result;
   }
 

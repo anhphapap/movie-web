@@ -57,9 +57,9 @@ const Banner = ({
         ></img>
         <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
         <div className="flex w-full aspect-[16/6]">
-          <div className="flex flex-col justify-end h-full z-10 space-y-3 w-2/3 xl:w-1/2">
+          <div className="flex flex-col justify-end z-10 space-y-3 w-2/3 xl:w-1/2">
             <h1
-              className="uppercase text-5xl lg:text-8xl 2xl:text-9xl font-extrabold italic text-red-600 truncate text-wrap line-clamp-2 hidden sm:block"
+              className="uppercase text-5xl lg:text-8xl 2xl:text-9xl font-extrabold italic text-red-600 truncate line-clamp-2 text-pretty hidden sm:block"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
             >
               {movie.movie.origin_name}

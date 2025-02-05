@@ -3,7 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ diff = false, children }) {
   const { user, loading } = UserAuth();
   if (loading)
     return (
@@ -15,7 +15,7 @@ function ProtectedRoute({ children }) {
         />
       </div>
     );
-
+  if (diff) return !user ? children : <Navigate to="/" />;
   return user ? children : <Navigate to="/" />;
 }
 

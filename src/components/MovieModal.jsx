@@ -1,8 +1,18 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
+import { UserAuth } from "../context/AuthContext";
+import { db } from "../firebase";
+import {
+  doc,
+  updateDoc,
+  arrayUnion,
+  getDoc,
+  arrayRemove,
+} from "firebase/firestore";
+import { toast } from "react-toastify";
 
 const customStyles = {
   content: {
@@ -21,7 +31,99 @@ const customStyles = {
 };
 
 const MovieModal = ({ isOpen, onClose, modal }) => {
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { user } = UserAuth();
+
+  useEffect(() => {
+    const checkSaved = async () => {
+      if (user?.email) {
+        setLoading(true);
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (
+          userSnap.exists() &&
+          userSnap
+            .data()
+            .savedMovies.some(
+              (movie) =>
+                movie.slug === modal?.movie.slug &&
+                movie.poster_url === modal?.movie.poster_url &&
+                movie.name === modal?.movie.name
+            )
+        ) {
+          setSaved(true);
+        } else {
+          setSaved(false);
+        }
+        setLoading(false);
+      }
+    };
+    checkSaved();
+  }, [modal, user]);
+
+  const handleSaveMovie = async () => {
+    if (!user?.email) {
+      toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", user.uid);
+
+      if (saved) {
+        await updateDoc(userRef, {
+          savedMovies: arrayRemove({
+            slug: modal.movie.slug,
+            poster_url: modal.movie.poster_url,
+            name: modal.movie.name,
+          }),
+        });
+        toast.success("Đã xóa khỏi danh sách yêu thích.");
+      } else {
+        await updateDoc(userRef, {
+          savedMovies: arrayUnion({
+            slug: modal.movie.slug,
+            poster_url: modal.movie.poster_url,
+            name: modal.movie.name,
+          }),
+        });
+        toast.success("Đã thêm vào danh sách yêu thích.");
+      }
+
+      setSaved(!saved);
+    } catch (error) {
+      console.log(error);
+      toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
+    }
+  };
+
   if (!modal?.movie) return null;
+  if (loading)
+    return (
+      <Modal
+        isOpen={isOpen}
+        onRequestClose={onClose}
+        style={customStyles}
+        ariaHideApp={false}
+        className="relative w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+      >
+        <button
+          className="aspect-square w-7 rounded-full bg-[#141414] absolute right-3 top-3 z-10 flex items-center justify-center"
+          onClick={onClose}
+        >
+          <FontAwesomeIcon icon="fa-solid fa-xmark" />
+        </button>
+        <div className="h-screen flex items-center justify-center">
+          <FontAwesomeIcon
+            icon="fa-solid fa-spinner"
+            size="2xl"
+            className="animate-spin text-white"
+          />
+        </div>
+      </Modal>
+    );
 
   return (
     <Modal
@@ -46,7 +148,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             <FontAwesomeIcon icon="fa-solid fa-xmark" />
           </button>
           <div className="flex space-x-2 absolute left-[5%] bottom-[5%]">
-            <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center">
+            <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center transition-all ease-linear">
               {(modal.episodes[0].server_data[0].link_embed != "" && (
                 <Link
                   to={`/watch/${modal.movie.slug}/${0}`}
@@ -65,11 +167,15 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 </button>
               )}
             </div>
-            <button className="p-2 sm:p-3 lg:p-5 h-full rounded-full bg-transparent border-2 flex items-center justify-center">
-              <FontAwesomeIcon icon="fa-solid fa-plus" />
-            </button>
-            <button className="p-2 sm:p-3 lg:p-5 h-full rounded-full bg-transparent border-2 flex items-center justify-center">
-              <FontAwesomeIcon icon="fa-regular fa-heart" />
+            <button
+              className="p-1 sm:p-2 lg:p-3 h-full rounded-full bg-transparent border-2 flex items-center justify-center border-white/40 hover:border-white hover:bg-white/10 transition-all ease-linear"
+              onClick={handleSaveMovie}
+              title="Yêu thích"
+            >
+              <FontAwesomeIcon
+                icon={`fa-${saved ? "solid" : "regular"} fa-heart`}
+                className="sm:text-lg"
+              />
             </button>
           </div>
         </div>

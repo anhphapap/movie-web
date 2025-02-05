@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 const customStyles = {
   content: {
     position: "absolute",
-    top: "4%",
+    top: "10%",
     left: "50%",
     bottom: "auto",
     transform: "translate(-50%)",
@@ -27,7 +27,7 @@ function AvatarModal({ isOpen, onClose }) {
 
   const handleChangeAvatar = async () => {
     await updateUserProfile({ photoURL: selectedAvatar });
-    toast.success("Cập nhập hồ sơ thành công.");
+    toast.success("Cập nhật hồ sơ thành công.");
     onClose();
   };
 
@@ -37,26 +37,58 @@ function AvatarModal({ isOpen, onClose }) {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+      className="w-[94%] xl:w-[60%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="p-[3%]">
         <div className="w-full flex flex-col items-center">
           <h1 className="text-xl md:text-3xl font-bold">Đổi ảnh đại diện</h1>
-          <div className="flex gap-4 mt-5 flex-wrap items-center">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 2xl:grid-cols-9 gap-4 mt-5 ">
+            {user.providerData[0].providerId === "google.com" && (
+              <div
+                className="relative group cursor-pointer w-auto"
+                onClick={() => setSelectedAvatar(user.providerData[0].photoURL)}
+                key={user.providerData[0].photoURL}
+              >
+                <div
+                  className={`absolute top-0 left-0 w-full h-full group-hover:bg-transparent transition-all ease-linear duration-75 ${
+                    selectedAvatar === user.providerData[0].photoURL
+                      ? "bg-transparent"
+                      : "bg-black/40"
+                  }`}
+                />
+                <img
+                  src={user.providerData[0].photoURL}
+                  className={`rounded aspect-square object-cover group-hover:outline-4 group-hover:outline transition-all ease-linear duration-75 ${
+                    selectedAvatar === user.providerData[0].photoURL
+                      ? "outline-4 outline"
+                      : ""
+                  }`}
+                ></img>
+              </div>
+            )}
             {listAvatar.map((item) => (
-              <img
-                src={item}
-                className={`w-[100px] rounded aspect-square object-cover cursor-pointer hover:outline-4 hover:outline ${
-                  selectedAvatar === item ? "outline-4 outline" : ""
-                }`}
-                key={item}
+              <div
+                className="relative group cursor-pointer"
                 onClick={() => setSelectedAvatar(item)}
-              ></img>
+                key={item}
+              >
+                <div
+                  className={`absolute top-0 left-0 w-full h-full group-hover:bg-transparent transition-all ease-linear duration-100 ${
+                    selectedAvatar === item ? "bg-transparent" : "bg-black/40"
+                  }`}
+                />
+                <img
+                  src={item}
+                  className={`w-[100px] rounded aspect-square object-cover group-hover:outline-4 group-hover:outline transition-all ease-linear duration-100 ${
+                    selectedAvatar === item ? "outline-4 outline" : ""
+                  }`}
+                ></img>
+              </div>
             ))}
           </div>
-          <div className="flex justify-end w-full mt-3 mr-5">
+          <div className="flex justify-center w-full mt-5">
             <button
-              className="bg-[#e50914] px-5 py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear"
+              className="bg-[#e50914] px-5 py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear font-bold"
               onClick={handleChangeAvatar}
             >
               Lưu

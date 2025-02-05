@@ -110,7 +110,7 @@ function SignUpPage() {
         ></img>
         <div className="hidden sm:block absolute left-0 top-0 w-full h-full bg-black/60 z-10"></div>
 
-        <form className="relative w-full sm:w-[600px] sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10">
+        <form className="relative w-full sm:w-auto sm:bg-black/75 text-white space-y-4 sm:px-10 rounded-md z-20 px-5 py-10 mt-10">
           <h2 className="font-bold text-3xl pb-3">Đăng ký</h2>
           <div className="relative group">
             <input
@@ -180,11 +180,7 @@ function SignUpPage() {
             {!checkPassword && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                 <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
-                <span>
-                  {" "}
-                  Mật khẩu của bạn phải chứa từ 6 ký tự trở lên và không chứa
-                  khoảng trắng.
-                </span>
+                <span> Mật khẩu của bạn phải chứa từ 6 ký tự trở lên.</span>
               </p>
             )}
           </div>
@@ -208,11 +204,7 @@ function SignUpPage() {
             {!checkPassword2 && (
               <p className="mt-2 text-sm text-red-600 dark:text-red-500">
                 <FontAwesomeIcon icon="fa-regular fa-circle-xmark" />
-                <span>
-                  {" "}
-                  Mật khẩu của bạn phải chứa từ 6 ký tự trở lên và không chứa
-                  khoảng trắng.
-                </span>
+                <span> Mật khẩu của bạn phải chứa từ 6 ký tự trở lên.</span>
               </p>
             )}
           </div>

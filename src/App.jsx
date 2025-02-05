@@ -25,6 +25,7 @@ import SignUpPage from "./pages/SignUpPage";
 import { ToastContainer } from "react-toastify";
 import AccountPage from "./pages/AccountPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FavouritePage from "./pages/FavouritePage";
 
 library.add(fas, fab, far);
 
@@ -101,7 +102,7 @@ function App() {
           />
           <ToastContainer
             position="bottom-right"
-            autoClose={3000}
+            autoClose={4000}
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick
@@ -110,6 +111,7 @@ function App() {
             draggable
             pauseOnHover
             theme="dark"
+            className={"z-[99999]"}
           />
           <AppLayout>
             <Routes>
@@ -155,13 +157,35 @@ function App() {
                 element={<FilterPage openModal={openModal} />}
               />
               <Route path="/donate" element={<DonatePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
+              <Route
+                path="/login"
+                element={
+                  <ProtectedRoute diff={true}>
+                    <LoginPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/signup"
+                element={
+                  <ProtectedRoute diff={true}>
+                    <SignUpPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/account"
                 element={
                   <ProtectedRoute>
                     <AccountPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/favourite"
+                element={
+                  <ProtectedRoute>
+                    <FavouritePage openModal={openModal} />
                   </ProtectedRoute>
                 }
               />

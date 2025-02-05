@@ -13,7 +13,7 @@ const MovieList = ({
   search = false,
   keyword = "",
 }) => {
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [titleHead, setTitleHead] = useState(null);
@@ -95,9 +95,13 @@ const MovieList = ({
     fetchMovies();
   }, [keyword, type_slug, country, category, year, sort_field]);
 
+  if (!movies) return <></>;
+
   return (
     <div className="text-white mt-36 px-[3%]">
-      {(movies.length == 0 && <h1>Không tìm thấy bộ phim nào !</h1>) || (
+      {(!loading && movies.length == 0 && (
+        <h1>Không tìm thấy bộ phim nào !</h1>
+      )) || (
         <h1 className="text-xl md:text-2xl 2xl:text-4xl">
           {(search && (
             <>

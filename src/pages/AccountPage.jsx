@@ -33,7 +33,7 @@ function AccountPage() {
           src={user.photoURL}
           onClick={() => setIsModalOpen(true)}
           title="Đổi ảnh đại diện"
-          className="w-[120px] md:w-[200px] aspect-square object-cover rounded-md absolute top-1/3 left-1/2 -translate-y-1/2 -translate-x-1/2 cursor-pointer"
+          className="w-[120px] md:w-[200px] aspect-square object-cover rounded-md absolute top-1/3 left-1/2 -translate-y-1/2 -translate-x-1/2 cursor-pointer transition-all ease-linear hover:scale-105"
         ></img>
         <div className="mt-[80px] md:mt-[120px] text-center space-y-4">
           {change ? (
@@ -70,6 +70,14 @@ function AccountPage() {
               <FontAwesomeIcon icon="fa-solid fa-pen" />
             </p>
           )}
+          <p>
+            Ngày gia nhập:{" "}
+            <span className=" font-bold">
+              {new Date(user.metadata.creationTime).toLocaleString("vi-VN", {
+                timeZone: "Asia/Ho_Chi_Minh",
+              })}
+            </span>
+          </p>
           <p>
             Email: <span className=" font-bold">{user.email}</span>
           </p>
