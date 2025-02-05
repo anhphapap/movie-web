@@ -84,6 +84,15 @@ function App() {
     setListContent(null);
   };
 
+  const contextClass = {
+    success: "bg-white/10 backdrop-blur",
+    error: "bg-white/10 backdrop-blur",
+    info: "bg-white/10 backdrop-blur",
+    warning: "bg-white/10 backdrop-blur",
+    default: "bg-white/10 backdrop-blur",
+    dark: "bg-white/10 backdrop-blur",
+  };
+
   return (
     <AuthContextProvider>
       <div className="bg-[#141414] overflow-x-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
@@ -102,7 +111,7 @@ function App() {
           />
           <ToastContainer
             position="bottom-right"
-            autoClose={4000}
+            autoClose={5000}
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick
@@ -112,6 +121,10 @@ function App() {
             pauseOnHover
             theme="dark"
             className={"z-[99999]"}
+            toastClassName={(context) =>
+              contextClass[context?.type || "default"] +
+              " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg"
+            }
           />
           <AppLayout>
             <Routes>
