@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const NetflixSearch = () => {
+const Search = ({ open = false }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const inputRef = useRef(null);
   const navigate = useNavigate();
@@ -45,11 +45,23 @@ const NetflixSearch = () => {
     }
   };
 
+  if (open)
+    return (
+      <div className="border-[1px] border-white px-3 py-2 bg-black flex items-center justify-start space-x-2 mb-2 rounded-md">
+        <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
+        <input
+          ref={inputRef}
+          type="text"
+          className="bg-black text-white placeholder:text-gray-400 outline-none w-full "
+          placeholder="Tên phim..."
+          onChange={handleChange}
+        ></input>
+      </div>
+    );
+
   return (
     <div
-      className={`relative flex items-center transition-all duration-300 ease-in-out ${
-        isSearchOpen ? "w-64" : "w-10"
-      }`}
+      className={`relative flex items-center transition-all duration-300 ease-in-out `}
       onBlur={closeSearch}
     >
       {!isSearchOpen && (
@@ -62,7 +74,7 @@ const NetflixSearch = () => {
       )}
 
       {isSearchOpen && (
-        <div className="absolute -left-3 w-64 z-40 border-[1px] border-white px-3 py-1 bg-black flex items-center justify-start space-x-2">
+        <div className=" flex-grow absolute right-3 w-64 z-40 border-[1px] border-white px-3 py-1 bg-black flex items-center justify-start space-x-2">
           <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
           <input
             ref={inputRef}
@@ -77,4 +89,4 @@ const NetflixSearch = () => {
   );
 };
 
-export default NetflixSearch;
+export default Search;
