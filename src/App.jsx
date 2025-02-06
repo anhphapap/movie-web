@@ -123,7 +123,7 @@ function App() {
             className={"z-[99999]"}
             toastClassName={(context) =>
               contextClass[context?.type || "default"] +
-              " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg"
+              " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
             }
           />
           <AppLayout>
