@@ -189,7 +189,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </a>
           ))}
         </div>
-        <div className="border-t-[0.01px] px-[3%] py-2 text-white md:hidden space-y-1">
+        <div className="border-t-[0.01px] px-[3%] py-2 text-white sm:hidden space-y-1">
           {user?.email ? (
             <>
               <div className="px-3 py-2 flex space-x-3 items-center">
