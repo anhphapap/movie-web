@@ -130,7 +130,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                     color="white"
                     className="group-hover:rotate-180 ease-linear duration-200"
                   />
-                  <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36 border-t-2">
+                  <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36 border-t-2 z-10">
                     <ul className="p-3">
                       <Link to="/account">
                         <li className="hover:underline space-x-3 mb-3">
