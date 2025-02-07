@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 
 const customStyles = {
   content: {
@@ -19,8 +20,38 @@ const customStyles = {
   },
 };
 
-function ListModal({ isOpen, onClose, movies, openModal, nameList }) {
-  if (!movies) return null;
+function ListModal({ isOpen, onClose, openModal, nameList, api }) {
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchAPI = async () => {
+      if (api && isOpen && page <= totalPage) {
+        setLoading(true);
+        const currentList = await axios.get(api + "&page=" + page);
+        setMovies((prev) => [...prev, ...currentList.data.data.items]);
+        if (page == 1)
+          setTotalPage(
+            Math.ceil(
+              currentList.data.data.params.pagination.totalItems /
+                currentList.data.data.params.pagination.totalItemsPerPage
+            )
+          );
+        setLoading(false);
+      }
+    };
+    fetchAPI();
+  }, [api, nameList, page, isOpen]);
+
+  useEffect(() => {
+    setMovies([]);
+    setPage(1);
+    setTotalPage(1);
+  }, [isOpen]);
+
+  if (movies.length === 0) return null;
   return (
     <Modal
       isOpen={isOpen}
@@ -30,9 +61,11 @@ function ListModal({ isOpen, onClose, movies, openModal, nameList }) {
       className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
-        <h1 className="font-extrabold text-5xl my-12">{nameList}</h1>
+        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl my-12 text-center">
+          {nameList}
+        </h1>
         <div className="w-full">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-x-3 gap-y-14 mt-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-x-3 gap-y-14 mt-5">
             {movies.map((item) => (
               <div
                 className="aspect-video bg-cover rounded-md group cursor-pointer relative"
@@ -51,7 +84,27 @@ function ListModal({ isOpen, onClose, movies, openModal, nameList }) {
                 </div>
               </div>
             ))}
+            {loading && (
+              <div className="flex items-center justify-center">
+                <FontAwesomeIcon
+                  icon="fa-solid fa-spinner"
+                  size="2xl"
+                  className="animate-spin text-white"
+                />
+              </div>
+            )}
           </div>
+        </div>
+        <div className="relative border-b-[1.6px] border-white/20 w-full my-10">
+          {page < totalPage && (
+            <button
+              title="Xem thêm"
+              onClick={() => setPage(page + 1)}
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414] border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
+            >
+              <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
+            </button>
+          )}
         </div>
         <button
           className="aspect-square w-7 rounded-full absolute right-3 top-3 z-10 flex items-center justify-center"

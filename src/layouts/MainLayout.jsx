@@ -50,6 +50,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               nameList={item.nameList}
               typeList={item.typeList}
               sort_field={item?.sort_field}
+              year={item?.year}
               type_slug={item.type_slug}
               country={item.country}
               category={item.category}

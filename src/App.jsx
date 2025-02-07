@@ -53,6 +53,7 @@ function App() {
   const [modalContent, setModalContent] = useState(null);
   const [isListOpen, setIsListOpen] = useState(false);
   const [listContent, setListContent] = useState(null);
+  const [listAPI, setListAPI] = useState("");
   const [nameList, setNameList] = useState("");
 
   const openModal = async (slug) => {
@@ -68,20 +69,25 @@ function App() {
     setModalContent(null);
   };
 
-  const openList = async ({ type_slug, country, category, nameList }) => {
-    const currentList = await axios.get(
+  const openList = async ({
+    type_slug,
+    country,
+    category,
+    year,
+    sort_field,
+    nameList,
+  }) => {
+    setListAPI(
       `${
         import.meta.env.VITE_API_LIST
-      } ${type_slug}?sort_field=modified.time&category=${category}&country=${country}&year=&page=1`
+      }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
     );
     setNameList(nameList);
-    setListContent(currentList.data.data.items);
     setIsListOpen(true);
   };
 
   const closeList = () => {
     setIsListOpen(false);
-    setListContent(null);
   };
 
   const contextClass = {
@@ -105,9 +111,9 @@ function App() {
           <ListModal
             isOpen={isListOpen}
             onClose={closeList}
-            movies={listContent}
             openModal={openModal}
             nameList={nameList}
+            api={listAPI}
           />
           <ToastContainer
             position="bottom-right"

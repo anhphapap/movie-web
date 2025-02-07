@@ -180,7 +180,7 @@ const MovieCarousel = ({
     if (typeList === "top") {
       return (
         <div className="my-8 relative bg-transparent">
-          <h2 className="text-white font-bold mb-3 px-[3%]">{nameList}</h2>
+          <h2 className="text-white/80 font-bold mb-3 px-[3%]">{nameList}</h2>
           <Carousel
             responsive={responsive}
             centerMode={true}
@@ -224,13 +224,22 @@ const MovieCarousel = ({
     return (
       <div className="my-8 relative">
         <div
-          className="group cursor-pointer text-white font-bold px-[3%] mb-3 inline-block"
-          onClick={() => openList({ type_slug, country, category, nameList })}
+          className="group cursor-pointer text-white/80 font-bold px-[3%] mb-3 inline-block"
+          onClick={() =>
+            openList({
+              type_slug,
+              country,
+              category,
+              year,
+              sort_field,
+              nameList,
+            })
+          }
         >
-          <span className="pr-2 group-hover:opacity-70 transition-all ease-in-out duration-300">
+          <span className="group-hover:text-white transition-all ease-in-out duration-500">
             {nameList}
           </span>
-          <span className="opacity-0 text-xs group-hover:opacity-70 transition-all ease-in-out duration-300">
+          <span className="opacity-0 text-xs group-hover:opacity-70 group-hover:pl-2 transition-all ease-in-out duration-500">
             Xem tất cả{" "}
             <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
           </span>

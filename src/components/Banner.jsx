@@ -58,8 +58,17 @@ const Banner = ({
         <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
         <div className="flex w-full aspect-[16/6]">
           <div className="flex flex-col justify-end z-10 space-y-3 w-2/3 xl:w-1/2">
+            <div className="flex items-center space-x-1">
+              <img
+                className="h-[20px] object-cover"
+                src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+              ></img>
+              <span className="font-bold text-white/70 text-xs tracking-[3px]">
+                {movie.movie.type === "series" ? "LOẠT PHIM" : "PHIM"}
+              </span>
+            </div>
             <h1
-              className="uppercase text-5xl lg:text-8xl 2xl:text-9xl font-extrabold italic text-red-600 truncate line-clamp-2 text-pretty hidden sm:block"
+              className="uppercase text-4xl lg:text-7xl font-extrabold italic text-red-600 truncate line-clamp-1 text-pretty hidden sm:block"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
             >
               {movie.movie.origin_name}
