@@ -63,7 +63,7 @@ function FilterNavbar({ type_slug }) {
         </div>
       </div>
       <div
-        className={`bg-[#141414] ${
+        className={`bg-[#141414] lg:bg-transparent ${
           showMenu ? "block" : "hidden"
         } mt-2 lg:flex lg:pr-[3%] lg:items-center lg:gap-2 lg:justify-center`}
         id="mobile-filter"
@@ -71,11 +71,15 @@ function FilterNavbar({ type_slug }) {
         <div className="space-y-1 pb-2 px-[3%] lg:px-0 grid sm:grid-cols-2 md:grid-cols-3 gap-2 lg:flex">
           <select
             id="sortField"
-            className="px-1 pr-4 py-[1px] mt-1 border-white border-[1px] bg-black cursor-pointer"
+            className="px-1 pr-4 py-[1px] mt-1 border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
           >
             {listSortField.map((cate, index) => {
               return (
-                <option key={index + cate.value} value={cate.value}>
+                <option
+                  key={index + cate.value}
+                  value={cate.value}
+                  className="bg-black"
+                >
                   {cate.name}
                 </option>
               );
@@ -83,12 +87,16 @@ function FilterNavbar({ type_slug }) {
           </select>
           <select
             id="type"
-            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer"
+            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
             defaultValue={type_slug}
           >
             {listType.map((cate, index) => {
               return (
-                <option key={index + cate.value} value={cate.value}>
+                <option
+                  key={index + cate.value}
+                  value={cate.value}
+                  className="bg-black"
+                >
                   {cate.name}
                 </option>
               );
@@ -96,12 +104,16 @@ function FilterNavbar({ type_slug }) {
           </select>
           <select
             id="category"
-            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer"
+            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
           >
             <option value="">Thể loại</option>
             {listCategory.map((cate, index) => {
               return (
-                <option key={index + cate.value} value={cate.value}>
+                <option
+                  key={index + cate.value}
+                  value={cate.value}
+                  className="bg-black"
+                >
                   {cate.name}
                 </option>
               );
@@ -109,12 +121,16 @@ function FilterNavbar({ type_slug }) {
           </select>
           <select
             id="country"
-            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer"
+            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
           >
             <option value="">Quốc gia</option>
             {listCountry.map((ct, index) => {
               return (
-                <option key={index + ct.value} value={ct.value}>
+                <option
+                  key={index + ct.value}
+                  value={ct.value}
+                  className="bg-black"
+                >
                   {ct.name}
                 </option>
               );
@@ -122,13 +138,13 @@ function FilterNavbar({ type_slug }) {
           </select>
           <select
             id="year"
-            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer"
+            className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
           >
             <option value="">Năm</option>
             {[...Array(2025 - 2010 + 1)].map((_, index) => {
               var year = 2025 - index;
               return (
-                <option key={year} value={year}>
+                <option key={year} value={year} className="bg-black">
                   {year}
                 </option>
               );
@@ -137,7 +153,7 @@ function FilterNavbar({ type_slug }) {
         </div>
         <div className="text-end px-[3%] lg:px-0">
           <button
-            className="bg-black border-[1px] px-4 py-[1px] mb-1 hover:bg-transparent/15"
+            className="bg-black border-[1px] px-4 py-[1px] mb-1 hover:bg-white/10 transition-all ease-linear"
             onClick={handleFilter}
           >
             Lọc

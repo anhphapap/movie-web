@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { listCategory, listCountry, listType } from "../utils/data";
 import { tops } from "../utils/data";
 
 const CustomRightArrow = ({ onClick }) => {
@@ -65,6 +64,7 @@ const responsive = {
 };
 
 const MovieCarousel = ({
+  nameList,
   typeList = "list",
   openModal,
   openList,
@@ -77,16 +77,6 @@ const MovieCarousel = ({
 }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-  var nameList = "";
-  if (typeList === "top") {
-    nameList =
-      "Top 10 " + listType.find((item) => item.value === type_slug).name;
-  } else
-    nameList =
-      "Phim " +
-      listCategory.find((item) => item.value === category).name +
-      " " +
-      listCountry.find((item) => item.value === country).name;
 
   useEffect(() => {
     const fetchMovies = async () => {

@@ -54,11 +54,11 @@ const MovieList = ({
 
         if (!titleHead) {
           const yearNow = new Date().getFullYear();
+
           setTitleHead(
-            listResponse.data.data.seoOnPage.titleHead.replace(
-              "2022",
-              yearNow.toString()
-            )
+            listResponse.data.data.seoOnPage.titleHead
+              .replace(/Ophim.Tv/g, "Needflex")
+              .replace(/2022/g, yearNow.toString())
           );
         }
       }

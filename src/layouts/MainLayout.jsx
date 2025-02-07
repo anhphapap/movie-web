@@ -1,9 +1,9 @@
 import React, { Children, useEffect, useState } from "react";
 import Banner from "../components/Banner";
-import { randomList } from "../utils/randomList";
 import { useLocation } from "react-router-dom";
 import MovieCarousel from "../components/MovieCarousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { homeContent, seriesContent, singleContent } from "../utils/data";
 
 const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
   const [listInfo, setListInfo] = useState(null);
@@ -11,7 +11,10 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
   const locate = useLocation();
   useEffect(() => {
     setLoading(true);
-    setListInfo(randomList(locate.pathname));
+    if (locate.pathname === "/") setListInfo(homeContent);
+    if (locate.pathname === "/phim-bo") setListInfo(seriesContent);
+    if (locate.pathname === "/phim-le") setListInfo(singleContent);
+
     setLoading(false);
   }, [type_slug]);
 
@@ -33,6 +36,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
         <div key={`${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
             <MovieCarousel
+              nameList={item.nameList}
               typeList={item.typeList}
               type_slug={item.type_slug}
               sort_field={item.sort_field}
@@ -43,7 +47,9 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
             />
           ) : (
             <MovieCarousel
+              nameList={item.nameList}
               typeList={item.typeList}
+              sort_field={item?.sort_field}
               type_slug={item.type_slug}
               country={item.country}
               category={item.category}
