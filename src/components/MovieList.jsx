@@ -131,13 +131,16 @@ const MovieList = ({
           </div>
         ))}
         {loading && (
-          <div className="flex items-center justify-center">
-            <FontAwesomeIcon
-              icon="fa-solid fa-spinner"
-              size="2xl"
-              className="animate-spin text-white"
-            />
-          </div>
+          <>
+            {[...Array(7)].map((_, index) => (
+              <div
+                key={index + 198}
+                className="aspect-video cursor-pointer relative animate-pulse"
+              >
+                <div className="w-full h-full bg-gray-600 rounded-md"></div>
+              </div>
+            ))}
+          </>
         )}
       </div>
     </div>

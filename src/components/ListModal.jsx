@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
+import Tooltip from "./Tooltip";
 
 const customStyles = {
   content: {
@@ -85,24 +86,27 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
               </div>
             ))}
             {loading && (
-              <div className="flex items-center justify-center">
-                <FontAwesomeIcon
-                  icon="fa-solid fa-spinner"
-                  size="2xl"
-                  className="animate-spin text-white"
-                />
-              </div>
+              <>
+                {[...Array(6)].map((_, index) => (
+                  <div
+                    key={index + 99}
+                    className="aspect-video cursor-pointer relative animate-pulse"
+                  >
+                    <div className="w-full h-full bg-gray-600 rounded-md"></div>
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
         <div className="relative border-b-[1.6px] border-white/20 w-full my-10">
           {page < totalPage && (
             <button
-              title="Xem thêm"
               onClick={() => setPage(page + 1)}
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414] border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
+              className="absolute group bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414] border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
             >
               <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
+              <Tooltip content={"Xem thêm"} />
             </button>
           )}
         </div>

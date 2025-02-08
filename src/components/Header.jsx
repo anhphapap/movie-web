@@ -10,7 +10,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
   const { user, logOut, loading } = UserAuth();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
-  const [onTab, setOnTab] = useState(0);
+  const [onTab, setOnTab] = useState(-1);
 
   const navigation = [
     { name: "Trang chủ", href: "/" },
@@ -114,6 +114,19 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   {item.name}
                 </a>
               ))}
+              {user?.email && (
+                <a
+                  href="/favourite"
+                  className={` ${
+                    onTab === 5
+                      ? "font-bold text-white"
+                      : "text-white/80 hover:opacity-70"
+                  }`}
+                  onClick={() => setOnTab(index)}
+                >
+                  Yêu thích
+                </a>
+              )}
             </nav>
           </div>
           <div className="items-center hidden md:flex">
