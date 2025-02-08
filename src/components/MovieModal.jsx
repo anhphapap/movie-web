@@ -13,6 +13,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { toast } from "react-toastify";
+import Tooltip from "./Tooltip";
 
 const customStyles = {
   content: {
@@ -168,10 +169,12 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
               )}
             </div>
             <button
-              className="p-1 sm:p-2 lg:p-3 h-full rounded-full bg-transparent border-2 flex items-center justify-center border-white/40 hover:border-white hover:bg-white/10 transition-all ease-linear"
+              className={`group relative p-1 sm:p-2 lg:p-3 h-full rounded-full bg-transparent border-2 flex items-center justify-center ${
+                saved ? "border-white" : "border-white/40"
+              } hover:border-white hover:bg-white/10 transition-all ease-linear`}
               onClick={handleSaveMovie}
-              title="Yêu thích"
             >
+              <Tooltip content={saved ? "Bỏ thích" : "Yêu thích"} />
               <FontAwesomeIcon
                 icon={`fa-${saved ? "solid" : "regular"} fa-heart`}
                 className="sm:text-lg"

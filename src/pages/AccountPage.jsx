@@ -3,6 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast } from "react-toastify";
 import AvatarModal from "../components/AvatarModal";
+import Tooltip from "../components/Tooltip";
 
 function AccountPage() {
   const { user, updateUserProfile } = UserAuth();
@@ -59,16 +60,18 @@ function AccountPage() {
               </button>
             </div>
           ) : (
-            <p
-              className="ml-5 space-x-1 cursor-pointer"
-              title="Đổi tên hiển thị"
-              onClick={() => setChange(true)}
-            >
-              <span className="font-bold text-xl md:text-3xl">
-                {user.displayName}
-              </span>
-              <FontAwesomeIcon icon="fa-solid fa-pen" />
-            </p>
+            <>
+              <p
+                className="ml-4 space-x-1 cursor-pointer group relative"
+                onClick={() => setChange(true)}
+              >
+                <span className="font-bold text-xl md:text-3xl">
+                  {user.displayName}
+                </span>
+                <FontAwesomeIcon icon="fa-solid fa-pen" />{" "}
+                <Tooltip content={"Đổi tên hiển thị"} />
+              </p>
+            </>
           )}
           <p>
             Ngày gia nhập:{" "}

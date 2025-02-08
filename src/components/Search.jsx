@@ -47,12 +47,16 @@ const Search = ({ open = false }) => {
 
   if (open)
     return (
-      <div className="border-[1px] border-white px-3 py-2 bg-black flex items-center justify-start space-x-2 mb-2 rounded-md">
-        <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
+      <div className="group border-y-[0.1px] border-white/60 py-2 px-[3%] bg-[#141414] flex items-center justify-start space-x-2 mb-2">
+        <FontAwesomeIcon
+          icon="fa-solid fa-magnifying-glass"
+          color="white"
+          className="transition-opacity duration-200 opacity-70 group-focus-within:opacity-100"
+        />
         <input
           ref={inputRef}
           type="text"
-          className="bg-black text-white placeholder:text-gray-400 outline-none w-full "
+          className="bg-[#141414] text-white placeholder:text-white/70 outline-none w-full"
           placeholder="Tên phim..."
           onChange={handleChange}
         ></input>

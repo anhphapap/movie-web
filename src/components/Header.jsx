@@ -61,7 +61,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
       className={`fixed flex flex-col top-0 left-0 right-0 z-50 transition-all duration-500 ease-linear text-sm lg:text-base`}
     >
       <div
-        className={`flex items-center justify-start py-4 px-[3%] transition-all duration-500 ease-linear text-white ${
+        className={`flex items-center justify-start py-2 px-[3%] transition-all duration-500 ease-linear text-white sm:py-3 md:py-4 ${
           filter
             ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : isScrolled || showMenu
@@ -74,17 +74,17 @@ const Header = ({ filter = false, type_slug = "" }) => {
           <div className="flex items-center md:hidden">
             <button
               type="button"
-              className="relative inline-flex items-center justify-center rounded-md p-3 text-white aspect-square w-10 border-[1px] hover:bg-white/10"
+              className="relative inline-flex items-center justify-center text-white p-2 rounded hover:bg-white/10"
               onClick={() => setShowMenu(!showMenu)}
             >
               {showMenu ? (
-                <FontAwesomeIcon icon="fa-solid fa-xmark" />
+                <FontAwesomeIcon icon="fa-solid fa-xmark" color="red" />
               ) : (
                 <FontAwesomeIcon icon="fa-solid fa-bars" />
               )}
             </button>
           </div>
-          <div className="md:hidden h-8 aspect-square flex justify-center">
+          <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
             <a href="/">
               <img
                 src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
@@ -103,8 +103,10 @@ const Header = ({ filter = false, type_slug = "" }) => {
               {navigation.slice(0, 4).map((item, index) => (
                 <a
                   href={item.href}
-                  className={`text-white hover:opacity-80 ${
-                    onTab === index && "font-semibold"
+                  className={` ${
+                    onTab === index
+                      ? "font-bold text-white"
+                      : "text-white/80 hover:opacity-70"
                   }`}
                   onClick={() => setOnTab(index)}
                   key={item.href}
@@ -114,11 +116,11 @@ const Header = ({ filter = false, type_slug = "" }) => {
               ))}
             </nav>
           </div>
-          <div className="items-center hidden sm:flex">
+          <div className="items-center hidden md:flex">
             <div className="hidden md:block">
               <Search />
             </div>
-            <div className="hidden sm:block">
+            <div className="hidden md:block">
               {user?.email ? (
                 <div className="relative flex flex-shrink-0 items-center space-x-2 cursor-pointer group">
                   <img
@@ -171,11 +173,13 @@ const Header = ({ filter = false, type_slug = "" }) => {
         </div>
       </div>
       <div
-        className={`bg-[#141414] md:hidden ${showMenu ? "block" : "hidden"}`}
+        className={`bg-[#141414] md:hidden border-b-[1px] border-white ${
+          showMenu ? "block" : "hidden"
+        }`}
         id="mobile-menu"
       >
+        <Search open={true} />
         <div className="space-y-1 pb-2 px-[3%]">
-          <Search open={true} />
           {navigation.slice(0, 4).map((item, index) => (
             <a
               href={item.href}
@@ -189,7 +193,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </a>
           ))}
         </div>
-        <div className="border-t-[0.01px] px-[3%] py-2 text-white sm:hidden space-y-1">
+        <div className="border-t-[0.1px] px-[3%] py-2 border-white/60 text-white md:hidden space-y-1">
           {user?.email ? (
             <>
               <div className="px-3 py-2 flex space-x-3 items-center">
