@@ -4,14 +4,15 @@ import "react-multi-carousel/lib/styles.css";
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { tops } from "../utils/data";
 
 const CustomRightArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute right-0 top-0 h-full w-[5%] bg-black bg-opacity-30 p-3 rounded-s-md hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
+      id="btn-carousel"
+      className="absolute right-0 top-0 h-full w-[3%] bg-black bg-opacity-30 p-3 rounded-s hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-right" />
     </button>
@@ -22,7 +23,7 @@ const CustomLeftArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute left-0 top-0 h-full w-[5%] bg-black bg-opacity-30 p-3 rounded-e-md hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute left-0 top-0 h-full w-[3%] bg-black bg-opacity-30 p-3 rounded-e hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-left" />
     </button>
@@ -41,25 +42,35 @@ const CustomDot = ({ onClick, active }) => {
 };
 
 const responsive = {
+  xxxl: {
+    breakpoint: { max: 3000, min: 1400 },
+    items: 6,
+    slidesToSlide: 6,
+    partialVisibilityGutter: 14,
+  },
   xxl: {
-    breakpoint: { max: 3000, min: 1536 },
+    breakpoint: { max: 1400, min: 1100 },
     items: 5,
     slidesToSlide: 5,
+    partialVisibilityGutter: 14,
   },
   xl: {
-    breakpoint: { max: 1536, min: 1280 },
+    breakpoint: { max: 1100, min: 800 },
     items: 4,
     slidesToSlide: 4,
+    partialVisibilityGutter: 14,
   },
   lg: {
-    breakpoint: { max: 1280, min: 768 },
+    breakpoint: { max: 800, min: 500 },
     items: 3,
     slidesToSlide: 3,
+    partialVisibilityGutter: 14,
   },
   md: {
-    breakpoint: { max: 768, min: 0 },
+    breakpoint: { max: 500, min: 0 },
     items: 2,
     slidesToSlide: 2,
+    partialVisibilityGutter: 14,
   },
 };
 
@@ -116,7 +127,7 @@ const MovieCarousel = ({
     const range = Array.from({ length: 10 }, (_, index) => index);
     if (typeList === "top") {
       return (
-        <div className="my-8 relative animate-pulse">
+        <div className="my-10 relative animate-pulse">
           <h2 className="text-white font-bold mb-3 mx-[3%] rounded">
             {nameList}
           </h2>
@@ -152,7 +163,7 @@ const MovieCarousel = ({
       );
     }
     return (
-      <div className="my-8 relative animate-pulse">
+      <div className="my-10 relative animate-pulse">
         <h2 className="font-bold mb-3 mx-[3%] rounded text-white">
           {nameList}
         </h2>
@@ -179,41 +190,73 @@ const MovieCarousel = ({
   } else {
     if (typeList === "top") {
       return (
-        <div className="my-8 relative bg-transparent">
+        <div className="my-10 relative bg-transparent">
           <h2 className="text-white/80 font-bold mb-3 px-[3%]">{nameList}</h2>
           <Carousel
             responsive={responsive}
-            centerMode={true}
             customRightArrow={<CustomRightArrow />}
             customLeftArrow={<CustomLeftArrow />}
             customDot={<CustomDot />}
             showDots={true}
             renderDotsOutside={true}
-            dotListClass="absolute top-5 !right-[4%] !left-auto"
-            className="px-[3%]"
+            dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
+            className="px-[3%] absolute w-full h-full z-10"
+            partialVisbile
+            itemClass="group hover:z-[9999] pr-2"
           >
             {movies.map((item, index) => (
               <div
-                className="flex cursor-pointer group h-[85px] sm:h-[120px] md:h-[150px] lg:h-[200px] mr-2"
+                className="flex cursor-pointer group"
                 onClick={() => openModal(item.slug)}
                 key={item._id}
               >
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: tops[index],
-                  }}
-                  className="h-full"
-                />
-                <div className="aspect-[2/3] h-full relative">
-                  <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center p-2 text-white">
-                    <div className=" font-bold text-center truncate line-clamp-4 text-pretty">
-                      {item.name}
+                <div className="flex items-center">
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: tops[index],
+                    }}
+                    className="w-[50%] h-auto"
+                  />
+                  <div className="aspect-[2/3] relative w-[50%]">
+                    <img
+                      src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
+                      className="object-cover h-full w-full object-center rounded-sm"
+                    ></img>
+                  </div>
+                </div>
+                <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[20%] rounded transition-all ease-in-out duration-300">
+                  <img
+                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                  />
+                  <div
+                    className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b"
+                    onClick={() => openModal(item.slug)}
+                  >
+                    <h3 className="font-bold truncate">{item.name}</h3>
+
+                    <div className="flex space-x-2 items-center text-white/80">
+                      <span className="lowercase">{item.year}</span>
+                      <span className="lowercase">{item.time}</span>
+                      <span
+                        className="px-1 border-[1px] rounded font-bold uppercase"
+                        style={{ fontSize: "8px" }}
+                      >
+                        {item.quality}
+                      </span>
+                    </div>
+                    <div>
+                      {item.category.map(
+                        (cat, index) =>
+                          index < 3 &&
+                          (index != 0 ? (
+                            <span> - {cat.name}</span>
+                          ) : (
+                            <span>{cat.name}</span>
+                          ))
+                      )}
                     </div>
                   </div>
-                  <img
-                    src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
-                    className="object-cover h-full w-full object-center"
-                  ></img>
                 </div>
               </div>
             ))}
@@ -222,7 +265,7 @@ const MovieCarousel = ({
       );
     }
     return (
-      <div className="my-8 relative">
+      <div className="my-10 relative">
         <div
           className="group cursor-pointer text-white/80 font-bold px-[3%] mb-3 inline-block"
           onClick={() =>
@@ -246,29 +289,54 @@ const MovieCarousel = ({
         </div>
         <Carousel
           responsive={responsive}
-          centerMode={true}
           customRightArrow={<CustomRightArrow />}
           customLeftArrow={<CustomLeftArrow />}
           customDot={<CustomDot />}
           showDots={true}
           renderDotsOutside={true}
-          dotListClass="absolute top-5 !right-[4%] !left-auto"
-          className="px-[3%]"
+          dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
+          className="px-[3%] absolute w-full h-full z-10"
+          partialVisible={true}
+          itemClass="group hover:z-[9999] pr-2"
         >
           {movies.map((item, index) => (
             <div
-              className="aspect-video bg-cover rounded-md group cursor-pointer mr-[3%] relative"
-              style={{
-                backgroundImage: `url(${import.meta.env.VITE_API_IMAGE}${
-                  item.poster_url
-                })`,
-              }}
+              className="aspect-video bg-cover bg-center rounded cursor-pointer group-hover:z-[99999]"
               onClick={() => openModal(item.slug)}
               key={item._id}
             >
-              <div className="absolute top-0 left-0 w-full rounded-md h-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-white">
-                <div className=" font-bold text-center truncate line-clamp-2 text-pretty">
-                  {item.name}
+              <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[60%] rounded transition-all ease-in-out duration-300">
+                <img
+                  src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                  className="aspect-video object-cover rounded group-hover:rounded-b-none h-full"
+                />
+                <div
+                  className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 mr-2"
+                  onClick={() => openModal(item.slug)}
+                >
+                  <h3 className="font-bold truncate">{item.name}</h3>
+
+                  <div className="flex space-x-2 items-center text-white/80">
+                    <span className="lowercase">{item.year}</span>
+                    <span className="lowercase">{item.time}</span>
+                    <span
+                      className="px-1 border-[1px] rounded font-bold uppercase"
+                      style={{ fontSize: "8px" }}
+                    >
+                      {item.quality}
+                    </span>
+                  </div>
+                  <div>
+                    {item.category.map(
+                      (cat, index) =>
+                        index < 3 &&
+                        (index != 0 ? (
+                          <span> - {cat.name}</span>
+                        ) : (
+                          <span>{cat.name}</span>
+                        ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

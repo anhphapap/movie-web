@@ -136,7 +136,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
     >
       <div className="flex flex-col w-full rounded-lg">
         <div
-          className="aspect-video bg-cover w-full relative rounded-t-lg"
+          className="aspect-video bg-cover bg-center w-full relative rounded-t-lg"
           style={{
             backgroundImage: `url(${modal.movie.poster_url})`,
           }}

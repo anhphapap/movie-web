@@ -62,7 +62,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
       className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
-        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl my-12 text-center">
+        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl mb-20 mt-12 text-center">
           {nameList}
         </h1>
         <div className="w-full">
@@ -70,17 +70,41 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
             {movies.map((item) => (
               <div
                 className="aspect-video bg-cover rounded-md group cursor-pointer relative"
-                style={{
-                  backgroundImage: `url(${import.meta.env.VITE_API_IMAGE}${
-                    item.poster_url
-                  })`,
-                }}
                 onClick={() => openModal(item.slug)}
                 key={item._id}
               >
-                <div className="absolute top-0 left-0 w-full rounded-md h-full bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 text-white">
-                  <div className="font-bold text-center truncate line-clamp-2 text-pretty">
-                    {item.name}
+                <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:z-[99999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300">
+                  <img
+                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                  ></img>
+                  <div
+                    className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100"
+                    onClick={() => openModal(item.slug)}
+                  >
+                    <h3 className="font-bold">{item.name}</h3>
+
+                    <div className="flex space-x-2 items-center text-white/80">
+                      <span className="lowercase">{item.year}</span>
+                      <span className="lowercase">{item.time}</span>
+                      <span
+                        className="px-1 border-[1px] rounded font-bold uppercase"
+                        style={{ fontSize: "8px" }}
+                      >
+                        {item.quality}
+                      </span>
+                    </div>
+                    <div>
+                      {item.category.map(
+                        (cat, index) =>
+                          index < 3 &&
+                          (index != 0 ? (
+                            <span> - {cat.name}</span>
+                          ) : (
+                            <span>{cat.name}</span>
+                          ))
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
