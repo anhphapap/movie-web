@@ -144,9 +144,9 @@ const MovieList = ({
                     (cat, index) =>
                       index < 3 &&
                       (index != 0 ? (
-                        <span> - {cat.name}</span>
+                        <span key={item.slug + cat.name}> - {cat.name}</span>
                       ) : (
-                        <span>{cat.name}</span>
+                        <span key={item.slug + cat.name}>{cat.name}</span>
                       ))
                   )}
                 </div>

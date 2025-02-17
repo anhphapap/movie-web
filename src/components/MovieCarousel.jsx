@@ -34,8 +34,8 @@ const CustomDot = ({ onClick, active }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-[7px] sm:w-[14px] h-[1px] sm:h-[2px] mx-[0.5px] rounded-full transition-all ${
-        active ? "bg-white" : "bg-gray-500"
+      className={`w-[7px] sm:w-[14px] h-[0.8px] sm:h-[2px] mx-[0.8px] transition-all ${
+        active ? "bg-white/90" : "bg-white/40"
       }`}
     ></button>
   );
@@ -201,7 +201,7 @@ const MovieCarousel = ({
             renderDotsOutside={true}
             dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
             className="px-[3%] absolute w-full h-full z-10"
-            partialVisbile
+            partialVisible
             itemClass="group hover:z-[9999] pr-2"
           >
             {movies.map((item, index) => (
@@ -250,9 +250,12 @@ const MovieCarousel = ({
                         (cat, index) =>
                           index < 3 &&
                           (index != 0 ? (
-                            <span> - {cat.name}</span>
+                            <span key={item.slug + cat.name}>
+                              {" "}
+                              - {cat.name}
+                            </span>
                           ) : (
-                            <span>{cat.name}</span>
+                            <span key={item.slug + cat.name}>{cat.name}</span>
                           ))
                       )}
                     </div>
@@ -296,7 +299,7 @@ const MovieCarousel = ({
           renderDotsOutside={true}
           dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
           className="px-[3%] absolute w-full h-full z-10"
-          partialVisible={true}
+          partialVisible
           itemClass="group hover:z-[9999] pr-2"
         >
           {movies.map((item, index) => (
@@ -331,9 +334,9 @@ const MovieCarousel = ({
                       (cat, index) =>
                         index < 3 &&
                         (index != 0 ? (
-                          <span> - {cat.name}</span>
+                          <span key={item.slug + cat.name}> - {cat.name}</span>
                         ) : (
-                          <span>{cat.name}</span>
+                          <span key={item.slug + cat.name}>{cat.name}</span>
                         ))
                     )}
                   </div>

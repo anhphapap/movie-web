@@ -156,7 +156,7 @@ export const homeContent = [
     size: 10,
   },
   {
-    nameList: "Mới trên needflex",
+    nameList: "Mới trên Needflex",
     typeList: "list",
     type_slug: "phim-moi-cap-nhat",
     category: "",

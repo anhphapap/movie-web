@@ -26,7 +26,6 @@ const WatchPage = () => {
   useEffect(() => {
     const checkSaved = async () => {
       if (user?.email && movie?.movie) {
-        console.log("zo");
         setLoading(true);
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
@@ -36,15 +35,18 @@ const WatchPage = () => {
           userSnap
             .data()
             .savedMovies.some(
-              (m) =>
-                m.slug === movie.movie.slug &&
-                m.poster_url === movie.movie.poster_url &&
-                m.name === movie.movie.name
+              (movie) =>
+                movie.slug === modal?.movie.slug &&
+                movie.poster_url === modal?.movie.poster_url &&
+                movie.name === modal?.movie.name &&
+                movie.year === modal.movie.year &&
+                movie.time === modal.movie.time &&
+                movie.quality === modal.movie.quality &&
+                movie.category === modal.movie.category
             )
         ) {
           setSaved(true);
         } else {
-          console.log("fals");
           setSaved(false);
         }
         setLoading(false);
@@ -84,18 +86,26 @@ const WatchPage = () => {
       if (saved) {
         await updateDoc(userRef, {
           savedMovies: arrayRemove({
-            slug: movie.movie.slug,
-            poster_url: movie.movie.poster_url,
-            name: movie.movie.name,
+            slug: modal.movie.slug,
+            poster_url: modal.movie.poster_url,
+            name: modal.movie.name,
+            year: modal.movie.year,
+            time: modal.movie.time,
+            quality: modal.movie.quality,
+            category: modal.movie.category,
           }),
         });
         toast.success("Đã xóa khỏi danh sách yêu thích.");
       } else {
         await updateDoc(userRef, {
           savedMovies: arrayUnion({
-            slug: movie.movie.slug,
-            poster_url: movie.movie.poster_url,
-            name: movie.movie.name,
+            slug: modal.movie.slug,
+            poster_url: modal.movie.poster_url,
+            name: modal.movie.name,
+            year: modal.movie.year,
+            time: modal.movie.time,
+            quality: modal.movie.quality,
+            category: modal.movie.category,
           }),
         });
         toast.success("Đã thêm vào danh sách yêu thích.");
@@ -128,7 +138,7 @@ const WatchPage = () => {
             className="absolute top-0 left-0 w-full aspect-video"
             allowFullScreen
           />
-          <div className="opacity-0 flex group-hover:opacity-100 items-center justify-between absolute top-0 left-0 h-[10%] px-[1%] pt-[2%] lg:pt-[1%] w-full transition-all ease-linear">
+          <div className="opacity-0 flex group-hover:opacity-100 bg-gradient-to-b from-black/60 to-transparent items-center justify-between absolute top-0 left-0 h-[10%] px-[1%] pt-[2%] lg:pt-[1%] w-full transition-all ease-linear">
             <div className="border-l-[3px] sm:border-l-4 border-[#e50914] px-[1%]">
               <p>{movie.movie.name}</p>
               <span className="text-white/70">

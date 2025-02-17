@@ -47,12 +47,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           userSnap.exists() &&
           userSnap
             .data()
-            .savedMovies.some(
-              (movie) =>
-                movie.slug === modal?.movie.slug &&
-                movie.poster_url === modal?.movie.poster_url &&
-                movie.name === modal?.movie.name
-            )
+            .savedMovies.some((movie) => movie.slug === modal?.movie.slug)
         ) {
           setSaved(true);
         } else {
@@ -79,6 +74,10 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             slug: modal.movie.slug,
             poster_url: modal.movie.poster_url,
             name: modal.movie.name,
+            year: modal.movie.year,
+            time: modal.movie.time,
+            quality: modal.movie.quality,
+            category: modal.movie.category,
           }),
         });
         toast.success("Đã xóa khỏi danh sách yêu thích.");
@@ -88,6 +87,10 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             slug: modal.movie.slug,
             poster_url: modal.movie.poster_url,
             name: modal.movie.name,
+            year: modal.movie.year,
+            time: modal.movie.time,
+            quality: modal.movie.quality,
+            category: modal.movie.category,
           }),
         });
         toast.success("Đã thêm vào danh sách yêu thích.");
