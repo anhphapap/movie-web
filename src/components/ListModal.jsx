@@ -59,14 +59,14 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+      className="w-[80%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
-        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl mb-20 mt-12 text-center">
+        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl mb-10 sm:mb-20 mt-8 sm:mt-12 text-center">
           {nameList}
         </h1>
         <div className="w-full">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-x-3 gap-y-14 mt-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-14 mt-5">
             {movies.map((item) => (
               <div
                 className="aspect-video bg-cover rounded-md group cursor-pointer relative"

@@ -36,13 +36,13 @@ const WatchPage = () => {
             .data()
             .savedMovies.some(
               (movie) =>
-                movie.slug === modal?.movie.slug &&
-                movie.poster_url === modal?.movie.poster_url &&
-                movie.name === modal?.movie.name &&
-                movie.year === modal.movie.year &&
-                movie.time === modal.movie.time &&
-                movie.quality === modal.movie.quality &&
-                movie.category === modal.movie.category
+                movie.slug === movie?.movie?.slug &&
+                movie.poster_url === movie?.movie?.poster_url &&
+                movie.name === movie?.movie?.name &&
+                movie.year === movie.movie?.year &&
+                movie.time === movie.movie?.time &&
+                movie.quality === movie.movie?.quality &&
+                movie.category === movie.movie?.category
             )
         ) {
           setSaved(true);
@@ -72,7 +72,7 @@ const WatchPage = () => {
     };
 
     fetchMovie();
-  }, [movieSlug]);
+  }, [movieSlug, episode]);
 
   const handleSaveMovie = async () => {
     if (!user?.email) {
@@ -86,26 +86,26 @@ const WatchPage = () => {
       if (saved) {
         await updateDoc(userRef, {
           savedMovies: arrayRemove({
-            slug: modal.movie.slug,
-            poster_url: modal.movie.poster_url,
-            name: modal.movie.name,
-            year: modal.movie.year,
-            time: modal.movie.time,
-            quality: modal.movie.quality,
-            category: modal.movie.category,
+            slug: movie.movie.slug,
+            poster_url: movie.movie.poster_url,
+            name: movie.movie.name,
+            year: movie.movie.year,
+            time: movie.movie.time,
+            quality: movie.movie.quality,
+            category: movie.movie.category,
           }),
         });
         toast.success("Đã xóa khỏi danh sách yêu thích.");
       } else {
         await updateDoc(userRef, {
           savedMovies: arrayUnion({
-            slug: modal.movie.slug,
-            poster_url: modal.movie.poster_url,
-            name: modal.movie.name,
-            year: modal.movie.year,
-            time: modal.movie.time,
-            quality: modal.movie.quality,
-            category: modal.movie.category,
+            slug: movie.movie.slug,
+            poster_url: movie.movie.poster_url,
+            name: movie.movie.name,
+            year: movie.movie.year,
+            time: movie.movie.time,
+            quality: movie.movie.quality,
+            category: movie.movie.category,
           }),
         });
         toast.success("Đã thêm vào danh sách yêu thích.");
