@@ -30,20 +30,10 @@ const WatchPage = () => {
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
+        console.log(userSnap.data().savedMovies);
         if (
           userSnap.exists() &&
-          userSnap
-            .data()
-            .savedMovies.some(
-              (movie) =>
-                movie.slug === movie?.movie?.slug &&
-                movie.poster_url === movie?.movie?.poster_url &&
-                movie.name === movie?.movie?.name &&
-                movie.year === movie.movie?.year &&
-                movie.time === movie.movie?.time &&
-                movie.quality === movie.movie?.quality &&
-                movie.category === movie.movie?.category
-            )
+          userSnap.data().savedMovies.some((m) => m.slug === movie?.movie?.slug)
         ) {
           setSaved(true);
         } else {
@@ -72,7 +62,7 @@ const WatchPage = () => {
     };
 
     fetchMovie();
-  }, [movieSlug, episode]);
+  }, [movieSlug]);
 
   const handleSaveMovie = async () => {
     if (!user?.email) {
