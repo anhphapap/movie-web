@@ -73,20 +73,22 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                 onClick={() => openModal(item.slug)}
                 key={item._id}
               >
-                <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:z-[99999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300">
+                <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full z-0 group-hover:z-[9999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
                   <img
                     src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                     className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
                   ></img>
                   <div
-                    className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100"
+                    className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
                     onClick={() => openModal(item.slug)}
                   >
                     <h3 className="font-bold">{item.name}</h3>
 
                     <div className="flex space-x-2 items-center text-white/80">
                       <span className="lowercase">{item.year}</span>
-                      <span className="lowercase">{item.time}</span>
+                      <span className="lowercase hidden lg:block">
+                        {item.time}
+                      </span>
                       <span
                         className="px-1 border-[1px] rounded font-bold uppercase"
                         style={{ fontSize: "8px" }}
@@ -94,7 +96,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                         {item.quality}
                       </span>
                     </div>
-                    <div>
+                    <div className="line-clamp-1">
                       {item.category.map(
                         (cat, index) =>
                           index < 3 &&
