@@ -12,7 +12,7 @@ const CustomRightArrow = ({ onClick }) => {
     <button
       onClick={onClick}
       id="btn-carousel"
-      className="absolute right-0 top-0 h-full w-[3%] bg-black bg-opacity-30 p-3 rounded-s hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute -right-[3.5%] top-0 h-[100.1%] w-[3.6%] bg-black bg-opacity-0 p-3 rounded-s hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-right" />
     </button>
@@ -23,7 +23,7 @@ const CustomLeftArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute left-0 top-0 h-full w-[3%] bg-black bg-opacity-30 p-3 rounded-e hover:bg-opacity-60 z-10 text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute -left-[3.5%] top-0 h-[100.1%] w-[3.1%] bg-black bg-opacity-0 p-3 rounded-e hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-left" />
     </button>
@@ -46,31 +46,26 @@ const responsive = {
     breakpoint: { max: 3000, min: 1400 },
     items: 6,
     slidesToSlide: 6,
-    partialVisibilityGutter: 14,
   },
   xxl: {
     breakpoint: { max: 1400, min: 1100 },
     items: 5,
     slidesToSlide: 5,
-    partialVisibilityGutter: 14,
   },
   xl: {
     breakpoint: { max: 1100, min: 800 },
     items: 4,
     slidesToSlide: 4,
-    partialVisibilityGutter: 14,
   },
   lg: {
     breakpoint: { max: 800, min: 500 },
     items: 3,
     slidesToSlide: 3,
-    partialVisibilityGutter: 14,
   },
   md: {
     breakpoint: { max: 500, min: 0 },
     items: 2,
     slidesToSlide: 2,
-    partialVisibilityGutter: 14,
   },
 };
 
@@ -200,24 +195,23 @@ const MovieCarousel = ({
             showDots={true}
             renderDotsOutside={true}
             dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
-            className="px-[3%] absolute w-full h-full z-10"
-            partialVisible
-            itemClass="group hover:z-[9999] pr-2"
+            className="absolute w-[94%] h-full z-10 mx-[3%] pr-1"
+            itemClass="group hover:z-[9999] z-0 pr-2"
           >
             {movies.map((item, index) => (
               <div
-                className="flex cursor-pointer group"
+                className="flex cursor-pointer group h-full"
                 onClick={() => openModal(item.slug)}
                 key={item._id}
               >
-                <div className="flex items-center">
+                <div className="flex items-center w-full">
                   <div
                     dangerouslySetInnerHTML={{
                       __html: tops[index],
                     }}
                     className="w-[50%] h-auto"
                   />
-                  <div className="aspect-[2/3] relative w-[50%]">
+                  <div className="relative w-[50%]">
                     <img
                       src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
                       className="object-cover h-full w-full object-center rounded-sm"
@@ -300,13 +294,12 @@ const MovieCarousel = ({
           showDots={true}
           renderDotsOutside={true}
           dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
-          className="px-[3%] absolute w-full h-full z-10"
-          partialVisible
-          itemClass="group hover:z-[9999] pr-2 z-0"
+          className="absolute w-[94%] h-full z-10 mx-[3%] pr-1"
+          itemClass="group hover:z-[9999] z-0 pl-2"
         >
           {movies.map((item, index) => (
             <div
-              className="aspect-video bg-cover bg-center rounded cursor-pointer "
+              className="aspect-video bg-cover bg-center rounded cursor-pointer h-full"
               onClick={() => openModal(item.slug)}
               key={item._id}
             >
