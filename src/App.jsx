@@ -52,7 +52,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
   const [isListOpen, setIsListOpen] = useState(false);
-  const [listContent, setListContent] = useState(null);
   const [listAPI, setListAPI] = useState("");
   const [nameList, setNameList] = useState("");
 
@@ -169,7 +168,9 @@ function App() {
               />
               <Route
                 path="/watch/:movieSlug/:episode"
-                element={<WatchPage onClose={closeModal} />}
+                element={
+                  <WatchPage onClose={closeModal} closeList={closeList} />
+                }
               />
               <Route
                 path="/filter/:typeSlug"

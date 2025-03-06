@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { tops } from "../utils/data";
+import { Link } from "react-router-dom";
+import Tooltip from "./Tooltip";
 
 const CustomRightArrow = ({ onClick }) => {
   return (
@@ -199,12 +201,11 @@ const MovieCarousel = ({
             itemClass="group hover:z-[9999] z-0 pr-2"
           >
             {movies.map((item, index) => (
-              <div
-                className="flex cursor-pointer group h-full"
-                onClick={() => openModal(item.slug)}
-                key={item._id}
-              >
-                <div className="flex items-center w-full">
+              <div className="flex cursor-pointer group h-full" key={item._id}>
+                <div
+                  className="flex items-center w-full"
+                  onClick={() => openModal(item.slug)}
+                >
                   <div
                     dangerouslySetInnerHTML={{
                       __html: tops[index],
@@ -219,27 +220,44 @@ const MovieCarousel = ({
                   </div>
                 </div>
                 <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[20%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
-                  <img
-                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
-                  />
-                  <div
-                    className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b"
-                    onClick={() => openModal(item.slug)}
-                  >
-                    <h3 className="font-bold truncate">{item.name}</h3>
-
-                    <div className="flex space-x-2 items-center text-white/80">
-                      <span className="lowercase">{item.year}</span>
-                      <span className="lowercase hidden lg:block">
-                        {item.time}
-                      </span>
-                      <span
-                        className="px-1 border-[1px] rounded font-bold uppercase"
-                        style={{ fontSize: "8px" }}
+                  <div className="relative">
+                    <img
+                      onClick={() => openModal(item.slug)}
+                      src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                      className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                    />
+                    <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0"></div>
+                    <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1">
+                      <Link to={`/watch/${item.slug}/0`}>
+                        <button className=" bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
+                          <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+                        </button>
+                      </Link>
+                      <button
+                        className="text-white border-2 border-white/40 hover:border-white bg-black/10 hover:bg-white/10 rounded-full h-[30px] aspect-square transition-all ease-in-out"
+                        onClick={() => openModal(item.slug)}
                       >
-                        {item.quality}
-                      </span>
+                        <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b">
+                    <div className="space-y-1">
+                      <h3 className="font-bold truncate">{item.name}</h3>
+                      <div className="flex space-x-2 items-center text-white/80">
+                        <span className="lowercase">{item.year}</span>
+                        <span className="hidden lg:block">
+                          {item.episode_current.includes("Hoàn tất")
+                            ? "Full"
+                            : item.episode_current}
+                        </span>
+                        <span
+                          className="px-1 border-[1px] rounded font-bold uppercase"
+                          style={{ fontSize: "8px" }}
+                        >
+                          {item.quality}
+                        </span>
+                      </div>
                     </div>
                     <div className="line-clamp-1">
                       {item.category.map(
@@ -248,7 +266,12 @@ const MovieCarousel = ({
                           (index != 0 ? (
                             <span key={item.slug + cat.name}>
                               {" "}
-                              - {cat.name}
+                              <FontAwesomeIcon
+                                icon="fa-solid fa-circle"
+                                size="2xs"
+                                className="opacity-50 scale-50"
+                              />{" "}
+                              {cat.name}
                             </span>
                           ) : (
                             <span key={item.slug + cat.name}>{cat.name}</span>
@@ -294,30 +317,48 @@ const MovieCarousel = ({
           showDots={true}
           renderDotsOutside={true}
           dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
-          className="absolute w-[94%] h-full z-10 mx-[3%] pr-1"
-          itemClass="group hover:z-[9999] z-0 pl-2"
+          className="absolute w-[94%] h-full z-10 mx-[3%] space-x-1"
+          itemClass="group hover:z-[9999] z-0 pr-2"
         >
           {movies.map((item, index) => (
             <div
-              className="aspect-video bg-cover bg-center rounded cursor-pointer h-full"
+              className="aspect-video rounded cursor-pointer h-full"
               onClick={() => openModal(item.slug)}
               key={item._id}
             >
-              <div className="text-base group-hover:scale-110 sm:group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
-                <img
-                  src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                  className="aspect-video object-cover rounded group-hover:rounded-b-none h-full"
-                />
+              <div className="text-base group-hover:scale-110 sm:group-hover:scale-125 group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms] h-full">
+                <div className="relative">
+                  <img
+                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                  />
+                  <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
+                  <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
+                    <Link to={`/watch/${item.slug}/0`}>
+                      <button className="bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
+                        <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+                      </button>
+                    </Link>
+                    <button
+                      className="text-white border-2 border-white/40 hover:border-white bg-black/10 hover:bg-white/10 rounded-full h-[30px] aspect-square transition-all ease-in-out"
+                      onClick={() => openModal(item.slug)}
+                    >
+                      <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
+                    </button>
+                  </div>
+                </div>
                 <div
-                  className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 -z-10 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 mr-2 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
+                  className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 -z-10 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
                   onClick={() => openModal(item.slug)}
                 >
                   <h3 className="font-bold truncate">{item.name}</h3>
 
                   <div className="flex space-x-2 items-center text-white/80">
                     <span className="lowercase">{item.year}</span>
-                    <span className="lowercase hidden lg:block">
-                      {item.time}
+                    <span className="hidden lg:block">
+                      {item.episode_current.includes("Hoàn tất")
+                        ? "Full"
+                        : item.episode_current}
                     </span>
                     <span
                       className="px-1 border-[1px] rounded font-bold uppercase"

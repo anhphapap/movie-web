@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const Banner = ({
   openModal,
-  type_slug = "phim-moi-cap-nhat",
+  type_slug = "phim-bo",
   sort_field = "view",
   year = 2025,
   filter = false,

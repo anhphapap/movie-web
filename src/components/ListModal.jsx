@@ -4,6 +4,7 @@ import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import Tooltip from "./Tooltip";
+import { Link } from "react-router-dom";
 
 const customStyles = {
   content: {
@@ -74,10 +75,26 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                 key={item._id}
               >
                 <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full z-0 group-hover:z-[9999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
-                  <img
-                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
-                  ></img>
+                  <div className="relative">
+                    <img
+                      src={import.meta.env.VITE_API_IMAGE + item.poster_url}
+                      className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                    />
+                    <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
+                    <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
+                      <Link to={`/watch/${item.slug}/0`}>
+                        <button className="text-black bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
+                          <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+                        </button>
+                      </Link>
+                      <button
+                        className="text-white border-2 border-white/40 hover:border-white bg-black/10 hover:bg-white/10 rounded-full h-[30px] aspect-square transition-all ease-in-out"
+                        onClick={() => openModal(item.slug)}
+                      >
+                        <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
+                      </button>
+                    </div>
+                  </div>
                   <div
                     className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
                     onClick={() => openModal(item.slug)}
@@ -86,8 +103,10 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
 
                     <div className="flex space-x-2 items-center text-white/80">
                       <span className="lowercase">{item.year}</span>
-                      <span className="lowercase hidden lg:block">
-                        {item.time}
+                      <span className="hidden lg:block">
+                        {item.episode_current.includes("Hoàn tất")
+                          ? "Full"
+                          : item.episode_current}
                       </span>
                       <span
                         className="px-1 border-[1px] rounded font-bold uppercase"

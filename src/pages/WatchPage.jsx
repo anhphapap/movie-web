@@ -14,7 +14,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 
-const WatchPage = () => {
+const WatchPage = ({ closeList, onClose }) => {
   const { movieSlug, episode } = useParams();
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,12 +25,13 @@ const WatchPage = () => {
 
   useEffect(() => {
     const checkSaved = async () => {
+      closeList();
+      onClose();
       if (user?.email && movie?.movie) {
         setLoading(true);
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
 
-        console.log(userSnap.data().savedMovies);
         if (
           userSnap.exists() &&
           userSnap.data().savedMovies.some((m) => m.slug === movie?.movie?.slug)
@@ -47,6 +48,8 @@ const WatchPage = () => {
 
   useEffect(() => {
     const fetchMovie = async () => {
+      closeList();
+      onClose();
       setLoading(true);
       try {
         var Response = await axios.get(
@@ -80,7 +83,7 @@ const WatchPage = () => {
             poster_url: movie.movie.poster_url,
             name: movie.movie.name,
             year: movie.movie.year,
-            time: movie.movie.time,
+            episode_current: movie.movie.episode_current,
             quality: movie.movie.quality,
             category: movie.movie.category,
           }),
@@ -93,7 +96,7 @@ const WatchPage = () => {
             poster_url: movie.movie.poster_url,
             name: movie.movie.name,
             year: movie.movie.year,
-            time: movie.movie.time,
+            episode_current: movie.movie.episode_current,
             quality: movie.movie.quality,
             category: movie.movie.category,
           }),
