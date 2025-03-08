@@ -25,8 +25,6 @@ const WatchPage = ({ closeList, onClose }) => {
 
   useEffect(() => {
     const checkSaved = async () => {
-      closeList();
-      onClose();
       if (user?.email && movie?.movie) {
         setLoading(true);
         const userRef = doc(db, "users", user.uid);
@@ -48,8 +46,6 @@ const WatchPage = ({ closeList, onClose }) => {
 
   useEffect(() => {
     const fetchMovie = async () => {
-      closeList();
-      onClose();
       setLoading(true);
       try {
         var Response = await axios.get(

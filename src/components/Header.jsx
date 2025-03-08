@@ -70,7 +70,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         }`}
         id="header"
       >
-        <div className="flex items-center justify-between w-full">
+        <div className="flex flex-row-reverse md:flex-row md:flex items-center justify-between w-full">
           <div className="flex items-center md:hidden">
             <button
               type="button"

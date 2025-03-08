@@ -36,26 +36,26 @@ const CustomDot = ({ onClick, active }) => {
   return (
     <button
       onClick={onClick}
-      className={`w-[7px] sm:w-[14px] h-[0.8px] sm:h-[2px] mx-[0.8px] transition-all ${
+      className={`hidden lg:block w-[7px] sm:w-[14px] h-[0.8px] sm:h-[2px] mx-[0.8px] transition-all ${
         active ? "bg-white/90" : "bg-white/40"
       }`}
     ></button>
   );
 };
 
-const responsive = {
+const responsiveTop = {
   xxxl: {
     breakpoint: { max: 3000, min: 1400 },
     items: 6,
     slidesToSlide: 6,
   },
   xxl: {
-    breakpoint: { max: 1400, min: 1100 },
+    breakpoint: { max: 1400, min: 1024 },
     items: 5,
     slidesToSlide: 5,
   },
   xl: {
-    breakpoint: { max: 1100, min: 800 },
+    breakpoint: { max: 1024, min: 800 },
     items: 4,
     slidesToSlide: 4,
   },
@@ -68,6 +68,34 @@ const responsive = {
     breakpoint: { max: 500, min: 0 },
     items: 2,
     slidesToSlide: 2,
+  },
+};
+
+const responsiveList = {
+  xxxl: {
+    breakpoint: { max: 3000, min: 1400 },
+    items: 6,
+    slidesToSlide: 6,
+  },
+  xxl: {
+    breakpoint: { max: 1400, min: 1024 },
+    items: 5,
+    slidesToSlide: 5,
+  },
+  xl: {
+    breakpoint: { max: 1024, min: 800 },
+    items: 5,
+    slidesToSlide: 5,
+  },
+  lg: {
+    breakpoint: { max: 800, min: 500 },
+    items: 4,
+    slidesToSlide: 4,
+  },
+  md: {
+    breakpoint: { max: 500, min: 0 },
+    items: 3,
+    slidesToSlide: 3,
   },
 };
 
@@ -129,7 +157,7 @@ const MovieCarousel = ({
             {nameList}
           </h2>
           <Carousel
-            responsive={responsive}
+            responsive={responsiveTop}
             centerMode={true}
             customRightArrow={<CustomRightArrow />}
             customLeftArrow={<CustomLeftArrow />}
@@ -165,7 +193,7 @@ const MovieCarousel = ({
           {nameList}
         </h2>
         <Carousel
-          responsive={responsive}
+          responsive={responsiveList}
           centerMode={true}
           customRightArrow={<CustomRightArrow />}
           customLeftArrow={<CustomLeftArrow />}
@@ -190,7 +218,7 @@ const MovieCarousel = ({
         <div className="my-10 relative bg-transparent">
           <h2 className="text-white/80 font-bold mb-3 px-[3%]">{nameList}</h2>
           <Carousel
-            responsive={responsive}
+            responsive={responsiveTop}
             customRightArrow={<CustomRightArrow />}
             customLeftArrow={<CustomLeftArrow />}
             customDot={<CustomDot />}
@@ -210,16 +238,24 @@ const MovieCarousel = ({
                     dangerouslySetInnerHTML={{
                       __html: tops[index],
                     }}
-                    className="w-[50%] h-auto"
+                    className="w-[30%] lg:w-[50%] h-auto self-end pb-1"
                   />
-                  <div className="relative w-[50%]">
+                  <div className="relative w-[70%] lg:w-[50%] aspect-[2/3]">
                     <img
                       src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
-                      className="object-cover h-full w-full object-center rounded-sm"
+                      className="object-cover h-full w-full object-center rounded lg:rounded-sm"
                     ></img>
+                    <span className="block lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                      {item.episode_current.toLowerCase().includes("hoàn tất")
+                        ? "Full"
+                        : item.episode_current}
+                    </span>
+                    <span className="block lg:hidden absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
+                      {item.quality}
+                    </span>
                   </div>
                 </div>
-                <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[20%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
+                <div className="hidden lg:block invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[15%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
                   <div className="relative">
                     <img
                       onClick={() => openModal(item.slug)}
@@ -289,7 +325,7 @@ const MovieCarousel = ({
     return (
       <div className="my-10 relative">
         <div
-          className="group cursor-pointer text-white/80 font-bold px-[3%] mb-3 inline-block"
+          className="group cursor-pointer text-white/80 font-bold px-[3%] mb-3 flex justify-between items-center lg:inline-block "
           onClick={() =>
             openList({
               type_slug,
@@ -304,13 +340,13 @@ const MovieCarousel = ({
           <span className="group-hover:text-white transition-all ease-in-out duration-500">
             {nameList}
           </span>
-          <span className="opacity-0 text-xs group-hover:opacity-70 group-hover:pl-2 transition-all ease-in-out duration-500">
+          <span className="lg:opacity-0 lg:text-xs group-hover:opacity-70 group-hover:pl-2 transition-all ease-in-out duration-500">
             Xem tất cả{" "}
             <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
           </span>
         </div>
         <Carousel
-          responsive={responsive}
+          responsive={responsiveList}
           customRightArrow={<CustomRightArrow />}
           customLeftArrow={<CustomLeftArrow />}
           customDot={<CustomDot />}
@@ -322,15 +358,32 @@ const MovieCarousel = ({
         >
           {movies.map((item, index) => (
             <div
-              className="aspect-video rounded cursor-pointer h-full"
-              onClick={() => openModal(item.slug)}
+              className="aspect-video rounded cursor-pointer w-full"
               key={item._id}
             >
-              <div className="text-base group-hover:scale-110 sm:group-hover:scale-125 group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms] h-full">
-                <div className="relative">
+              <div
+                className="block lg:hidden relative"
+                onClick={() => openModal(item.slug)}
+              >
+                <img
+                  src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
+                  className="w-full object-cover aspect-[2/3] rounded"
+                ></img>
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                  {item.episode_current.toLowerCase().includes("hoàn tất")
+                    ? "Full"
+                    : item.episode_current}
+                </span>
+                <span className="absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
+                  {item.quality}
+                </span>
+              </div>
+              <div className="hidden lg:block text-base group-hover:scale-110 sm:group-hover:scale-125 group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms] h-full">
+                <div className="relative w-full aspect-video">
                   <img
                     src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                     className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                    onClick={() => openModal(item.slug)}
                   />
                   <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                   <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
@@ -351,7 +404,7 @@ const MovieCarousel = ({
                   className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 -z-10 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
                   onClick={() => openModal(item.slug)}
                 >
-                  <h3 className="font-bold truncate">{item.name}</h3>
+                  <h3 className="font-bold truncate ">{item.name}</h3>
 
                   <div className="flex space-x-2 items-center text-white/80">
                     <span className="lowercase">{item.year}</span>

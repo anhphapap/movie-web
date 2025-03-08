@@ -60,21 +60,38 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[80%] text-xs lg:text-lg outline-none "
+      className="w-[95%] lg:w-[80%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
         <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl mb-10 sm:mb-20 mt-8 sm:mt-12 text-center">
           {nameList}
         </h1>
         <div className="w-full">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-14 mt-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3 gap-y-14 mt-5">
             {movies.map((item) => (
               <div
                 className="aspect-video bg-cover rounded-md group cursor-pointer relative"
                 onClick={() => openModal(item.slug)}
                 key={item._id}
               >
-                <div className="text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full z-0 group-hover:z-[9999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
+                <div
+                  className="block lg:hidden relative"
+                  onClick={() => openModal(item.slug)}
+                >
+                  <img
+                    src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
+                    className="w-full object-cover aspect-[2/3] rounded"
+                  ></img>
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                    {item.episode_current.toLowerCase().includes("hoàn tất")
+                      ? "Full"
+                      : item.episode_current}
+                  </span>
+                  <span className="absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
+                    {item.quality}
+                  </span>
+                </div>
+                <div className="hidden lg:block text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full z-0 group-hover:z-[9999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
                   <div className="relative">
                     <img
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
@@ -138,7 +155,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                 {[...Array(6)].map((_, index) => (
                   <div
                     key={index + 99}
-                    className="aspect-video cursor-pointer relative animate-pulse"
+                    className="w-full aspect-[2/3] lg:aspect-video cursor-pointer relative animate-pulse"
                   >
                     <div className="w-full h-full bg-gray-600 rounded-md"></div>
                   </div>

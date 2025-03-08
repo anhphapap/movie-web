@@ -104,7 +104,7 @@ const Banner = ({
                   onClick={() => openModal(movie.movie.slug)}
                 >
                   <FontAwesomeIcon icon="fa-solid fa-circle-info" />
-                  <span>Thông tin khác</span>
+                  <span className="line-clamp-1">Thông tin khác</span>
                 </button>
               </div>
             </div>
