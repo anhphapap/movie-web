@@ -14,7 +14,7 @@ const CustomRightArrow = ({ onClick }) => {
     <button
       onClick={onClick}
       id="btn-carousel"
-      className="absolute -right-[3.5%] top-0 h-[100.1%] w-[3.6%] bg-black bg-opacity-0 p-3 rounded-s hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute -right-[3.2%] top-0 h-full w-[3%] bg-black bg-opacity-0 p-3 rounded-s hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-right" />
     </button>
@@ -25,7 +25,7 @@ const CustomLeftArrow = ({ onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="absolute -left-[3.5%] top-0 h-[100.1%] w-[3.1%] bg-black bg-opacity-0 p-3 rounded-e hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute -left-[3.2%] top-0 h-full w-[3%] bg-black bg-opacity-0 p-3 rounded-e hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-left" />
     </button>
@@ -225,8 +225,8 @@ const MovieCarousel = ({
             showDots={true}
             renderDotsOutside={true}
             dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
-            className="absolute w-[94%] h-full z-10 mx-[3%] pr-1"
-            itemClass="group hover:z-[9999] z-0 pr-2"
+            className="absolute w-[94%] h-full z-10 mx-[3%]"
+            itemClass="group hover:z-[9999] z-0 px-1"
           >
             {movies.map((item, index) => (
               <div className="flex cursor-pointer group h-full" key={item._id}>
@@ -240,28 +240,66 @@ const MovieCarousel = ({
                     }}
                     className="w-[30%] lg:w-[50%] h-auto self-end pb-1"
                   />
-                  <div className="relative w-[70%] lg:w-[50%] aspect-[2/3]">
+                  <div className="relative w-[70%] lg:w-[50%] aspect-[2/3] rounded lg:rounded-sm overflow-hidden">
                     <img
+                      loading="lazy"
                       src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
                       className="object-cover h-full w-full object-center rounded lg:rounded-sm"
                     ></img>
-                    <span className="block lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                    {item.sub_docquyen && (
+                      <img
+                        loading="lazy"
+                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        className="absolute top-[6px] left-[6px] w-3"
+                      ></img>
+                    )}
+                    <span className="block lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
                       {item.episode_current.toLowerCase().includes("hoàn tất")
-                        ? "Full"
+                        ? "Hoàn tất"
                         : item.episode_current}
                     </span>
-                    <span className="block lg:hidden absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
-                      {item.quality}
-                    </span>
+                    <div>
+                      <div
+                        className={`absolute ${
+                          item.quality.length > 2
+                            ? "-top-[10px] -right-[3px] w-8"
+                            : "-top-[6px] -right-[6px] w-7"
+                        } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                      ></div>
+                      <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                        {item.quality}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="hidden lg:block invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[15%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
-                  <div className="relative">
+                <div className="z-10 hidden lg:block invisible group-hover:visible opacity-0 group-hover:opacity-100 text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full group-hover:-translate-y-[15%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
+                  <div className="relative rounded-t overflow-hidden">
                     <img
+                      loading="lazy"
                       onClick={() => openModal(item.slug)}
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                      className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                      className="aspect-video object-cover rounded group-hover:rounded-none w-full"
                     />
+                    {item.sub_docquyen && (
+                      <img
+                        loading="lazy"
+                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        className="absolute top-[6px] left-[6px] w-3"
+                      ></img>
+                    )}
+                    <div>
+                      <div
+                        className={`absolute ${
+                          item.quality.length > 2
+                            ? "-top-[10px] -right-[3px] w-8"
+                            : "-top-[6px] -right-[6px] w-7"
+                        } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                      ></div>
+                      <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                        {item.quality}
+                      </span>
+                    </div>
+
                     <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0"></div>
                     <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1">
                       <Link to={`/watch/${item.slug}/0`}>
@@ -284,7 +322,7 @@ const MovieCarousel = ({
                         <span className="lowercase">{item.year}</span>
                         <span className="hidden lg:block">
                           {item.episode_current.includes("Hoàn tất")
-                            ? "Full"
+                            ? "Hoàn tất"
                             : item.episode_current}
                         </span>
                         <span
@@ -353,8 +391,8 @@ const MovieCarousel = ({
           showDots={true}
           renderDotsOutside={true}
           dotListClass="absolute top-0 !right-[4%] !left-auto overflow-visible z-0 h-1"
-          className="absolute w-[94%] h-full z-10 mx-[3%] space-x-1"
-          itemClass="group hover:z-[9999] z-0 pr-2"
+          className="absolute w-[94%] h-full z-10 mx-[3%]"
+          itemClass="group hover:z-[9999] z-0 px-1"
         >
           {movies.map((item, index) => (
             <div
@@ -362,29 +400,67 @@ const MovieCarousel = ({
               key={item._id}
             >
               <div
-                className="block lg:hidden relative"
+                className="block lg:hidden relative overflow-hidden rounded"
                 onClick={() => openModal(item.slug)}
               >
                 <img
+                  loading="lazy"
                   src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
                   className="w-full object-cover aspect-[2/3] rounded"
                 ></img>
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                {item.sub_docquyen && (
+                  <img
+                    loading="lazy"
+                    src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                    className="absolute top-2 left-2 w-3"
+                  ></img>
+                )}
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
                   {item.episode_current.toLowerCase().includes("hoàn tất")
-                    ? "Full"
+                    ? "Hoàn tất"
                     : item.episode_current}
                 </span>
-                <span className="absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
-                  {item.quality}
-                </span>
+
+                <div>
+                  <div
+                    className={`absolute ${
+                      item.quality.length > 2
+                        ? "-top-[10px] -right-[3px] w-8"
+                        : "-top-[6px] -right-[6px] w-7"
+                    } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                  ></div>
+                  <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                    {item.quality}
+                  </span>
+                </div>
               </div>
-              <div className="hidden lg:block text-base group-hover:scale-110 sm:group-hover:scale-125 group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms] h-full">
-                <div className="relative w-full aspect-video">
+              <div className="hidden lg:block text-base group-hover:scale-125 group-hover:-translate-y-[60%] lg:group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms] h-full">
+                <div className="relative w-full aspect-video rounded-t overflow-hidden">
                   <img
+                    loading="lazy"
                     src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                     className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
                     onClick={() => openModal(item.slug)}
                   />
+                  <div>
+                    <div
+                      className={`absolute ${
+                        item.quality.length > 2
+                          ? "-top-[10px] -right-[3px] w-8"
+                          : "-top-[6px] -right-[6px] w-7"
+                      } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                    ></div>
+                    <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                      {item.quality}
+                    </span>
+                  </div>
+                  {item.sub_docquyen && (
+                    <img
+                      loading="lazy"
+                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      className="absolute top-2 left-2 w-3"
+                    ></img>
+                  )}
                   <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                   <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
                     <Link to={`/watch/${item.slug}/0`}>
@@ -410,7 +486,7 @@ const MovieCarousel = ({
                     <span className="lowercase">{item.year}</span>
                     <span className="hidden lg:block">
                       {item.episode_current.includes("Hoàn tất")
-                        ? "Full"
+                        ? "Hoàn tất"
                         : item.episode_current}
                     </span>
                     <span

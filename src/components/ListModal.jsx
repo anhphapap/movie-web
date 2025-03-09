@@ -75,28 +75,65 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                 key={item._id}
               >
                 <div
-                  className="block lg:hidden relative"
+                  className="block lg:hidden relative rounded overflow-hidden"
                   onClick={() => openModal(item.slug)}
                 >
                   <img
+                    loading="lazy"
                     src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
                     className="w-full object-cover aspect-[2/3] rounded"
                   ></img>
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center">
+                  {item.sub_docquyen && (
+                    <img
+                      loading="lazy"
+                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      className="absolute top-2 left-2 w-3"
+                    ></img>
+                  )}
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
                     {item.episode_current.toLowerCase().includes("hoàn tất")
-                      ? "Full"
+                      ? "Hoàn tất"
                       : item.episode_current}
                   </span>
-                  <span className="absolute top-0 right-0 bg-[#e50914] rounded-se text-xs font-black text-white py-[2px] px-1 uppercase">
-                    {item.quality}
-                  </span>
+                  <div>
+                    <div
+                      className={`absolute ${
+                        item.quality.length > 2
+                          ? "-top-[10px] -right-[3px] w-8"
+                          : "-top-[6px] -right-[6px] w-7"
+                      } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                    ></div>
+                    <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                      {item.quality}
+                    </span>
+                  </div>
                 </div>
                 <div className="hidden lg:block text-base group-hover:scale-125 absolute top-0 left-0 w-full h-full z-0 group-hover:z-[9999] group-hover:-translate-y-[50%] rounded transition-all ease-in-out duration-300 group-hover:delay-[400ms]">
-                  <div className="relative">
+                  <div className="relative rounded-t overflow-hidden">
                     <img
+                      loading="lazy"
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                       className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
                     />
+                    {item.sub_docquyen && (
+                      <img
+                        loading="lazy"
+                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        className="absolute top-2 left-2 w-3"
+                      ></img>
+                    )}
+                    <div>
+                      <div
+                        className={`absolute ${
+                          item.quality.length > 2
+                            ? "-top-[10px] -right-[3px] w-8"
+                            : "-top-[6px] -right-[6px] w-7"
+                        } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
+                      ></div>
+                      <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
+                        {item.quality}
+                      </span>
+                    </div>
                     <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                     <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
                       <Link to={`/watch/${item.slug}/0`}>
@@ -122,7 +159,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                       <span className="lowercase">{item.year}</span>
                       <span className="hidden lg:block">
                         {item.episode_current.includes("Hoàn tất")
-                          ? "Full"
+                          ? "Hoàn tất"
                           : item.episode_current}
                       </span>
                       <span

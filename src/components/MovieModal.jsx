@@ -189,11 +189,11 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           <div className="flex items-start space-x-[3%]">
             <div className="flex flex-col space-y-4 w-[70%]">
               <div className="flex flex-col space-y-4">
-                <div className="flex items-center justify-between opacity-70">
+                <div className="flex items-center justify-between text-white/70">
                   <div className="flex space-x-2 items-center">
                     <span className="lowercase">{modal.movie.year}</span>
                     <span className="lowercase">{modal.movie.time}</span>
-                    <span className="px-1 border-[1px] text-xs rounded font-bold">
+                    <span className="px-1 bg-[#e50914] text-xs rounded font-black text-white">
                       {modal.movie.quality}
                     </span>
                   </div>
