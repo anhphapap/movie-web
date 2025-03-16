@@ -14,7 +14,7 @@ const CustomRightArrow = ({ onClick }) => {
     <button
       onClick={onClick}
       id="btn-carousel"
-      className="absolute -right-[3.2%] top-0 h-full w-[3%] bg-black bg-opacity-0 p-3 rounded-s hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
+      className="absolute -right-[3.2%] top-0 h-full w-[3.1%] bg-black bg-opacity-0 p-3 rounded-s hover:bg-opacity-60  text-transparent hover:text-white transition-all ease-linear duration-100"
     >
       <FontAwesomeIcon icon="fa-solid fa-chevron-right" />
     </button>
@@ -321,7 +321,9 @@ const MovieCarousel = ({
                       <div className="flex space-x-2 items-center text-white/80">
                         <span className="lowercase">{item.year}</span>
                         <span className="hidden lg:block">
-                          {item.episode_current.includes("Hoàn tất")
+                          {item.episode_current
+                            .toLowerCase()
+                            .includes("hoàn tất")
                             ? "Hoàn tất"
                             : item.episode_current}
                         </span>
@@ -485,7 +487,7 @@ const MovieCarousel = ({
                   <div className="flex space-x-2 items-center text-white/80">
                     <span className="lowercase">{item.year}</span>
                     <span className="hidden lg:block">
-                      {item.episode_current.includes("Hoàn tất")
+                      {item.episode_current.toLowerCase().includes("hoàn tất")
                         ? "Hoàn tất"
                         : item.episode_current}
                     </span>

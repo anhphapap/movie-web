@@ -27,7 +27,7 @@ const Search = ({ open = false }) => {
         }
         navigate(`/search?q=${searchTerm}`);
       }
-    }, 300);
+    }, 600);
 
     setSearchTimeout(newTimeout);
   };
