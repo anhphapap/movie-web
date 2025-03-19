@@ -80,8 +80,9 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                 >
                   <img
                     loading="lazy"
+                    alt={item.name}
                     src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
-                    className="w-full object-cover aspect-[2/3] rounded"
+                    className="w-full object-cover aspect-[2/3] rounded text-white text-center"
                   ></img>
                   {item.sub_docquyen && (
                     <img
@@ -112,8 +113,9 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                   <div className="relative rounded-t overflow-hidden">
                     <img
                       loading="lazy"
+                      alt={item.name}
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                      className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                      className="aspect-video object-cover rounded group-hover:rounded-b-none w-full text-white text-center"
                     />
                     {item.sub_docquyen && (
                       <img

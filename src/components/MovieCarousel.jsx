@@ -243,6 +243,7 @@ const MovieCarousel = ({
                   <div className="relative w-[70%] lg:w-[50%] aspect-[2/3] rounded lg:rounded-sm overflow-hidden">
                     <img
                       loading="lazy"
+                      alt={item.name}
                       src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
                       className="object-cover h-full w-full object-center rounded lg:rounded-sm"
                     ></img>
@@ -276,9 +277,10 @@ const MovieCarousel = ({
                   <div className="relative rounded-t overflow-hidden">
                     <img
                       loading="lazy"
+                      alt={item.name}
                       onClick={() => openModal(item.slug)}
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                      className="aspect-video object-cover rounded group-hover:rounded-none w-full"
+                      className="aspect-video object-cover rounded group-hover:rounded-none w-full text-white text-center"
                     />
                     {item.sub_docquyen && (
                       <img
@@ -407,6 +409,7 @@ const MovieCarousel = ({
               >
                 <img
                   loading="lazy"
+                  alt={item.name}
                   src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
                   className="w-full object-cover aspect-[2/3] rounded"
                 ></img>
@@ -440,8 +443,9 @@ const MovieCarousel = ({
                 <div className="relative w-full aspect-video rounded-t overflow-hidden">
                   <img
                     loading="lazy"
+                    alt={item.name}
                     src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full"
+                    className="aspect-video object-cover rounded group-hover:rounded-b-none w-full text-white text-center"
                     onClick={() => openModal(item.slug)}
                   />
                   <div>

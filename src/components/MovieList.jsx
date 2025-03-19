@@ -125,8 +125,9 @@ const MovieList = ({
             >
               <img
                 loading="lazy"
+                alt={item.name}
                 src={import.meta.env.VITE_API_IMAGE + item.thumb_url}
-                className="w-full object-cover aspect-[2/3] rounded"
+                className="w-full object-cover aspect-[2/3] rounded text-white text-center"
               ></img>
               <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
                 {item.episode_current.toLowerCase().includes("hoàn tất")
@@ -157,8 +158,9 @@ const MovieList = ({
               <div className="relative rounded-t overflow-hidden">
                 <img
                   loading="lazy"
+                  alt={item.name}
                   src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                  className="aspect-video object-cover rounded group-hover:rounded-b-none w-full  transition-all ease-in-out duration-300"
+                  className="aspect-video object-cover rounded group-hover:rounded-b-none w-full  transition-all ease-in-out duration-300 text-white text-center"
                 />
                 {item.sub_docquyen && (
                   <img
