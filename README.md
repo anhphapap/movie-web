@@ -23,36 +23,34 @@ Dự án được xây dựng với mục tiêu học tập và thực hành cá
    cd movie-web
    ```
 
-2. **Cài đặt dependencies:**
+2. **Tạo file `.env` từ mẫu:**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Để ứng dụng hoạt động chính xác, bạn cần cấu hình một số dịch vụ trong Firebase:
+
+   - Kích hoạt **Authentication** với hai phương thức: **Email/Password** và **Google**
+   - Tạo một **Cloud Firestore database**
+
+   Sau đó điền đầy đủ thông tin Firebase vào file `.env`.
+
+3. **Cài đặt dependencies:**
 
    ```bash
    npm install
    ```
 
-3. **Chạy ứng dụng ở chế độ phát triển:**
+4. **Chạy ứng dụng ở chế độ phát triển:**
 
    ```bash
    npm run dev
    ```
 
-4. **Truy cập ứng dụng:**
+5. **Truy cập ứng dụng:**
 
    Mở trình duyệt và truy cập `http://localhost:5173` để xem ứng dụng.
-
-## 📁 Cấu trúc thư mục
-
-```plaintext
-movie-web/
-├── src/                 # Mã nguồn chính
-│   ├── components/      # Các component React
-│   ├── pages/           # Các trang chính của ứng dụng
-│   ├── App.jsx          # Component gốc
-│   └── main.jsx         # Điểm vào của ứng dụng
-├── public/              # Tài nguyên tĩnh
-├── package.json         # Thông tin dự án và dependencies
-├── tailwind.config.js   # Cấu hình Tailwind CSS
-└── vite.config.js       # Cấu hình Vite
-```
 
 ## 🌐 Nguồn dữ liệu API
 
