@@ -13,6 +13,7 @@ import {
   getDoc,
   arrayRemove,
 } from "firebase/firestore";
+import VideoPlayer from "../components/VideoPlayer";
 
 const WatchPage = ({ closeList, onClose }) => {
   const { movieSlug, episode } = useParams();
@@ -120,14 +121,25 @@ const WatchPage = ({ closeList, onClose }) => {
   return (
     <div className="min-h-screen text-white relative px-[3%] mt-16">
       <div className="rounded sm:rounded-xl overflow-hidden">
-        <div className="relative w-full bg-black aspect-video group">
-          <iframe
+        <div className="relative w-full bg-black aspect-video">
+          <div className="absolute top-0 left-0 w-full aspect-video">
+            <VideoPlayer
+              src={movie.episodes[0].server_data[episode].link_m3u8}
+              poster={movie.movie.poster_url}
+              title={movie.movie.name}
+              episode={episode}
+              episodeName={`Tập ${movie.episodes[0].server_data[episode].name}`}
+              episodes={movie.episodes[0].server_data}
+              movieSlug={movie.movie.slug}
+            />
+          </div>
+          {/* <iframe
             src={movie.episodes[0].server_data[episode].link_embed}
             title={`${movie.movie.name} - Tập ${movie.episodes[0].server_data[episode].name}`}
             className="absolute top-0 left-0 w-full aspect-video"
             allowFullScreen
-          />
-          <div className="opacity-0 flex group-hover:opacity-100 bg-gradient-to-b from-black/60 to-transparent items-center justify-between absolute top-0 left-0 h-[10%] px-[1%] pt-[2%] lg:pt-[1%] w-full transition-all ease-linear">
+          /> */}
+          {/* <div className="opacity-0 flex hover:opacity-100 bg-gradient-to-b from-black/60 to-transparent items-start justify-between absolute top-0 left-0 h-[10%] px-[1%] pt-[2%] lg:pt-[1%] w-full transition-all ease-linear">
             <div className="border-l-[3px] sm:border-l-4 border-[#e50914] px-[1%]">
               <p>{movie.movie.name}</p>
               <span className="text-white/70">
@@ -138,7 +150,7 @@ const WatchPage = ({ closeList, onClose }) => {
               <FontAwesomeIcon icon="fa-solid fa-list" />
               <span> Danh sách tập</span>
             </div>
-          </div>
+          </div> */}
         </div>
         <div className="bg-[#181818] px-4 py-2 sm:py-3 space-x-2">
           <button

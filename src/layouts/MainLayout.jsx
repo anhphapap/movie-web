@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import MovieCarousel from "../components/MovieCarousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { homeContent, seriesContent, singleContent } from "../utils/data";
+import Carousel from "../components/Carousel";
 
 const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
   const [listInfo, setListInfo] = useState(null);
@@ -35,7 +36,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
       {listInfo.map((item, index) => (
         <div key={`${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
-            <MovieCarousel
+            <Carousel
               nameList={item.nameList}
               typeList={item.typeList}
               type_slug={item.type_slug}
@@ -46,7 +47,7 @@ const MainLayout = ({ type_slug, openModal, filter = false, openList }) => {
               openList={openList}
             />
           ) : (
-            <MovieCarousel
+            <Carousel
               nameList={item.nameList}
               typeList={item.typeList}
               sort_field={item?.sort_field}

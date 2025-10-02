@@ -5,3 +5,35 @@
 body {
   font-family: "Roboto", sans-serif;
 }
+
+.swiper {
+  overflow: visible !important;
+}
+
+.swiper-wrapper {
+  overflow: visible !important;
+}
+
+.swiper-slide {
+  overflow: visible !important;
+}
+
+.swiper-pagination-bullet {
+  width: 10px !important;
+  height: 2px !important;
+  background: #4d4d4d !important;
+  border-radius: 0 !important;
+  margin: 0 0.5px !important;
+}
+
+.swiper-pagination-bullet-active {
+  background: #aaa !important;
+  width: 10px !important;
+  height: 2px !important;
+  border-radius: 0 !important;
+  margin: 0 0.5px !important;
+}
+
+.swiper-pagination-bullets.swiper-pagination-horizontal {
+  width: fit-content !important;
+}
