@@ -343,3 +343,11 @@ export const formatTime = (time) => {
     )}`;
   }
 };
+
+export const getYoutubeId = (url) => {
+  if (!url || typeof url !== "string") return null;
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^&?\/]+)/
+  );
+  return match ? match[1] : null;
+};

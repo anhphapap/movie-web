@@ -37,3 +37,7 @@ body {
 .swiper-pagination-bullets.swiper-pagination-horizontal {
   width: fit-content !important;
 }
+
+.swiper-lazy-preloader {
+  display: none !important;
+}

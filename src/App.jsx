@@ -26,7 +26,6 @@ import { ToastContainer } from "react-toastify";
 import AccountPage from "./pages/AccountPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FavouritePage from "./pages/FavouritePage";
-
 library.add(fas, fab, far);
 
 const AppLayout = ({ children }) => {
@@ -136,7 +135,11 @@ function App() {
               <Route
                 path="/"
                 element={
-                  <MainLayout openList={openList} openModal={openModal} />
+                  <MainLayout
+                    openList={openList}
+                    openModal={openModal}
+                    onClose={closeModal}
+                  />
                 }
               />
               <Route
@@ -147,6 +150,7 @@ function App() {
                     openModal={openModal}
                     openList={openList}
                     filter={true}
+                    onClose={closeModal}
                   />
                 }
               />
@@ -158,6 +162,7 @@ function App() {
                     openModal={openModal}
                     openList={openList}
                     filter={true}
+                    onClose={closeModal}
                   />
                 }
               />
