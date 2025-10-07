@@ -202,10 +202,7 @@ export default function Carousel({
                 />
                 <div className="relative w-[70%] lg:w-[50%] rounded lg:rounded-sm overflow-hidden">
                   <div className="object-cover w-full aspect-[2/3] object-center rounded lg:rounded-sm">
-                    <LazyImage
-                      src={`${import.meta.env.VITE_API_IMAGE}${item.thumb_url}`}
-                      alt={item.name}
-                    />
+                    <LazyImage src={`${item.thumb_url}`} alt={item.name} />
                   </div>
                   {item.sub_docquyen && (
                     <img
@@ -367,10 +364,7 @@ export default function Carousel({
             >
               <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
                 <div className="object-cover w-full h-full rounded">
-                  <LazyImage
-                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                    alt={item.name}
-                  />
+                  <LazyImage src={item.poster_url} alt={item.name} />
                 </div>
                 <div>
                   <div
@@ -399,10 +393,7 @@ export default function Carousel({
                 onClick={() => openModal(item.slug)}
               >
                 <div className="w-full object-cover aspect-[2/3] rounded">
-                  <LazyImage
-                    src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-                    alt={item.name}
-                  />
+                  <LazyImage src={item.poster_url} alt={item.name} />
                 </div>
                 {item.sub_docquyen && (
                   <img
