@@ -284,7 +284,7 @@ const VideoPlayer = ({
       )}
 
       {showOverlay && (
-        <div className="absolute inset-0 bg-black/80 flex flex-col justify-center px-[10%] transition-opacity duration-500">
+        <div className="absolute inset-0 bg-black/60 flex flex-col justify-center px-[10%] transition-opacity duration-500">
           <div className="text-white max-w-2xl pt-12 lg:pt-0">
             <p className="text-xs lg:text-base mb-2 text-white/70">
               Bạn đang xem
@@ -420,7 +420,7 @@ const VideoPlayer = ({
             {/* Title */}
           </div>
           <span className="hidden lg:block ml-4 text-base font-semibold">
-            {title} - {episodeName}
+            {title} - {"Tập " + episodeName}
           </span>
 
           <div className="flex items-center space-x-2 lg:space-x-4">

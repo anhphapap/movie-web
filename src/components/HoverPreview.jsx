@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import LazyImage from "./LazyImage";
 
 export default function HoverPreview({
   hovered,
@@ -50,11 +51,9 @@ export default function HoverPreview({
       >
         <div className="bg-[#141414] rounded-md origin-top w-[150%] cursor-pointer overflow-hidden">
           <div className="relative w-full aspect-video rounded-t-md overflow-hidden">
-            <img
-              src={import.meta.env.VITE_API_IMAGE + item.poster_url}
-              className="object-cover w-full h-full"
-              alt={item.name}
-            />
+            <div className="w-full h-full">
+              <LazyImage src={item.poster_url} alt={item.name} widths={[640]} />
+            </div>
             <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div>
           </div>
 

@@ -19,7 +19,7 @@ export default function Carousel({
   sort_field = "modified.time",
   country = "",
   category = "",
-  year = "",
+  year = new Date().getFullYear(),
   size = 16,
   onClose,
 }) {
@@ -163,7 +163,7 @@ export default function Carousel({
             setLastVisible(swiper.params.slidesPerView - 1);
             setSwiperHeight(swiper.el.clientHeight);
             setCanSlidePrev(!swiper.isBeginning);
-            setCanSlideNext(swiper.isEnd);
+            setCanSlideNext(!swiper.isEnd);
           }}
           onSlideChange={(swiper) => {
             setFirstVisible(swiper.activeIndex);
@@ -332,7 +332,7 @@ export default function Carousel({
           setLastVisible(swiper.params.slidesPerView - 1);
           setSwiperHeight(swiper.el.clientHeight);
           setCanSlidePrev(!swiper.isBeginning);
-          setCanSlideNext(swiper.isEnd);
+          setCanSlideNext(!swiper.isEnd);
         }}
         onSlideChange={(swiper) => {
           setFirstVisible(swiper.activeIndex);
@@ -341,11 +341,11 @@ export default function Carousel({
           setCanSlideNext(!swiper.isEnd);
         }}
         breakpoints={{
-          1400: { slidesPerView: 6 },
-          1024: { slidesPerView: 5 },
-          800: { slidesPerView: 4 },
-          500: { slidesPerView: 3 },
-          0: { slidesPerView: 2 },
+          // 1400: { slidesPerView: 6 },
+          1024: { slidesPerView: 6 },
+          800: { slidesPerView: 5 },
+          500: { slidesPerView: 4 },
+          0: { slidesPerView: 3 },
         }}
         className="w-[94%] mx-[3%]"
         ref={swiperRef}
@@ -393,7 +393,7 @@ export default function Carousel({
                 onClick={() => openModal(item.slug)}
               >
                 <div className="w-full object-cover aspect-[2/3] rounded">
-                  <LazyImage src={item.poster_url} alt={item.name} />
+                  <LazyImage src={item.thumb_url} alt={item.name} />
                 </div>
                 {item.sub_docquyen && (
                   <img

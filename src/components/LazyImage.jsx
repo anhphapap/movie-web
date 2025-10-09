@@ -4,7 +4,7 @@ import { buildImage } from "../utils/image";
 const LazyImage = ({
   src,
   alt,
-  widths = [320, 640, 960, 1280],
+  widths = [64, 128, 160, 240, 320, 480, 640, 960, 1280, 1920, 3200],
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px",
   className = "",
 }) => {
@@ -19,7 +19,7 @@ const LazyImage = ({
   return (
     <div className="relative w-full h-full">
       {!loaded && (
-        <div className="absolute inset-0 bg-gray-800 animate-pulse"></div>
+        <div className="absolute inset-0 bg-[#262626] animate-pulse"></div>
       )}
       <img
         src={fallback}
