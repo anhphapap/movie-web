@@ -107,11 +107,14 @@ function App() {
     <AuthContextProvider>
       <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
         <Router>
-          {/* Suspense bọc toàn bộ app để fallback khi load chunk */}
           <Suspense
             fallback={
               <div className="h-screen flex items-center justify-center text-white text-lg">
-                Loading...
+                <FontAwesomeIcon
+                  icon="fa-solid fa-spinner"
+                  size="2xl"
+                  className="animate-spin text-white"
+                />
               </div>
             }
           >

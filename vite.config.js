@@ -18,16 +18,14 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           // 🔥 Tách các vendor lớn thành chunk riêng (cache lâu dài)
-          manualChunks: {
-            react: ["react", "react-dom"],
-            firebase: ["firebase/app", "firebase/auth", "firebase/firestore"],
-            swiper: ["swiper/react", "swiper/modules"],
-            fontawesome: [
-              "@fortawesome/fontawesome-svg-core",
-              "@fortawesome/free-solid-svg-icons",
-              "@fortawesome/free-brands-svg-icons",
-              "@fortawesome/free-regular-svg-icons",
-            ],
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.includes("@fortawesome")) return "vendor-fontawesome";
+              if (id.includes("firebase")) return "vendor-firebase";
+              if (id.includes("swiper")) return "vendor-swiper";
+              if (id.includes("react")) return "vendor-react";
+              return "vendor";
+            }
           },
         },
       },
