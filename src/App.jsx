@@ -2,47 +2,49 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { fas } from "@fortawesome/free-solid-svg-icons";
 import { fab } from "@fortawesome/free-brands-svg-icons";
 import { far } from "@fortawesome/free-regular-svg-icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   useLocation,
 } from "react-router-dom";
-import MovieModal from "./components/MovieModal";
-import MainLayout from "./layouts/MainLayout";
-import SearchPage from "./pages/SearchPage";
 import axios from "axios";
-import Header from "./components/Header";
-import WatchPage from "./pages/WatchPage";
-import Footer from "./components/Footer";
-import FilterPage from "./pages/FilterPage";
-import DonatePage from "./pages/DonatePage";
-import ListModal from "./components/ListModal";
 import { AuthContextProvider } from "./context/AuthContext";
-import LoginPage from "./pages/LoginPage";
-import SignUpPage from "./pages/SignUpPage";
 import { ToastContainer } from "react-toastify";
-import AccountPage from "./pages/AccountPage";
-import ProtectedRoute from "./components/ProtectedRoute";
-import FavouritePage from "./pages/FavouritePage";
 import { warmTmdbCache } from "./utils/tmdbCache";
 import ScrollToTop from "./components/ScrollToTop";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+// 🎯 lazy load các component nặng / page lớn
+const MovieModal = lazy(() => import("./components/MovieModal"));
+const ListModal = lazy(() => import("./components/ListModal"));
+const MainLayout = lazy(() => import("./layouts/MainLayout"));
+const SearchPage = lazy(() => import("./pages/SearchPage"));
+const WatchPage = lazy(() => import("./pages/WatchPage"));
+const FilterPage = lazy(() => import("./pages/FilterPage"));
+const DonatePage = lazy(() => import("./pages/DonatePage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const SignUpPage = lazy(() => import("./pages/SignUpPage"));
+const AccountPage = lazy(() => import("./pages/AccountPage"));
+const FavouritePage = lazy(() => import("./pages/FavouritePage"));
+const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
+
 library.add(fas, fab, far);
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
-
+  const pathname = location.pathname;
   const pathsWithFilter = ["/phim-bo", "/phim-le"];
 
   return (
     <div>
       <Header
         filter={
-          pathsWithFilter.includes(useLocation().pathname) ||
-          useLocation().pathname.startsWith("/filter")
+          pathsWithFilter.includes(pathname) || pathname.startsWith("/filter")
         }
-        type_slug={useLocation().pathname}
+        type_slug={pathname}
       />
       {children}
     </div>
@@ -86,9 +88,7 @@ function App() {
     setIsListOpen(true);
   };
 
-  const closeList = () => {
-    setIsListOpen(false);
-  };
+  const closeList = () => setIsListOpen(false);
 
   const contextClass = {
     success: "bg-white/10 backdrop-blur",
@@ -107,123 +107,134 @@ function App() {
     <AuthContextProvider>
       <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
         <Router>
-          <MovieModal
-            isOpen={isModalOpen}
-            onClose={closeModal}
-            modal={modalContent}
-          />
-          <ListModal
-            isOpen={isListOpen}
-            onClose={closeList}
-            openModal={openModal}
-            nameList={nameList}
-            api={listAPI}
-          />
-          <ToastContainer
-            position="bottom-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-            className={"z-[99999]"}
-            toastClassName={(context) =>
-              contextClass[context?.type || "default"] +
-              " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+          {/* Suspense bọc toàn bộ app để fallback khi load chunk */}
+          <Suspense
+            fallback={
+              <div className="h-screen flex items-center justify-center text-white text-lg">
+                Loading...
+              </div>
             }
-          />
-          <AppLayout>
-            <ScrollToTop />
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <MainLayout
-                    openList={openList}
-                    openModal={openModal}
-                    onClose={closeModal}
-                  />
-                }
-              />
-              <Route
-                path="/phim-bo"
-                element={
-                  <MainLayout
-                    type_slug={"phim-bo"}
-                    openModal={openModal}
-                    openList={openList}
-                    filter={true}
-                    onClose={closeModal}
-                  />
-                }
-              />
-              <Route
-                path="/phim-le"
-                element={
-                  <MainLayout
-                    type_slug={"phim-le"}
-                    openModal={openModal}
-                    openList={openList}
-                    filter={true}
-                    onClose={closeModal}
-                  />
-                }
-              />
+          >
+            {/* Modals */}
+            <MovieModal
+              isOpen={isModalOpen}
+              onClose={closeModal}
+              modal={modalContent}
+            />
+            <ListModal
+              isOpen={isListOpen}
+              onClose={closeList}
+              openModal={openModal}
+              nameList={nameList}
+              api={listAPI}
+            />
 
-              <Route
-                path="/search"
-                element={<SearchPage openModal={openModal}></SearchPage>}
-              />
-              <Route
-                path="/watch/:movieSlug/:episode"
-                element={
-                  <WatchPage onClose={closeModal} closeList={closeList} />
-                }
-              />
-              <Route
-                path="/filter/:typeSlug"
-                element={<FilterPage openModal={openModal} />}
-              />
-              <Route path="/donate" element={<DonatePage />} />
-              <Route
-                path="/login"
-                element={
-                  <ProtectedRoute diff={true}>
-                    <LoginPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/signup"
-                element={
-                  <ProtectedRoute diff={true}>
-                    <SignUpPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/account"
-                element={
-                  <ProtectedRoute>
-                    <AccountPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/favourite"
-                element={
-                  <ProtectedRoute>
-                    <FavouritePage openModal={openModal} />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </AppLayout>
-          <Footer />
+            {/* Toast */}
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              closeOnClick
+              draggable
+              pauseOnHover
+              theme="dark"
+              className="z-[99999]"
+              toastClassName={(context) =>
+                contextClass[context?.type || "default"] +
+                " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+              }
+            />
+
+            {/* Layout */}
+            <AppLayout>
+              <ScrollToTop />
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <MainLayout
+                      openList={openList}
+                      openModal={openModal}
+                      onClose={closeModal}
+                    />
+                  }
+                />
+                <Route
+                  path="/phim-bo"
+                  element={
+                    <MainLayout
+                      type_slug="phim-bo"
+                      openModal={openModal}
+                      openList={openList}
+                      filter
+                      onClose={closeModal}
+                    />
+                  }
+                />
+                <Route
+                  path="/phim-le"
+                  element={
+                    <MainLayout
+                      type_slug="phim-le"
+                      openModal={openModal}
+                      openList={openList}
+                      filter
+                      onClose={closeModal}
+                    />
+                  }
+                />
+                <Route
+                  path="/search"
+                  element={<SearchPage openModal={openModal} />}
+                />
+                <Route
+                  path="/watch/:movieSlug/:episode"
+                  element={
+                    <WatchPage onClose={closeModal} closeList={closeList} />
+                  }
+                />
+                <Route
+                  path="/filter/:typeSlug"
+                  element={<FilterPage openModal={openModal} />}
+                />
+                <Route path="/donate" element={<DonatePage />} />
+                <Route
+                  path="/login"
+                  element={
+                    <ProtectedRoute diff>
+                      <LoginPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <ProtectedRoute diff>
+                      <SignUpPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/account"
+                  element={
+                    <ProtectedRoute>
+                      <AccountPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/favourite"
+                  element={
+                    <ProtectedRoute>
+                      <FavouritePage openModal={openModal} />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </AppLayout>
+
+            <Footer />
+          </Suspense>
         </Router>
       </div>
     </AuthContextProvider>

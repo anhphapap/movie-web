@@ -45,6 +45,16 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
     };
   }, [type_slug]);
 
+  useEffect(() => {
+    if (!movie?.poster_url) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = `${movie.poster_url}?tr=w-1280,q-70,f-auto`;
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
+  }, [movie]);
+
   if (loading || !movie) {
     return (
       <div className="w-screen aspect-square sm:aspect-video flex items-center justify-center">
