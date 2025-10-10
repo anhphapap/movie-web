@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 800, // tránh spam warning
     sourcemap: false,
-    minify: "terser",
+    minify: "esbuild",
     terserOptions: {
       compress: {
         drop_console: true, // bỏ console.log khỏi bundle
