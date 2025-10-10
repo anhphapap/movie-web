@@ -16,6 +16,7 @@ import { warmTmdbCache } from "./utils/tmdbCache";
 import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // 🎯 lazy load các component nặng / page lớn
 const MovieModal = lazy(() => import("./components/MovieModal"));
