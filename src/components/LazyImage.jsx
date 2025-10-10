@@ -59,6 +59,7 @@ const LazyImage = ({
   aspect = "cover", // 'cover' | 'contain'
   className = "",
   priority = false, // preload cho ảnh quan trọng (banner)
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw",
 }) => {
   const [loaded, setLoaded] = useState(false);
 
@@ -66,7 +67,7 @@ const LazyImage = ({
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
   // Kích thước responsive
-  const widths = [320, 480, 768, 1024, 1366, 1600];
+  const widths = [64, 128, 160, 240, 320, 480, 640, 960, 1280, 1920];
 
   const srcSet = useMemo(
     () =>
@@ -82,10 +83,6 @@ const LazyImage = ({
         .join(", "),
     [src, quality, pixelRatio]
   );
-
-  // sizes để trình duyệt tự chọn ảnh phù hợp
-  const sizes =
-    "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw";
 
   // Ảnh nét (full quality)
   const fullImage = buildImage(src, {

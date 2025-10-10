@@ -223,7 +223,8 @@ export default function Carousel({
                     <LazyImage
                       src={`${item.thumb_url}`}
                       alt={item.name}
-                      sizes="(max-width: 500px) 31vw, (max-width: 800px) 21vw, (max-width: 1024px) 16vw, 10vw"
+                      sizes="(max-width: 500px) 15vw, (max-width: 800px) 21vw, (max-width: 1024px) 16vw, 10vw"
+                      quality={65}
                     />
                   </div>
                   {item.sub_docquyen && (
@@ -392,6 +393,7 @@ export default function Carousel({
                     src={item.poster_url}
                     alt={item.name}
                     sizes="16vw"
+                    quality={65}
                   />
                 </div>
                 <div>
@@ -424,7 +426,8 @@ export default function Carousel({
                   <LazyImage
                     src={item.thumb_url}
                     alt={item.name}
-                    sizes="(max-width: 500px) 32vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                    sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                    quality={65}
                   />
                 </div>
                 {item.sub_docquyen && (

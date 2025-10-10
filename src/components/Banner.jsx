@@ -71,6 +71,7 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
             src={movie.movie.poster_url.split("movies/")[1]}
             alt={movie.movie.name}
             priority
+            sizes="100vw"
           />
         </div>
         <div className="absolute top-0 left-0 w-full sm:hidden">
@@ -78,6 +79,7 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
             src={movie.movie.thumb_url.split("movies/")[1]}
             alt={movie.movie.name}
             priority
+            sizes="100vw"
           />
         </div>
         <div className="absolute top-0 left-0 w-full aspect-square sm:aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
