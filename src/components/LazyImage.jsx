@@ -10,8 +10,12 @@ const LazyImage = ({
 }) => {
   const [loaded, setLoaded] = useState(false);
 
+  const pixelRatio = Math.min(window.devicePixelRatio || 1.5, 2);
   const srcSet = widths
-    .map((w) => `${buildImage(src, { w, q: 75 })} ${w}w`)
+    .map(
+      (w) =>
+        `${buildImage(src, { w: Math.round(w * pixelRatio), q: 80 })} ${w}w`
+    )
     .join(", ");
 
   const fallback = buildImage(src, { w: widths[widths.length - 1], q: 75 });

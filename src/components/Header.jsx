@@ -85,47 +85,54 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </button>
           </div>
           <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
-            <a href="/">
+            <div className="cursor-pointer" onClick={() => navigate("/")}>
               <img
                 src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
                 className="object-cover h-full"
               ></img>
-            </a>
+            </div>
           </div>
           <div className="hidden md:flex items-center justify-start flex-shink-0">
-            <a href="/" className="w-[20%] mt-1 mr-4 flex-shrink-0">
+            <div
+              className="w-[20%] mt-1 mr-4 flex-shrink-0 cursor-pointer"
+              onClick={() => navigate("/")}
+            >
               <img
                 src="https://fontmeme.com/permalink/250104/46a7ee5646a1ff7768a3c2dadc2dba3e.png"
                 className="object-cover h-full"
               ></img>
-            </a>
+            </div>
             <nav className=" space-x-4 flex flex-shrink-0">
               {navigation.slice(0, 4).map((item, index) => (
-                <a
-                  href={item.href}
+                <div
+                  onClick={() => {
+                    navigate(item.href);
+                    setOnTab(index);
+                  }}
                   className={` ${
                     onTab === index
                       ? "font-bold text-white"
-                      : "text-white/80 hover:opacity-70"
+                      : "text-white/80 hover:opacity-70 cursor-pointer"
                   }`}
-                  onClick={() => setOnTab(index)}
                   key={item.href}
                 >
                   {item.name}
-                </a>
+                </div>
               ))}
               {user?.email && (
-                <a
-                  href="/favourite"
+                <div
+                  onClick={() => {
+                    navigate("/favourite");
+                    setOnTab(5);
+                  }}
                   className={` ${
                     onTab === 5
                       ? "font-bold text-white"
-                      : "text-white/80 hover:opacity-70"
+                      : "text-white/80 hover:opacity-70 cursor-pointer"
                   }`}
-                  onClick={() => setOnTab(index)}
                 >
                   Yêu thích
-                </a>
+                </div>
               )}
             </nav>
           </div>

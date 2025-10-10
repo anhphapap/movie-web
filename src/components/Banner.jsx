@@ -1,55 +1,53 @@
 import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LazyImage from "./LazyImage";
-
-const Banner = ({
-  openModal,
-  type_slug = "phim-bo",
-  sort_field = "view",
-  year = 2025,
-  filter = false,
-}) => {
+import { getTmdbCached } from "../utils/tmdbCache";
+import axios from "axios";
+const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
+    let isMounted = true;
+
     const fetchMovie = async () => {
-      setLoading(true);
       try {
-        let movieList = null;
-        if (type_slug === "phim-bo") {
-          movieList = { slug: "ngu-tru-cua-bao-chua" };
-        } else if (type_slug === "phim-le") {
-          movieList = { slug: "mantis" };
-        } else {
-          const listResponse = await axios.get(
-            `${
-              import.meta.env.VITE_API_LIST
-            }${type_slug}?&page=1&sort_field=${sort_field}&year=${year}`
-          );
-          movieList = listResponse.data.data.items[0] || null;
+        setLoading(true);
+
+        const listType = type_slug === "phim-bo" ? "tv" : "movie";
+        const movies = await getTmdbCached(listType, "week");
+
+        if (!movies || movies.length === 0) {
+          console.warn("No movies found");
+          return;
         }
 
-        const detailResponse = await axios.get(
-          `${import.meta.env.VITE_API_DETAILS}${movieList.slug}`
+        const selectedMovie = movies[Math.floor(Math.random() * movies.length)];
+
+        const { data } = await axios.get(
+          `${import.meta.env.VITE_API_DETAILS}${selectedMovie.slug}`
         );
-        setMovie(detailResponse.data);
-        console.log(detailResponse.data);
-      } catch (error) {
-        console.error("Error fetching movies:", error);
+
+        if (isMounted) setMovie(data);
+      } catch (err) {
+        console.error("Error fetching movie banner:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchMovie();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [type_slug]);
 
   if (loading || !movie) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center">
+      <div className="w-screen aspect-square sm:aspect-video flex items-center justify-center">
         <FontAwesomeIcon
           icon="fa-solid fa-spinner"
           size="2xl"
@@ -72,14 +70,14 @@ const Banner = ({
           <LazyImage
             src={movie.movie.poster_url.split("movies/")[1]}
             alt={movie.movie.name}
-            widths={[1920, 2560, 3200]}
+            sizes="100vw"
           />
         </div>
         <div className="absolute top-0 left-0 w-full sm:hidden">
           <LazyImage
             src={movie.movie.thumb_url.split("movies/")[1]}
             alt={movie.movie.name}
-            widths={[320, 640]}
+            sizes="100vw"
           />
         </div>
         <div className="absolute top-0 left-0 w-full aspect-square sm:aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
@@ -95,7 +93,7 @@ const Banner = ({
               </span>
             </div>
             <h1
-              className="uppercase text-4xl lg:text-6xl xl:text-7xl font-extrabold italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
+              className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-extrabold italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
             >
               {movie.movie.origin_name}
@@ -108,20 +106,13 @@ const Banner = ({
             </div>
             <div className="flex justify-center sm:justify-start items-center space-x-3">
               <div className="relative rounded bg-white hover:bg-white/80 w-1/2 sm:w-auto flex items-center justify-center">
-                {(movie.episodes[0].server_data[0].link_embed != "" && (
-                  <button
-                    className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
-                    onClick={() => navigate(`/watch/${movie.movie.slug}/${0}`)}
-                  >
-                    <FontAwesomeIcon icon="fa-solid fa-play" />
-                    <span>Phát</span>
-                  </button>
-                )) || (
-                  <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
-                    <FontAwesomeIcon icon="fa-solid fa-bell" />
-                    <span>Nhắc tôi</span>
-                  </button>
-                )}
+                <button
+                  className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
+                  onClick={() => navigate(`/watch/${movie.movie.slug}/${0}`)}
+                >
+                  <FontAwesomeIcon icon="fa-solid fa-play" />
+                  <span>Phát</span>
+                </button>
               </div>
               <div className="relative rounded bg-white/30 hover:bg-white/20 w-1/2 sm:w-auto flex items-center justify-center">
                 <button

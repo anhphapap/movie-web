@@ -26,6 +26,8 @@ import { ToastContainer } from "react-toastify";
 import AccountPage from "./pages/AccountPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import FavouritePage from "./pages/FavouritePage";
+import { warmTmdbCache } from "./utils/tmdbCache";
+import ScrollToTop from "./components/ScrollToTop";
 library.add(fas, fab, far);
 
 const AppLayout = ({ children }) => {
@@ -97,6 +99,10 @@ function App() {
     dark: "bg-white/10 backdrop-blur",
   };
 
+  useEffect(() => {
+    warmTmdbCache();
+  }, []);
+
   return (
     <AuthContextProvider>
       <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
@@ -131,6 +137,7 @@ function App() {
             }
           />
           <AppLayout>
+            <ScrollToTop />
             <Routes>
               <Route
                 path="/"

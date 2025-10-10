@@ -16,11 +16,11 @@ import { toast } from "react-toastify";
 import Tooltip from "./Tooltip";
 import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
+import LazyImage from "./LazyImage";
 
 const customStyles = {
   content: {
     position: "absolute",
-    top: "4%",
     left: "50%",
     bottom: "auto",
     transform: "translate(-50%)",
@@ -39,6 +39,13 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
   const [player, setPlayer] = useState(null);
   const [isMuted, setIsMuted] = useState(false);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [fadeOutImage, setFadeOutImage] = useState(false);
+  const [intervalId, setIntervalId] = useState(null);
+  useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [intervalId]);
   const { user } = UserAuth();
   const [playerOptions, setPlayerOptions] = useState({
     height: "100%",
@@ -56,6 +63,14 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
       playsinline: 1,
     },
   });
+
+  const handleClose = () => {
+    if (intervalId) clearInterval(intervalId);
+    setShowTrailer(false);
+    setPlayer(null);
+    setFadeOutImage(false);
+    onClose();
+  };
 
   useEffect(() => {
     const checkSaved = async () => {
@@ -177,66 +192,88 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] min-h-screen lg:min-h-0"
     >
-      <div className="flex flex-col w-full rounded-lg">
-        <div className="aspect-video bg-cover bg-center w-full relative rounded-t-lg overflow-hidden">
-          {showTrailer && youtubeId ? (
-            <YouTube
-              videoId={youtubeId}
-              opts={playerOptions}
-              className="aspect-video object-cover pointer-events-none absolute w-[101%] h-[101%] -translate-x-[0.5%] -translate-y-[0.5%] top-0 left-0 rounded-t-lg"
-              onReady={(e) => {
-                const ytPlayer = e.target;
-                const iframe = ytPlayer.getIframe();
-                iframe.style.pointerEvents = "none";
-                setPlayer(ytPlayer);
-                ytPlayer.playVideo();
-                if (isMuted) ytPlayer.mute();
-
-                const checkTime = setInterval(() => {
-                  const duration = ytPlayer.getDuration();
-                  const current = ytPlayer.getCurrentTime();
-
-                  if (duration - current <= 6) {
-                    clearInterval(checkTime);
-                    ytPlayer.stopVideo();
-                    setShowTrailer(false);
-                  }
-                }, 500);
-
-                ytPlayer._checkTime = checkTime;
-              }}
-              onStateChange={(e) => {
-                if (e.data === 0) {
-                  setShowTrailer(false);
-                } else if (e.data === 2 && player?._checkTime) {
-                  clearInterval(player._checkTime);
-                }
-              }}
-            />
-          ) : (
-            <img
-              src={modal.movie.poster_url}
-              className="object-cover w-full absolute top-0 left-0 rounded-t-lg aspect-video outline-none"
-              alt={modal.movie.name}
-            />
-          )}
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-0" />
-          <button
-            className="aspect-square w-7 rounded-full bg-[#141414] absolute right-3 top-3 z-10 flex items-center justify-center"
-            onClick={onClose}
+      <div className="flex flex-col w-full lg:rounded-lg">
+        <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
+          <div
+            className={`absolute top-0 left-0 w-full h-full object-cover z-10 transition-opacity duration-1000 ease-in-out ${
+              fadeOutImage ? "opacity-0" : "opacity-100"
+            }`}
           >
-            <FontAwesomeIcon icon="fa-solid fa-xmark" />
+            <LazyImage
+              src={modal.movie.poster_url.split("movies/")[1]}
+              alt={modal.movie.name}
+              sizes="(max-width: 1280px) 100vw,(max-width: 1535px) 70vw, 50vw"
+            />
+          </div>
+
+          {youtubeId && (
+            <div
+              className={`absolute top-0 left-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+                showTrailer ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <YouTube
+                videoId={youtubeId}
+                opts={playerOptions}
+                className="aspect-video object-cover pointer-events-none absolute w-full h-full top-0 left-0 z-0 rounded-t-lg"
+                onReady={(e) => {
+                  const ytPlayer = e.target;
+                  const iframe = ytPlayer.getIframe();
+                  iframe.style.pointerEvents = "none";
+                  setPlayer(ytPlayer);
+                  ytPlayer.playVideo();
+                  if (isMuted) ytPlayer.mute();
+
+                  const id = setInterval(() => {
+                    const duration = ytPlayer.getDuration();
+                    const current = ytPlayer.getCurrentTime();
+
+                    if (current > 0.1) setFadeOutImage(true);
+
+                    if (duration - current <= 6) {
+                      clearInterval(id);
+                      ytPlayer.stopVideo();
+
+                      setFadeOutImage(false);
+                      setTimeout(() => setShowTrailer(false), 800);
+                    }
+                  }, 500);
+
+                  setIntervalId(id);
+                  ytPlayer._checkTime = id;
+                }}
+                onStateChange={(e) => {
+                  if (e.data === window.YT.PlayerState.ENDED) {
+                    if (player?._checkTime) clearInterval(player._checkTime);
+
+                    setFadeOutImage(false);
+                    setTimeout(() => setShowTrailer(false), 800);
+                  }
+
+                  if (e.data === window.YT.PlayerState.PAUSED) {
+                    if (player?._checkTime) clearInterval(player._checkTime);
+                  }
+                }}
+              />
+            </div>
+          )}
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-10" />
+          <button
+            className="bg-[#141414] absolute right-3 sm:right-4 top-3 sm:top-4 h-7 sm:h-10 aspect-square rounded-full flex items-center justify-center z-20"
+            onClick={handleClose}
+          >
+            <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
-          <div className="flex space-x-2 justify-between items-center absolute left-[5%] right-[5%] bottom-[5%]">
+          <div className="flex space-x-2 justify-between items-center absolute left-[5%] right-[5%] bottom-[5%] z-20">
             <div className="flex space-x-2">
               <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center transition-all ease-linear">
                 {(modal.episodes[0].server_data[0].link_embed != "" && (
                   <Link
                     to={`/watch/${modal.movie.slug}/${0}`}
                     key={modal.movie._id + 0}
-                    onClick={onClose}
+                    onClick={handleClose}
                   >
                     <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                       <FontAwesomeIcon icon="fa-solid fa-play" />
@@ -263,19 +300,20 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 />
               </button>
             </div>
-            {showTrailer && youtubeId && (
+            {showTrailer && youtubeId && fadeOutImage && (
               <button
                 onClick={handleToggleMute}
                 className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square h-full rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
               >
-                <div className="w-5 h-5 flex items-center justify-center">
+                <div className="sm:w-5 sm:h-5 h-3 w-3 flex items-center justify-center">
                   <FontAwesomeIcon
                     icon={
                       isMuted
                         ? "fa-solid fa-volume-xmark"
                         : "fa-solid fa-volume-high"
                     }
-                    className="w-full h-full text[12px] sm:text-[18px]"
+                    className="text-xs sm:text-lg"
+                    size="xs"
                   />
                 </div>
               </button>
@@ -283,8 +321,8 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           </div>
         </div>
         <div className="flex flex-col p-[5%] space-y-10">
-          <div className="flex items-start space-x-[3%]">
-            <div className="flex flex-col space-y-4 w-[70%]">
+          <div className="flex items-start space-y-3 sm:space-y-0 sm:space-x-[3%] flex-col sm:flex-row">
+            <div className="flex flex-col space-y-4 w-full sm:w-[70%]">
               <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between text-white/70">
                   <div className="flex space-x-2 items-center">
@@ -331,7 +369,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 className="text-white text-pretty"
               />
             </div>
-            <div className="flex flex-col space-y-3 w-[30%]">
+            <div className="flex flex-col space-y-3 w-full sm:w-[30%]">
               {modal.movie.actor[0] != "" && (
                 <div>
                   <span className="opacity-50">Diễn viên: </span>

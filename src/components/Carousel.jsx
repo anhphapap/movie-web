@@ -6,9 +6,9 @@ import HoverPreview from "./HoverPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useHoverDelay from "../context/DelayContext";
 import { tops } from "../utils/data";
-import { useNavigate } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
 import LazyImage from "./LazyImage";
+import { getTmdbCached } from "../utils/tmdbCache";
 
 export default function Carousel({
   nameList,
@@ -21,7 +21,6 @@ export default function Carousel({
   category = "",
   year = new Date().getFullYear(),
   size = 16,
-  onClose,
 }) {
   const [movies, setMovies] = useState([]);
   const [firstVisible, setFirstVisible] = useState(0);
@@ -35,8 +34,10 @@ export default function Carousel({
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [canSlideNext, setCanSlideNext] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentSlidesPerView, setCurrentSlidesPerView] = useState(
+    typeList === "top" ? 5 : 6
+  ); // Default values
   const { hovered, onEnter, onLeave } = useHoverDelay();
-  const navigate = useNavigate();
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0,
@@ -60,6 +61,22 @@ export default function Carousel({
     if (!inView) return;
     const fetchMovies = async () => {
       setLoading(true);
+      if (typeList === "top") {
+        let mounted = true;
+        (async () => {
+          const data = await getTmdbCached(
+            type_slug === "phim-bo" ? "tv" : "movie",
+            "week"
+          );
+          if (mounted) {
+            setMovies(data);
+            setLoading(false);
+          }
+        })();
+        return () => {
+          mounted = false;
+        };
+      }
       var page = 1;
       var totalPage = 1;
       var movieList = [];
@@ -112,7 +129,6 @@ export default function Carousel({
       </div>
     );
   }
-
   if (typeList === "top") {
     return (
       <div
@@ -141,8 +157,8 @@ export default function Carousel({
             nextEl: nextRef.current,
           }}
           spaceBetween={6}
-          slidesPerView={5}
-          slidesPerGroup={5}
+          slidesPerView={currentSlidesPerView}
+          slidesPerGroup={currentSlidesPerView}
           slidesPerGroupAuto={true}
           onResize={(swiper) => {
             setSwiperHeight(swiper.el.clientHeight);
@@ -150,6 +166,7 @@ export default function Carousel({
             setLastVisible(
               swiper.activeIndex + swiper.params.slidesPerView - 1
             );
+            setCurrentSlidesPerView(swiper.params.slidesPerView);
           }}
           onInit={(swiper) => {
             swiper.params.pagination.el = paginationRef.current;
@@ -164,6 +181,7 @@ export default function Carousel({
             setSwiperHeight(swiper.el.clientHeight);
             setCanSlidePrev(!swiper.isBeginning);
             setCanSlideNext(!swiper.isEnd);
+            setCurrentSlidesPerView(swiper.params.slidesPerView);
           }}
           onSlideChange={(swiper) => {
             setFirstVisible(swiper.activeIndex);
@@ -202,7 +220,11 @@ export default function Carousel({
                 />
                 <div className="relative w-[70%] lg:w-[50%] rounded lg:rounded-sm overflow-hidden">
                   <div className="object-cover w-full aspect-[2/3] object-center rounded lg:rounded-sm">
-                    <LazyImage src={`${item.thumb_url}`} alt={item.name} />
+                    <LazyImage
+                      src={`${item.thumb_url}`}
+                      alt={item.name}
+                      sizes="(max-width: 500px) 31vw, (max-width: 800px) 21vw, (max-width: 1024px) 16vw, 10vw"
+                    />
                   </div>
                   {item.sub_docquyen && (
                     <img
@@ -312,13 +334,14 @@ export default function Carousel({
           nextEl: nextRef.current,
         }}
         spaceBetween={6}
-        slidesPerView={6}
-        slidesPerGroup={6}
+        slidesPerView={currentSlidesPerView}
+        slidesPerGroup={currentSlidesPerView}
         slidesPerGroupAuto={true}
         onResize={(swiper) => {
           setSwiperHeight(swiper.el.clientHeight);
           setFirstVisible(swiper.activeIndex);
           setLastVisible(swiper.activeIndex + swiper.params.slidesPerView - 1);
+          setCurrentSlidesPerView(swiper.params.slidesPerView);
         }}
         onInit={(swiper) => {
           swiper.params.pagination.el = paginationRef.current;
@@ -333,6 +356,7 @@ export default function Carousel({
           setSwiperHeight(swiper.el.clientHeight);
           setCanSlidePrev(!swiper.isBeginning);
           setCanSlideNext(!swiper.isEnd);
+          setCurrentSlidesPerView(swiper.params.slidesPerView);
         }}
         onSlideChange={(swiper) => {
           setFirstVisible(swiper.activeIndex);
@@ -364,7 +388,11 @@ export default function Carousel({
             >
               <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
                 <div className="object-cover w-full h-full rounded">
-                  <LazyImage src={item.poster_url} alt={item.name} />
+                  <LazyImage
+                    src={item.poster_url}
+                    alt={item.name}
+                    sizes="16vw"
+                  />
                 </div>
                 <div>
                   <div
@@ -393,7 +421,11 @@ export default function Carousel({
                 onClick={() => openModal(item.slug)}
               >
                 <div className="w-full object-cover aspect-[2/3] rounded">
-                  <LazyImage src={item.thumb_url} alt={item.name} />
+                  <LazyImage
+                    src={item.thumb_url}
+                    alt={item.name}
+                    sizes="(max-width: 500px) 32vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                  />
                 </div>
                 {item.sub_docquyen && (
                   <img

@@ -52,7 +52,7 @@ export default function HoverPreview({
         <div className="bg-[#141414] rounded-md origin-top w-[150%] cursor-pointer overflow-hidden">
           <div className="relative w-full aspect-video rounded-t-md overflow-hidden">
             <div className="w-full h-full">
-              <LazyImage src={item.poster_url} alt={item.name} widths={[640]} />
+              <LazyImage src={item.poster_url} alt={item.name} sizes="28vw" />
             </div>
             <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div>
           </div>
