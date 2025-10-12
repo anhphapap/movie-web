@@ -100,12 +100,16 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
                 className="h-[20px] object-cover"
                 src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
               ></img>
-              <span className="font-bold text-white/70 text-xs tracking-[3px]">
-                {movie.movie.type === "series" ? "LOẠT PHIM" : "PHIM"}
+              <span className="font-bold text-white text-xs tracking-[3px]">
+                {movie.movie.type === "series"
+                  ? "LOẠT PHIM"
+                  : movie.movie.type === "hoathinh"
+                  ? "HOẠT HÌNH"
+                  : "PHIM"}
               </span>
             </div>
             <h1
-              className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-extrabold italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
+              className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-black tracking-tighter italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
             >
               {movie.movie.origin_name}
@@ -118,13 +122,22 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
             </div>
             <div className="flex justify-center sm:justify-start items-center space-x-3">
               <div className="relative rounded bg-white hover:bg-white/80 w-1/2 sm:w-auto flex items-center justify-center">
-                <button
-                  className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
-                  onClick={() => navigate(`/watch/${movie.movie.slug}/${0}`)}
-                >
-                  <FontAwesomeIcon icon="fa-solid fa-play" />
-                  <span>Phát</span>
-                </button>
+                {movie.episodes[0].server_data[0].link_embed !== "" ? (
+                  <button
+                    className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
+                    onClick={() =>
+                      navigate(`/watch/${movie.movie.slug}?svr=${0}&ep=${0}`)
+                    }
+                  >
+                    <FontAwesomeIcon icon="fa-solid fa-play" />
+                    <span>Phát</span>
+                  </button>
+                ) : (
+                  <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
+                    <FontAwesomeIcon icon="fa-solid fa-bell" />
+                    <span>Nhắc tôi</span>
+                  </button>
+                )}
               </div>
               <div className="relative rounded bg-white/30 hover:bg-white/20 w-1/2 sm:w-auto flex items-center justify-center">
                 <button

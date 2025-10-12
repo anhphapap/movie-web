@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        roboto: ["Roboto", "sans-serif"],
+        netflix: ["Netflix Sans", "Inter", "sans-serif"],
       },
     },
   },

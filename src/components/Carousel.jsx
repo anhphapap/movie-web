@@ -9,6 +9,8 @@ import { tops } from "../utils/data";
 import { useInView } from "react-intersection-observer";
 import LazyImage from "./LazyImage";
 import { getTmdbCached } from "../utils/tmdbCache";
+import { useTop } from "../context/TopContext";
+import Top10Badge from "../assets/images/Top10Badge.svg";
 
 export default function Carousel({
   nameList,
@@ -16,7 +18,7 @@ export default function Carousel({
   openModal,
   openList,
   type_slug = "phim-moi-cap-nhat",
-  sort_field = "modified.time",
+  sort_field = "_id",
   country = "",
   category = "",
   year = new Date().getFullYear(),
@@ -38,9 +40,10 @@ export default function Carousel({
     typeList === "top" ? 5 : 6
   ); // Default values
   const { hovered, onEnter, onLeave } = useHoverDelay();
+  const { topSet } = useTop();
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0,
+    threshold: 0.2,
   });
 
   useEffect(() => {
@@ -139,7 +142,7 @@ export default function Carousel({
         }}
       >
         <div className="px-[3%] flex justify-between items-center w-full mb-3">
-          <h2 className="text-white/80 font-bold">{nameList}</h2>
+          <h2 className="text-white font-bold">{nameList}</h2>
           <div
             ref={paginationRef}
             className="ml-auto flex justify-center gap-[1px]"
@@ -234,23 +237,35 @@ export default function Carousel({
                       className="absolute top-[6px] left-[6px] w-3"
                     ></img>
                   )}
-                  <span className="block lg:hidden absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
-                    {item.episode_current.toLowerCase().includes("hoàn tất")
-                      ? "Hoàn tất"
-                      : item.episode_current}
-                  </span>
-                  <div>
-                    <div
-                      className={`absolute ${
-                        item.quality.length > 2
-                          ? "-top-[10px] -right-[3px] w-8"
-                          : "-top-[6px] -right-[6px] w-7"
-                      } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
-                    ></div>
-                    <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase ">
-                      {item.quality}
-                    </span>
-                  </div>
+                  {new Date().getTime() -
+                    new Date(item.modified.time).getTime() <
+                    1000 * 60 * 60 * 24 * 3 && (
+                    <>
+                      {item.episode_current
+                        .toLowerCase()
+                        .includes("hoàn tất") ||
+                      item.episode_current.toLowerCase().includes("full") ? (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] xl:w-[70%] 2xl:w-1/2 bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                          Mới thêm
+                        </span>
+                      ) : item.episode_current
+                          .toLowerCase()
+                          .includes("trailer") ? (
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] 2xl:w-1/2 bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                          Sắp ra mắt
+                        </span>
+                      ) : (
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col rounded-t overflow-hidden w-[80%] xl:w-[70%] 2xl:w-1/2">
+                          <span className=" text-white bg-[#e50914] xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                            Tập mới
+                          </span>
+                          <span className="text-black bg-white xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                            Xem ngay
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             </SwiperSlide>
@@ -298,7 +313,7 @@ export default function Carousel({
     >
       <div className="px-[3%] flex justify-between items-center w-full mb-3">
         <div
-          className="group cursor-pointer text-white/80 font-bold flex justify-between items-center lg:inline-block gap-2"
+          className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2"
           onClick={() =>
             openList({
               type_slug,
@@ -310,10 +325,10 @@ export default function Carousel({
             })
           }
         >
-          <span className="group-hover:text-white transition-all ease-in-out duration-500">
+          <span className="text-white transition-all ease-in-out duration-500">
             {nameList}
           </span>
-          <span className="lg:opacity-0 text-xs group-hover:opacity-70 group-hover:pl-2 transition-all ease-in-out duration-500">
+          <span className="lg:opacity-0 text-xs group-hover:opacity-100 group-hover:pl-2 transition-all ease-in-out duration-500 text-white/80 group-hover:text-white">
             Xem tất cả{" "}
             <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
           </span>
@@ -396,18 +411,6 @@ export default function Carousel({
                     quality={65}
                   />
                 </div>
-                <div>
-                  <div
-                    className={`absolute ${
-                      item.quality.length > 2
-                        ? "-top-[10px] -right-[3px] w-8"
-                        : "-top-[6px] -right-[6px] w-7"
-                    } aspect-square bg-[#e50914] rotate-6 shadow-black/80 shadow`}
-                  ></div>
-                  <span className="absolute -top-0 -right-0 bg-[#e50914] rounded-se text-xs font-black text-white pt-[3px] pb-[1px] px-1 uppercase">
-                    {item.quality}
-                  </span>
-                </div>
 
                 {item.sub_docquyen && (
                   <img
@@ -437,12 +440,39 @@ export default function Carousel({
                     className="absolute top-2 left-2 w-3"
                   />
                 )}
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white bg-[#e50914] sm:w-1/2 w-2/3 py-[2px] px-1 rounded-t text-xs font-black text-center shadow-black/80 shadow">
-                  {item.episode_current.toLowerCase().includes("hoàn tất")
-                    ? "Hoàn tất"
-                    : item.episode_current}
-                </span>
               </div>
+              {topSet?.has(item.slug) && (
+                <div className="absolute top-0 right-[2px]">
+                  <img
+                    src={Top10Badge}
+                    alt="Top 10"
+                    className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                  />
+                </div>
+              )}
+              {new Date().getTime() - new Date(item.modified.time).getTime() <
+                1000 * 60 * 60 * 24 * 3 && (
+                <>
+                  {item.episode_current.toLowerCase().includes("hoàn tất") ? (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] sm:w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                      Mới thêm
+                    </span>
+                  ) : item.episode_current.toLowerCase().includes("trailer") ? (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] sm:w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                      Sắp ra mắt
+                    </span>
+                  ) : (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-[80%] sm:w-1/2 xl:w-[70%] 2xl:w-1/2">
+                      <span className=" text-white bg-[#e50914] xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                        Tập mới
+                      </span>
+                      <span className="text-black bg-white xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                        Xem ngay
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </SwiperSlide>
         ))}

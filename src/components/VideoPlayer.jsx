@@ -25,6 +25,7 @@ const VideoPlayer = ({
   poster,
   title = "Movie title",
   episode,
+  svr,
   episodeName,
   episodes = [],
   movieSlug,
@@ -475,7 +476,9 @@ const VideoPlayer = ({
                                 <div
                                   className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-md cursor-pointer hover:scale-110 transition-all ease-linear duration-100"
                                   onClick={() =>
-                                    navigate(`/watch/${movieSlug}/${index}`)
+                                    navigate(
+                                      `/watch/${movieSlug}?svr=${svr}&ep=${index}`
+                                    )
                                   }
                                 >
                                   <Play

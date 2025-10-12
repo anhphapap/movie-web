@@ -21,7 +21,7 @@ export default function HoverPreview({
     <AnimatePresence mode="wait">
       <motion.div
         key={item._id}
-        className="absolute z-50 shadow-xl shadow-black/80 rounded-md hidden lg:block pointer-events-auto"
+        className="absolute z-50 shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.5),
           left:
@@ -49,21 +49,21 @@ export default function HoverPreview({
         }}
         onClick={() => openModal(item.slug)}
       >
-        <div className="bg-[#141414] rounded-md origin-top w-[150%] cursor-pointer overflow-hidden">
-          <div className="relative w-full aspect-video rounded-t-md overflow-hidden">
+        <div className="bg-[#141414] rounded origin-top w-[150%] cursor-pointer overflow-hidden">
+          <div className="relative w-full aspect-video rounded-t overflow-hidden">
             <div className="w-full h-full">
-              <LazyImage src={item.poster_url} alt={item.name} sizes="28vw" />
+              <LazyImage src={item.poster_url} alt={item.name} sizes="24vw" />
             </div>
-            <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div>
+            {/* <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div> */}
           </div>
 
-          <div className="px-4 pb-4 pt-1 flex flex-col gap-2">
+          <div className="px-4 py-4 flex flex-col gap-2">
             <div className="flex justify-between px-1">
               <div
                 className="bg-white rounded-full pl-[2px] h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/watch/${item.slug}/0`);
+                  navigate(`/watch/${item.slug}?svr=${0}&ep=${0}`);
                 }}
               >
                 <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
@@ -95,12 +95,18 @@ export default function HoverPreview({
               </span>
             </div>
 
-            <div className="text-white/80 text-sm">
+            <div className="text-white/80 text-sm flex items-center gap-2 flex-wrap">
               {item.category.slice(0, 3).map((cat, idx) => (
-                <span key={cat.name}>
-                  {idx !== 0 && " - "}
-                  {cat.name}
-                </span>
+                <>
+                  {idx !== 0 && (
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-circle"
+                      size="2xs"
+                      className="opacity-50 scale-50"
+                    />
+                  )}
+                  <span key={cat.name}>{cat.name}</span>
+                </>
               ))}
             </div>
           </div>

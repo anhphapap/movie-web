@@ -15,16 +15,20 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import VideoPlayer from "../components/VideoPlayer";
+import LazyImage from "../components/LazyImage";
 
-const WatchPage = ({ closeList, onClose }) => {
-  const { movieSlug, episode } = useParams();
+const WatchPage = () => {
+  const { movieSlug } = useParams();
+  const queryParams = new URLSearchParams(window.location.search);
+  const ep = queryParams.get("ep") || 0;
+  const svr = queryParams.get("svr") || 0;
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [cinema, setCinema] = useState(false);
   const [autoEpisodes, setAutoEpisodes] = useState(false);
   const [peoples, setPeoples] = useState([]);
-  const [server, setServer] = useState(0);
+  const [server, setServer] = useState(svr);
   const { user } = UserAuth();
   const navigate = useNavigate();
   useEffect(() => {
@@ -134,25 +138,26 @@ const WatchPage = ({ closeList, onClose }) => {
       <div className="flex items-center gap-4 my-6 pt-2 px-2">
         <button
           className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
         >
           <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
         </button>
         <h1 className="text-2xl font-bold">
           Xem phim {movie.movie.name} - Tập{" "}
-          {movie.episodes[server].server_data[episode].name}
+          {movie.episodes[svr].server_data[ep].name}
         </h1>
       </div>
       <div className="rounded sm:rounded-xl overflow-hidden">
         <div className="relative w-full bg-black aspect-video">
           <div className="absolute top-0 left-0 w-full aspect-video">
             <VideoPlayer
-              src={movie.episodes[server].server_data[episode].link_m3u8}
+              src={movie.episodes[svr].server_data[ep].link_m3u8}
               poster={movie.movie.poster_url}
               title={movie.movie.name}
-              episode={episode}
-              episodeName={movie.episodes[server].server_data[episode].name}
-              episodes={movie.episodes[server].server_data}
+              episode={ep}
+              svr={svr}
+              episodeName={movie.episodes[svr].server_data[ep].name}
+              episodes={movie.episodes[svr].server_data}
               movieSlug={movie.movie.slug}
               content={movie.movie.content}
             />
@@ -207,10 +212,10 @@ const WatchPage = ({ closeList, onClose }) => {
         <div className="flex flex-col space-y-5 w-full pr-4">
           <div className="items-start justify-between gap-3 hidden lg:flex">
             <div className="w-[15%] rounded-md overflow-hidden">
-              <img
-                src={movie.movie.thumb_url}
+              <LazyImage
+                src={movie.movie.thumb_url.split("movies/")[1]}
                 alt={movie.movie.name}
-                className="w-full object-cover"
+                sizes="14vw"
               />
             </div>
             <div className="w-[50%] p-2 space-y-2 ">
@@ -221,13 +226,31 @@ const WatchPage = ({ closeList, onClose }) => {
                 {movie.movie.origin_name}
               </span>
               <div className="flex items-center flex-wrap gap-2">
-                {movie.movie.tmdb.vote_count > 0 && (
-                  <div className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 text-sm">
+                {movie.movie.imdb?.vote_count > 0 && (
+                  <a
+                    className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 text-sm bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                    href={`https://www.imdb.com/title/${movie.movie.imdb.id}`}
+                    target="_blank"
+                  >
                     <span className="text-yellow-500 font-medium">IMDb</span>
                     <span className="font-semibold">
-                      {movie.movie.tmdb.vote_average.toFixed(1)}
+                      {movie.movie.imdb?.vote_average.toFixed(1)}
                     </span>
-                  </div>
+                  </a>
+                )}
+                {movie.movie.tmdb?.vote_count > 0 && (
+                  <a
+                    className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 text-sm bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                    href={`https://www.themoviedb.org/${
+                      movie.movie.type == "single" ? "movie" : "tv"
+                    }/${movie.movie.tmdb.id}`}
+                    target="_blank"
+                  >
+                    <span className="text-[#01b4e4] font-medium">TMDB</span>
+                    <span className="font-semibold">
+                      {movie.movie.tmdb?.vote_average.toFixed(1)}
+                    </span>
+                  </a>
                 )}
                 <span className="bg-white text-black font-medium rounded-md py-1 px-2 text-sm">
                   {movie.movie.episode_current}
@@ -235,9 +258,11 @@ const WatchPage = ({ closeList, onClose }) => {
                 <span className="border-[1px] rounded-md py-1 px-2 text-sm">
                   {movie.movie.year}
                 </span>
-                <span className="border-[1px] rounded-md py-1 px-2 text-sm">
-                  {movie.movie.time}
-                </span>
+                {movie.movie.time !== "? phút/tập" && (
+                  <span className="border-[1px] rounded-md py-1 px-2 text-sm">
+                    {movie.movie.time}
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
                 {movie.movie.category.map((category, index) => (
@@ -283,58 +308,62 @@ const WatchPage = ({ closeList, onClose }) => {
             />
           </div>
           <div>
-            {movie.movie.type != "single" &&
-              movie.episodes[server].server_data[server].link_embed != "" && (
-                <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
-                  <div className="flex gap-4 items-center">
-                    <span className="text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
-                      <Server size={16} strokeWidth={3} />
-                      Server
-                    </span>
-                    {movie.episodes.map((item, index) => (
-                      <div
-                        key={index}
-                        className={`${
-                          server == index
-                            ? "text-white border-[1px] border-white"
-                            : "text-white/70"
-                        } cursor-pointer px-2 py-1 rounded-lg hover:text-white transition-all ease-linear flex items-center gap-2 text-base`}
-                        onClick={() => setServer(index)}
-                      >
-                        <Captions size={16} />
-                        <span>{item.server_name.split(" #")[0]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
-                    {movie.episodes[server].server_data.map((item, index) => (
-                      <Link
-                        to={`/watch/${movie.movie.slug}/${index}`}
-                        className={`relative rounded bg-[#242424] group ${
-                          index == episode
-                            ? "bg-white/15 border-white border-[1px]"
-                            : "hover:bg-opacity-70"
-                        }`}
-                        key={movie.movie._id + index}
-                      >
-                        <button
-                          className={`py-2 transition-all ease-linear  gap-2 flex items-center justify-center ${
-                            index == episode
-                              ? "text-black bg-white"
-                              : "text-white/70 group-hover:text-white"
-                          } text-center w-full`}
-                        >
-                          <FontAwesomeIcon
-                            icon="fa-solid fa-play"
-                            className="text-xs"
-                          />
-                          <span className="text-base"> Tập {item.name}</span>
-                        </button>
-                      </Link>
-                    ))}
-                  </div>
+            {/* {movie.movie.type != "single" && */}
+            {movie.episodes[server].server_data[server].link_embed != "" && (
+              <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
+                <div className="flex gap-4 items-center">
+                  <span className="text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
+                    <Server size={16} strokeWidth={3} />
+                    Server
+                  </span>
+                  {movie.episodes.map((item, index) => (
+                    <div
+                      key={index}
+                      className={`${
+                        server == index
+                          ? " text-black bg-white border-[1px] border-white"
+                          : "text-white/70 hover:text-white hover:bg-white/10 border-[1px] border-white/70"
+                      } cursor-pointer px-2 py-1 rounded-md transition-all ease-linear flex items-center gap-2 text-base `}
+                      onClick={() => setServer(index)}
+                    >
+                      <Captions size={16} />
+                      <span>{item.server_name.split(" #")[0]}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
+                <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
+                  {movie.episodes[server].server_data.map((item, index) => (
+                    <div
+                      onClick={() =>
+                        navigate(
+                          `/watch/${movie.movie.slug}?svr=${server}&ep=${index}`
+                        )
+                      }
+                      className={`relative rounded bg-[#242424] group ${
+                        index == ep && svr == server
+                          ? "bg-white/15 "
+                          : "hover:bg-opacity-70"
+                      }`}
+                      key={movie.movie._id + index}
+                    >
+                      <button
+                        className={`py-2 transition-all ease-linear  gap-2 flex items-center justify-center ${
+                          index == ep && svr == server
+                            ? "text-black bg-white"
+                            : "text-white/70 group-hover:text-white"
+                        } text-center w-full rounded`}
+                      >
+                        <FontAwesomeIcon
+                          icon="fa-solid fa-play"
+                          className="text-xs"
+                        />
+                        <span className="text-base"> Tập {item.name}</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {peoples.length > 0 && (
@@ -358,10 +387,12 @@ const WatchPage = ({ closeList, onClose }) => {
                         alt={people.name}
                         className="w-[80px] aspect-square object-cover rounded-full"
                       />
-                      <span className="text-sm font-semibold">
+                      <span className="text-sm font-semibold text-center">
                         {people.name}
                       </span>
-                      <span className="text-sm">{people.character}</span>
+                      <span className="text-sm text-center">
+                        {people.character}
+                      </span>
                     </div>
                   )
               )}

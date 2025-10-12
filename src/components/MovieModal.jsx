@@ -17,6 +17,8 @@ import Tooltip from "./Tooltip";
 import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
 import LazyImage from "./LazyImage";
+import Top10Icon from "../assets/images/Top10Icon.svg";
+import { useTop } from "../context/TopContext";
 
 const customStyles = {
   content: {
@@ -41,6 +43,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
   const [showTrailer, setShowTrailer] = useState(false);
   const [fadeOutImage, setFadeOutImage] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
+  const { topSet } = useTop();
   useEffect(() => {
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -271,7 +274,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
               <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center transition-all ease-linear">
                 {(modal.episodes[0].server_data[0].link_embed != "" && (
                   <Link
-                    to={`/watch/${modal.movie.slug}/${0}`}
+                    to={`/watch/${modal.movie.slug}?svr=${0}&ep=${0}`}
                     key={modal.movie._id + 0}
                     onClick={handleClose}
                   >
@@ -327,30 +330,73 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 <div className="flex items-center justify-between text-white/70">
                   <div className="flex space-x-2 items-center">
                     <span className="lowercase">{modal.movie.year}</span>
-                    <span className="lowercase">{modal.movie.time}</span>
+                    {modal.movie.time !== "? phút/tập" && (
+                      <span className="lowercase">{modal.movie.time}</span>
+                    )}
                     <span className="px-1 bg-[#e50914] text-xs rounded font-black text-white">
                       {modal.movie.quality}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <span className="lowercase">{modal.movie.view}</span>
-                    <FontAwesomeIcon icon="fa-regular fa-eye" />
-                  </div>
+                  {parseInt(modal.movie.view) > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <span className="lowercase">{modal.movie.view}</span>
+                      <FontAwesomeIcon icon="fa-regular fa-eye" />
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="px-2 py-1 border-[1px] rounded-sm">
-                      {modal.movie.episode_current}
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
+                  <span className="bg-white text-black font-semibold border-[1px] rounded-md py-1 px-2">
+                    {modal.movie.episode_current}
+                  </span>
+                  {modal.movie.imdb?.vote_count > 0 && (
+                    <a
+                      className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                      href={`https://www.imdb.com/title/${modal.movie.imdb.id}`}
+                      target="_blank"
+                    >
+                      <span className="text-yellow-500 font-medium">IMDb</span>
+                      <span className="font-semibold">
+                        {modal.movie.imdb.vote_average.toFixed(1)}
+                      </span>
+                    </a>
+                  )}
+                  {modal.movie.tmdb?.vote_count > 0 && (
+                    <a
+                      className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                      href={`https://www.themoviedb.org/${
+                        modal.movie.type == "single" ? "movie" : "tv"
+                      }/${modal.movie.tmdb.id}`}
+                      target="_blank"
+                    >
+                      <span className="text-[#01b4e4] font-medium">TMDB</span>
+                      <span className="font-semibold">
+                        {modal.movie.tmdb.vote_average.toFixed(1)}
+                      </span>
+                    </a>
+                  )}
                 </div>
-                {modal.movie.tmdb.vote_count > 0 && (
-                  <div className="flex items-center space-x-2">
+                {topSet && topSet.has(modal.movie.slug) && (
+                  <div className="flex items-center gap-2 mt-2">
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg"
-                      className="h-4 lg:h-6"
-                    ></img>
-                    <span>{modal.movie.tmdb.vote_average.toFixed(1)}</span>
+                      src={Top10Icon}
+                      alt="Top 10"
+                      className="w-7 sm:w-9 aspect-auto"
+                    />
+                    <span className="text-white text-base sm:text-xl font-bold">
+                      #
+                      {modal.movie.type === "single"
+                        ? [...topSet].findIndex(
+                            (slug) => slug === modal.movie.slug
+                          ) +
+                          1 +
+                          " Phim lẻ "
+                        : [...topSet].findIndex(
+                            (slug) => slug === modal.movie.slug
+                          ) -
+                          9 +
+                          " Phim bộ "}
+                      hôm nay
+                    </span>
                   </div>
                 )}
               </div>
@@ -427,7 +473,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
                   {modal.episodes[0].server_data.map((item, index) => (
                     <Link
-                      to={`/watch/${modal.movie.slug}/${index}`}
+                      to={`/watch/${modal.movie.slug}?svr=${0}&ep=${index}`}
                       className="relative rounded bg-[#242424] hover:bg-opacity-70"
                       key={modal.movie._id + index}
                       onClick={onClose}

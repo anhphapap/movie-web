@@ -104,7 +104,7 @@ function FavouritePage({ openModal }) {
                 </div>
                 <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                 <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
-                  <Link to={`/watch/${item.slug}/0`}>
+                  <Link to={`/watch/${item.slug}?svr=${0}&ep=${0}`}>
                     <button className="text-black bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
                       <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
                     </button>

@@ -17,8 +17,8 @@ import ScrollToTop from "./components/ScrollToTop";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { TopProvider } from "./context/TopContext";
 
-// 🎯 lazy load các component nặng / page lớn
 const MovieModal = lazy(() => import("./components/MovieModal"));
 const ListModal = lazy(() => import("./components/ListModal"));
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
@@ -106,141 +106,143 @@ function App() {
 
   return (
     <AuthContextProvider>
-      <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
-        <Router>
-          <Suspense
-            fallback={
-              <div className="h-screen flex items-center justify-center text-white text-lg">
-                <FontAwesomeIcon
-                  icon="fa-solid fa-spinner"
-                  size="2xl"
-                  className="animate-spin text-white"
-                />
-              </div>
-            }
-          >
-            {/* Modals */}
-            <MovieModal
-              isOpen={isModalOpen}
-              onClose={closeModal}
-              modal={modalContent}
-            />
-            <ListModal
-              isOpen={isListOpen}
-              onClose={closeList}
-              openModal={openModal}
-              nameList={nameList}
-              api={listAPI}
-            />
-
-            {/* Toast */}
-            <ToastContainer
-              position="bottom-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              closeOnClick
-              draggable
-              pauseOnHover
-              theme="dark"
-              className="z-[99999]"
-              toastClassName={(context) =>
-                contextClass[context?.type || "default"] +
-                " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+      <TopProvider>
+        <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
+          <Router>
+            <Suspense
+              fallback={
+                <div className="h-screen flex items-center justify-center text-white text-lg">
+                  <FontAwesomeIcon
+                    icon="fa-solid fa-spinner"
+                    size="2xl"
+                    className="animate-spin text-white"
+                  />
+                </div>
               }
-            />
+            >
+              {/* Modals */}
+              <MovieModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                modal={modalContent}
+              />
+              <ListModal
+                isOpen={isListOpen}
+                onClose={closeList}
+                openModal={openModal}
+                nameList={nameList}
+                api={listAPI}
+              />
 
-            {/* Layout */}
-            <AppLayout>
-              <ScrollToTop />
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <MainLayout
-                      openList={openList}
-                      openModal={openModal}
-                      onClose={closeModal}
-                    />
-                  }
-                />
-                <Route
-                  path="/phim-bo"
-                  element={
-                    <MainLayout
-                      type_slug="phim-bo"
-                      openModal={openModal}
-                      openList={openList}
-                      filter
-                      onClose={closeModal}
-                    />
-                  }
-                />
-                <Route
-                  path="/phim-le"
-                  element={
-                    <MainLayout
-                      type_slug="phim-le"
-                      openModal={openModal}
-                      openList={openList}
-                      filter
-                      onClose={closeModal}
-                    />
-                  }
-                />
-                <Route
-                  path="/search"
-                  element={<SearchPage openModal={openModal} />}
-                />
-                <Route
-                  path="/watch/:movieSlug/:episode"
-                  element={
-                    <WatchPage onClose={closeModal} closeList={closeList} />
-                  }
-                />
-                <Route
-                  path="/filter/:typeSlug"
-                  element={<FilterPage openModal={openModal} />}
-                />
-                <Route path="/donate" element={<DonatePage />} />
-                <Route
-                  path="/login"
-                  element={
-                    <ProtectedRoute diff>
-                      <LoginPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/signup"
-                  element={
-                    <ProtectedRoute diff>
-                      <SignUpPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/account"
-                  element={
-                    <ProtectedRoute>
-                      <AccountPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/favourite"
-                  element={
-                    <ProtectedRoute>
-                      <FavouritePage openModal={openModal} />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </AppLayout>
+              {/* Toast */}
+              <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                closeOnClick
+                draggable
+                pauseOnHover
+                theme="dark"
+                className="z-[99999]"
+                toastClassName={(context) =>
+                  contextClass[context?.type || "default"] +
+                  " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+                }
+              />
 
-            <Footer />
-          </Suspense>
-        </Router>
-      </div>
+              {/* Layout */}
+              <AppLayout>
+                <ScrollToTop />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <MainLayout
+                        openList={openList}
+                        openModal={openModal}
+                        onClose={closeModal}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/phim-bo"
+                    element={
+                      <MainLayout
+                        type_slug="phim-bo"
+                        openModal={openModal}
+                        openList={openList}
+                        filter
+                        onClose={closeModal}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/phim-le"
+                    element={
+                      <MainLayout
+                        type_slug="phim-le"
+                        openModal={openModal}
+                        openList={openList}
+                        filter
+                        onClose={closeModal}
+                      />
+                    }
+                  />
+                  <Route
+                    path="/search"
+                    element={<SearchPage openModal={openModal} />}
+                  />
+                  <Route
+                    path="/watch/:movieSlug"
+                    element={
+                      <WatchPage onClose={closeModal} closeList={closeList} />
+                    }
+                  />
+                  <Route
+                    path="/filter/:typeSlug"
+                    element={<FilterPage openModal={openModal} />}
+                  />
+                  <Route path="/donate" element={<DonatePage />} />
+                  <Route
+                    path="/login"
+                    element={
+                      <ProtectedRoute diff>
+                        <LoginPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/signup"
+                    element={
+                      <ProtectedRoute diff>
+                        <SignUpPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/account"
+                    element={
+                      <ProtectedRoute>
+                        <AccountPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/favourite"
+                    element={
+                      <ProtectedRoute>
+                        <FavouritePage openModal={openModal} />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Routes>
+              </AppLayout>
+
+              <Footer />
+            </Suspense>
+          </Router>
+        </div>
+      </TopProvider>
     </AuthContextProvider>
   );
 }
