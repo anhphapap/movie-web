@@ -63,8 +63,8 @@ export default function Carousel({
   }, []);
 
   const fetchMoviesChunk = async (pageNum) => {
+    if (isAppending || !hasMore || typeList === "top") return;
     if (pageNum === 1) setLoading(true);
-    if (isAppending || !hasMore) return;
     setIsAppending(true);
 
     try {
@@ -115,8 +115,9 @@ export default function Carousel({
         return () => {
           mounted = false;
         };
+      } else {
+        fetchMoviesChunk(1);
       }
-      fetchMoviesChunk(1);
     };
 
     fetchMovies();
