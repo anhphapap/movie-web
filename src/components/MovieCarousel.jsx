@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { tops } from "../utils/data";
 import { Link } from "react-router-dom";
 import Tooltip from "./Tooltip";
-
+import { useMovieModal } from "../context/MovieModalContext";
 const CustomRightArrow = ({ onClick }) => {
   return (
     <button
@@ -102,7 +102,6 @@ const responsiveList = {
 const MovieCarousel = ({
   nameList,
   typeList = "list",
-  openModal,
   openList,
   type_slug = "phim-moi-cap-nhat",
   sort_field = "modified.time",
@@ -113,7 +112,7 @@ const MovieCarousel = ({
 }) => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const { openModal } = useMovieModal();
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
@@ -304,7 +303,7 @@ const MovieCarousel = ({
 
                     <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0"></div>
                     <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1">
-                      <Link to={`/watch/${item.slug}?svr=${0}&ep=${0}`}>
+                      <Link to={`/xem-phim/${item.slug}?svr=${0}&ep=${0}`}>
                         <button className=" bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
                           <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
                         </button>
@@ -469,7 +468,7 @@ const MovieCarousel = ({
                   )}
                   <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                   <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
-                    <Link to={`/watch/${item.slug}?svr=${0}&ep=${0}`}>
+                    <Link to={`/xem-phim/${item.slug}?svr=${0}&ep=${0}`}>
                       <button className="bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
                         <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
                       </button>

@@ -21,7 +21,7 @@ function FilterNavbar({ type_slug }) {
     const type = document.getElementById("type").value;
     const sortField = document.getElementById("sortField").value;
     navigate(
-      `/filter/${type}?sort_field=${sortField}&category=${category}&country=${country}&year=${year}`
+      `/duyet-tim/${type}?sort_field=${sortField}&category=${category}&country=${country}&year=${year}`
     );
   };
 

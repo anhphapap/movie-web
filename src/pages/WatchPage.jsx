@@ -138,7 +138,7 @@ const WatchPage = () => {
       <div className="flex items-center gap-4 my-6 pt-2 px-2">
         <button
           className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/trang-chu")}
         >
           <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
         </button>
@@ -336,7 +336,7 @@ const WatchPage = () => {
                     <div
                       onClick={() =>
                         navigate(
-                          `/watch/${movie.movie.slug}?svr=${server}&ep=${index}`
+                          `/xem-phim/${movie.movie.slug}?svr=${server}&ep=${index}`
                         )
                       }
                       className={`relative rounded bg-[#242424] group ${

@@ -299,11 +299,11 @@ export const singleContent = [
     country: "",
   },
   {
-    nameList: "Cổ trang Trung Quốc",
+    nameList: "Phim Kinh dị",
     typeList: "list",
     type_slug: "phim-le",
-    category: "co-trang",
-    country: "trung-quoc",
+    category: "kinh-di",
+    country: "",
   },
   {
     nameList: "Phim Hài",
@@ -311,10 +311,9 @@ export const singleContent = [
     type_slug: "phim-le",
     category: "hai-huoc",
     country: "",
-    sort_field: "year",
   },
   {
-    nameList: "Mới trên needflex",
+    nameList: "Mới trên Needflex",
     typeList: "list",
     type_slug: "phim-le",
     category: "",

@@ -5,9 +5,11 @@ import { useNavigate } from "react-router-dom";
 import LazyImage from "./LazyImage";
 import { getTmdbCached } from "../utils/tmdbCache";
 import axios from "axios";
-const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
+import { useMovieModal } from "../context/MovieModalContext";
+const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(false);
+  const { openModal } = useMovieModal();
   const navigate = useNavigate();
   useEffect(() => {
     let isMounted = true;
@@ -57,12 +59,10 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
 
   if (loading || !movie) {
     return (
-      <div className="w-screen aspect-square sm:aspect-video flex items-center justify-center">
-        <FontAwesomeIcon
-          icon="fa-solid fa-spinner"
-          size="2xl"
-          className="animate-spin text-white"
-        />
+      <div
+        className={`pt-12 relative w-screen aspect-square sm:aspect-auto overflow-hidden sm:overflow-visible mt-6`}
+      >
+        <div className="w-full sm:aspect-[16/5.5] aspect-square bg-neutral-700 animate-pulse"></div>
       </div>
     );
   } else {
@@ -72,10 +72,6 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
           filter && "mt-12"
         }`}
       >
-        {/* <img
-          src={movie.movie.poster_url}
-          className={`absolute top-0 left-0 w-full aspect-video bg-no-repeat bg-cover bg-top`}
-        ></img> */}
         <div className="absolute top-0 left-0 w-full aspect-video hidden sm:block">
           <LazyImage
             src={movie.movie.poster_url.split("movies/")[1]}
@@ -109,7 +105,7 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
               </span>
             </div>
             <h1
-              className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-black tracking-tighter italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
+              className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold tracking-tighter italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
               style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
             >
               {movie.movie.origin_name}
@@ -126,7 +122,7 @@ const Banner = ({ openModal, type_slug = "phim-bo", filter = false }) => {
                   <button
                     className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
                     onClick={() =>
-                      navigate(`/watch/${movie.movie.slug}?svr=${0}&ep=${0}`)
+                      navigate(`/xem-phim/${movie.movie.slug}?svr=${0}&ep=${0}`)
                     }
                   >
                     <FontAwesomeIcon icon="fa-solid fa-play" />

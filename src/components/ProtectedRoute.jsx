@@ -15,8 +15,8 @@ function ProtectedRoute({ diff = false, children }) {
         />
       </div>
     );
-  if (diff) return !user ? children : <Navigate to="/" />;
-  return user ? children : <Navigate to="/" />;
+  if (diff) return !user ? children : <Navigate to="/trang-chu" />;
+  return user ? children : <Navigate to="/trang-chu" />;
 }
 
 export default ProtectedRoute;

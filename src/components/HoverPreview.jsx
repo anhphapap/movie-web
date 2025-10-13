@@ -2,20 +2,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LazyImage from "./LazyImage";
-
-export default function HoverPreview({
-  hovered,
-  firstVisible,
-  lastVisible,
-  onEnter,
-  onLeave,
-  openModal,
-  typeList = "list",
-}) {
+import { useMovieModal } from "../context/MovieModalContext";
+import { useHoverPreview } from "../context/HoverPreviewContext";
+export default function HoverPreview() {
+  const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
+  const { openModal } = useMovieModal();
 
   if (!hovered || !hovered.rect) return null;
-  const { item, rect, index } = hovered;
+  const { item, rect, index, typeList, firstVisible, lastVisible } = hovered;
 
   return (
     <AnimatePresence mode="wait">
@@ -23,7 +18,7 @@ export default function HoverPreview({
         key={item._id}
         className="absolute z-50 shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
-          top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.5),
+          top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),
           left:
             index === firstVisible
               ? rect.left

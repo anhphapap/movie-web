@@ -2,20 +2,18 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination } from "swiper/modules";
 import { useRef, useState, useEffect } from "react";
 import axios from "axios";
-import HoverPreview from "./HoverPreview";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useHoverDelay from "../context/DelayContext";
+import { useHoverPreview } from "../context/HoverPreviewContext";
 import { tops } from "../utils/data";
 import { useInView } from "react-intersection-observer";
 import LazyImage from "./LazyImage";
 import { getTmdbCached } from "../utils/tmdbCache";
 import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
-
+import { useMovieModal } from "../context/MovieModalContext";
 export default function Carousel({
   nameList,
   typeList = "list",
-  openModal,
   openList,
   type_slug = "phim-moi-cap-nhat",
   sort_field = "_id",
@@ -36,11 +34,15 @@ export default function Carousel({
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [canSlideNext, setCanSlideNext] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isAppending, setIsAppending] = useState(false);
   const [currentSlidesPerView, setCurrentSlidesPerView] = useState(
     typeList === "top" ? 5 : 6
-  ); // Default values
-  const { hovered, onEnter, onLeave } = useHoverDelay();
+  );
+  const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
+  const { openModal } = useMovieModal();
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -59,6 +61,40 @@ export default function Carousel({
 
     return () => observer.disconnect();
   }, []);
+
+  const fetchMoviesChunk = async (pageNum) => {
+    if (pageNum === 1) setLoading(true);
+    if (isAppending || !hasMore) return;
+    setIsAppending(true);
+
+    try {
+      const res = await axios.get(
+        `${
+          import.meta.env.VITE_API_LIST
+        }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&page=${pageNum}&limit=8`
+      );
+      const items = res.data.data.items || [];
+
+      setMovies((prev) => [...prev.filter((m) => !m.skeleton), ...items]);
+
+      if (pageNum >= 3) setHasMore(false);
+      else {
+        const skeletons = Array.from(
+          { length: currentSlidesPerView },
+          (_, i) => ({
+            _id: `skeleton-${pageNum}-${i}`,
+            skeleton: true,
+          })
+        );
+        setMovies((prev) => [...prev, ...skeletons]);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAppending(false);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!inView) return;
@@ -80,30 +116,7 @@ export default function Carousel({
           mounted = false;
         };
       }
-      var page = 1;
-      var totalPage = 1;
-      var movieList = [];
-
-      try {
-        while (movieList.length < size && page <= totalPage) {
-          var listResponse = await axios.get(
-            `${
-              import.meta.env.VITE_API_LIST
-            }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}&page=${page}&limit=${size}`
-          );
-          var currentList = listResponse.data.data.items || [];
-          totalPage = parseInt(
-            listResponse.data.data.params.pagination.totalItems /
-              listResponse.data.data.params.pagination.totalItemsPerPage
-          );
-          movieList = movieList.concat(currentList);
-          page++;
-        }
-        setMovies(movieList.slice(0, size));
-      } catch (error) {
-        console.error("Error fetching movies:", error);
-      }
-      setLoading(false);
+      fetchMoviesChunk(1);
     };
 
     fetchMovies();
@@ -111,24 +124,30 @@ export default function Carousel({
 
   const handleEnter = (item, e, index) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const parentRect = containerRef.current.getBoundingClientRect();
+
     onEnter({
       item,
       rect: {
-        top: rect.top - parentRect.top,
-        left: rect.left - parentRect.left,
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX,
         width: rect.width,
         height: rect.height,
       },
       index,
+      firstVisible,
+      lastVisible,
+      typeList,
     });
   };
 
   if (loading) {
     return (
       <div className="px-[3%] relative animate-pulse my-10">
-        <h2 className="text-white/80 font-bold mb-3">{nameList}</h2>
-        <div className="h-[150px] bg-neutral-900 animate-pulse rounded-xl" />
+        <h2 className="font-bold mb-3 rounded h-5 bg-neutral-900 w-fit text-transparent">
+          {" "}
+          {nameList}
+        </h2>
+        <div className="lg:h-[150px] sm:h-[200px] h-[150px] bg-neutral-900 animate-pulse rounded-xl" />
       </div>
     );
   }
@@ -205,7 +224,7 @@ export default function Carousel({
         >
           {movies.map((item, index) => (
             <SwiperSlide
-              key={item._id}
+              key={`${type_slug}-${item._id}-${index}`}
               data-index={index}
               className="!overflow-visible"
             >
@@ -238,20 +257,20 @@ export default function Carousel({
                     ></img>
                   )}
                   {new Date().getTime() -
-                    new Date(item.modified.time).getTime() <
+                    new Date(item.modified?.time).getTime() <
                     1000 * 60 * 60 * 24 * 3 && (
                     <>
                       {item.episode_current
                         .toLowerCase()
                         .includes("hoàn tất") ||
                       item.episode_current.toLowerCase().includes("full") ? (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] xl:w-[70%] 2xl:w-1/2 bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] xl:w-[70%] 2xl:[60%] bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
                           Mới thêm
                         </span>
                       ) : item.episode_current
                           .toLowerCase()
                           .includes("trailer") ? (
-                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] 2xl:w-1/2 bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] xl:w-[70%] 2xl:[60%] bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
                           Sắp ra mắt
                         </span>
                       ) : (
@@ -291,15 +310,6 @@ export default function Carousel({
         >
           ›
         </button>
-        <HoverPreview
-          hovered={hovered}
-          firstVisible={firstVisible}
-          lastVisible={lastVisible}
-          onLeave={onLeave}
-          onEnter={onEnter}
-          openModal={openModal}
-          typeList="top"
-        />
       </div>
     );
   }
@@ -352,7 +362,6 @@ export default function Carousel({
         spaceBetween={6}
         slidesPerView={currentSlidesPerView}
         slidesPerGroup={currentSlidesPerView}
-        slidesPerGroupAuto={true}
         onResize={(swiper) => {
           setSwiperHeight(swiper.el.clientHeight);
           setFirstVisible(swiper.activeIndex);
@@ -360,14 +369,14 @@ export default function Carousel({
           setCurrentSlidesPerView(swiper.params.slidesPerView);
         }}
         onInit={(swiper) => {
-          swiper.params.pagination.el = paginationRef.current;
-          swiper.pagination.init();
-          swiper.pagination.render();
-          swiper.pagination.update();
           swiper.params.navigation.prevEl = prevRef.current;
           swiper.params.navigation.nextEl = nextRef.current;
           swiper.navigation.init();
           swiper.navigation.update();
+          swiper.params.pagination.el = paginationRef.current;
+          swiper.pagination.init();
+          swiper.pagination.render();
+          swiper.pagination.update();
           setLastVisible(swiper.params.slidesPerView - 1);
           setSwiperHeight(swiper.el.clientHeight);
           setCanSlidePrev(!swiper.isBeginning);
@@ -375,8 +384,22 @@ export default function Carousel({
           setCurrentSlidesPerView(swiper.params.slidesPerView);
         }}
         onSlideChange={(swiper) => {
+          const endIndex = swiper.activeIndex + swiper.params.slidesPerView - 1;
           setFirstVisible(swiper.activeIndex);
-          setLastVisible(swiper.activeIndex + swiper.params.slidesPerView - 1);
+          setLastVisible(endIndex);
+
+          if (
+            hasMore &&
+            !isAppending &&
+            endIndex >= movies.length - swiper.params.slidesPerView * 1.5
+          ) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchMoviesChunk(nextPage).then(() => {
+              swiper.update();
+            });
+          }
+
           setCanSlidePrev(!swiper.isBeginning);
           setCanSlideNext(!swiper.isEnd);
         }}
@@ -392,88 +415,96 @@ export default function Carousel({
       >
         {movies.map((item, index) => (
           <SwiperSlide
-            key={item._id}
+            key={`${type_slug}-${item._id}-${index}`}
             data-index={index}
             className="!overflow-visible"
           >
-            <div
-              className="group relative cursor-pointer h-full"
-              onMouseEnter={(e) => handleEnter(item, e, index)}
-              onMouseLeave={onLeave}
-              onClick={() => openModal(item.slug)}
-            >
-              <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
-                <div className="object-cover w-full h-full rounded">
-                  <LazyImage
-                    src={item.poster_url}
-                    alt={item.name}
-                    sizes="16vw"
-                    quality={65}
-                  />
-                </div>
-
-                {item.sub_docquyen && (
-                  <img
-                    loading="lazy"
-                    src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
-                    className="absolute top-2 left-2 w-3"
-                  />
-                )}
-              </div>
-
+            {item.skeleton ? (
+              <div className="bg-neutral-600 animate-pulse w-full aspect-video rounded-lg" />
+            ) : (
               <div
-                className="block lg:hidden relative overflow-hidden rounded"
+                className="group relative cursor-pointer h-full"
+                onMouseEnter={(e) => handleEnter(item, e, index)}
+                onMouseLeave={onLeave}
                 onClick={() => openModal(item.slug)}
               >
-                <div className="w-full object-cover aspect-[2/3] rounded">
-                  <LazyImage
-                    src={item.thumb_url}
-                    alt={item.name}
-                    sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
-                    quality={65}
-                  />
+                <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
+                  <div className="object-cover w-full h-full rounded">
+                    <LazyImage
+                      src={item.poster_url}
+                      alt={item.name}
+                      sizes="16vw"
+                      quality={65}
+                    />
+                  </div>
+
+                  {item.sub_docquyen && (
+                    <img
+                      loading="lazy"
+                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      className="absolute top-2 left-2 w-3"
+                    />
+                  )}
                 </div>
-                {item.sub_docquyen && (
-                  <img
-                    loading="lazy"
-                    src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
-                    className="absolute top-2 left-2 w-3"
-                  />
+
+                <div
+                  className="block lg:hidden relative overflow-hidden rounded"
+                  onClick={() => openModal(item.slug)}
+                >
+                  <div className="w-full object-cover aspect-[2/3] rounded">
+                    <LazyImage
+                      src={item.thumb_url}
+                      alt={item.name}
+                      sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                      quality={65}
+                    />
+                  </div>
+                  {item.sub_docquyen && (
+                    <img
+                      loading="lazy"
+                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      className="absolute top-2 left-2 w-3"
+                    />
+                  )}
+                </div>
+                {topSet?.has(item.slug) && (
+                  <div className="absolute top-0 right-[2px]">
+                    <img
+                      src={Top10Badge}
+                      alt="Top 10"
+                      className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                    />
+                  </div>
+                )}
+                {new Date().getTime() -
+                  new Date(item.modified?.time).getTime() <
+                  1000 * 60 * 60 * 24 * 3 && (
+                  <>
+                    {item.episode_current.toLowerCase().includes("hoàn tất") ||
+                    item.episode_current.toLowerCase().includes("full") ? (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] sm:w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                        Mới thêm
+                      </span>
+                    ) : item.episode_current
+                        .toLowerCase()
+                        .includes("trailer") ? (
+                      <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] sm:w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                        Sắp ra mắt
+                      </span>
+                    ) : (
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-[80%] sm:w-1/2 xl:w-[70%] 2xl:w-1/2">
+                        <span className=" text-white bg-[#e50914] xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                          Tập mới
+                        </span>
+                        <span className="text-black bg-white xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                          Xem ngay
+                        </span>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
-              {topSet?.has(item.slug) && (
-                <div className="absolute top-0 right-[2px]">
-                  <img
-                    src={Top10Badge}
-                    alt="Top 10"
-                    className="w-10 sm:w-12 lg:w-10 aspect-auto"
-                  />
-                </div>
-              )}
-              {new Date().getTime() - new Date(item.modified.time).getTime() <
-                1000 * 60 * 60 * 24 * 3 && (
-                <>
-                  {item.episode_current.toLowerCase().includes("hoàn tất") ? (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] sm:w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
-                      Mới thêm
-                    </span>
-                  ) : item.episode_current.toLowerCase().includes("trailer") ? (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] sm:w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
-                      Sắp ra mắt
-                    </span>
-                  ) : (
-                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-[80%] sm:w-1/2 xl:w-[70%] 2xl:w-1/2">
-                      <span className=" text-white bg-[#e50914] xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
-                        Tập mới
-                      </span>
-                      <span className="text-black bg-white xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
-                        Xem ngay
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
+            )}
           </SwiperSlide>
         ))}
       </Swiper>
@@ -497,14 +528,6 @@ export default function Carousel({
       >
         ›
       </button>
-      <HoverPreview
-        hovered={hovered}
-        firstVisible={firstVisible}
-        lastVisible={lastVisible}
-        onLeave={onLeave}
-        onEnter={onEnter}
-        openModal={openModal}
-      />
     </div>
   );
 }

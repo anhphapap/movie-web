@@ -25,7 +25,7 @@ const Search = ({ open = false }) => {
         if (!previousPath.current) {
           previousPath.current = location.pathname + location.search;
         }
-        navigate(`/search?q=${searchTerm}`);
+        navigate(`/tim-kiem?q=${searchTerm}`);
       }
     }, 600);
 

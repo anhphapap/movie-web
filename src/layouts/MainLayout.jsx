@@ -1,26 +1,18 @@
 import React, { Children, useEffect, useState } from "react";
 import Banner from "../components/Banner";
 import { useLocation } from "react-router-dom";
-import MovieCarousel from "../components/MovieCarousel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { homeContent, seriesContent, singleContent } from "../utils/data";
 import Carousel from "../components/Carousel";
-import { useInView } from "react-intersection-observer";
 
-const MainLayout = ({
-  type_slug,
-  openModal,
-  filter = false,
-  openList,
-  onClose,
-}) => {
+const MainLayout = ({ type_slug, filter = false, openList }) => {
   const [listInfo, setListInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const locate = useLocation();
 
   useEffect(() => {
     setLoading(true);
-    if (locate.pathname === "/") setListInfo(homeContent);
+    if (locate.pathname === "/trang-chu") setListInfo(homeContent);
     if (locate.pathname === "/phim-bo") setListInfo(seriesContent);
     if (locate.pathname === "/phim-le") setListInfo(singleContent);
 
@@ -40,7 +32,7 @@ const MainLayout = ({
 
   return (
     <>
-      <Banner openModal={openModal} type_slug={type_slug} filter={filter} />
+      <Banner type_slug={type_slug} filter={filter} />
       {listInfo.map((item, index) => (
         <div key={`${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
@@ -51,8 +43,6 @@ const MainLayout = ({
               sort_field={item.sort_field}
               year={item.year}
               size={item.size}
-              openModal={openModal}
-              onClose={onClose}
               openList={openList}
             />
           ) : (
@@ -65,8 +55,6 @@ const MainLayout = ({
               country={item.country}
               category={item.category}
               openList={openList}
-              openModal={openModal}
-              onClose={onClose}
             />
           )}
         </div>

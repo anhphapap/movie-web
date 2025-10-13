@@ -3,9 +3,8 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-
+import { useMovieModal } from "../context/MovieModalContext";
 const MovieList = ({
-  openModal,
   type_slug = "phim-moi-cap-nhat",
   sort_field = "modified.time",
   country = "",
@@ -19,7 +18,7 @@ const MovieList = ({
   const [loading, setLoading] = useState(false);
   const [titleHead, setTitleHead] = useState(null);
   const [hasMore, setHasMore] = useState(true);
-
+  const { openModal } = useMovieModal();
   const fetchMovies = async () => {
     setLoading(true);
     var api = null;

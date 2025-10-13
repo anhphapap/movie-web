@@ -4,9 +4,10 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../firebase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link } from "react-router-dom";
-
-function FavouritePage({ openModal }) {
+import { useMovieModal } from "../context/MovieModalContext";
+function FavouritePage() {
   const [movies, setMovies] = useState(null);
+  const { openModal } = useMovieModal();
   const { user } = UserAuth();
 
   useEffect(() => {

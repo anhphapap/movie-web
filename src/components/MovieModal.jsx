@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Link } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase";
 import {
@@ -19,7 +17,8 @@ import YouTube from "react-youtube";
 import LazyImage from "./LazyImage";
 import Top10Icon from "../assets/images/Top10Icon.svg";
 import { useTop } from "../context/TopContext";
-
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 const customStyles = {
   content: {
     position: "absolute",
@@ -35,7 +34,7 @@ const customStyles = {
   },
 };
 
-const MovieModal = ({ isOpen, onClose, modal }) => {
+export default function MovieModal({ onClose, slug }) {
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [player, setPlayer] = useState(null);
@@ -43,6 +42,8 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
   const [showTrailer, setShowTrailer] = useState(false);
   const [fadeOutImage, setFadeOutImage] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
+  const [modal, setModal] = useState(null);
+  const navigate = useNavigate();
   const { topSet } = useTop();
   useEffect(() => {
     return () => {
@@ -76,6 +77,12 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
   };
 
   useEffect(() => {
+    if (!slug) return;
+    const fetchMovie = async () => {
+      const res = await axios.get(`${import.meta.env.VITE_API_DETAILS}${slug}`);
+      setModal(res.data);
+    };
+    fetchMovie();
     const checkSaved = async () => {
       if (user?.email) {
         setLoading(true);
@@ -84,9 +91,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
 
         if (
           userSnap.exists() &&
-          userSnap
-            .data()
-            .savedMovies.some((movie) => movie.slug === modal?.movie.slug)
+          userSnap.data().savedMovies.some((movie) => movie.slug === slug)
         ) {
           setSaved(true);
         } else {
@@ -109,13 +114,14 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
     }
     const t = setTimeout(() => setShowTrailer(true), 300);
     return () => clearTimeout(t);
-  }, [modal, user]);
+  }, [slug, user]);
 
   const handleSaveMovie = async () => {
     if (!user?.email) {
       toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
       return;
     }
+    if (!modal) return;
 
     try {
       const userRef = doc(db, "users", user.uid);
@@ -167,7 +173,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
   if (loading)
     return (
       <Modal
-        isOpen={isOpen}
+        isOpen={!!slug}
         onRequestClose={onClose}
         style={customStyles}
         ariaHideApp={false}
@@ -191,7 +197,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
 
   return (
     <Modal
-      isOpen={isOpen}
+      isOpen={!!slug}
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
@@ -265,7 +271,7 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-10" />
           <button
             className="bg-[#141414] absolute right-3 sm:right-4 top-3 sm:top-4 h-7 sm:h-10 aspect-square rounded-full flex items-center justify-center z-20"
-            onClick={handleClose}
+            onClick={onClose}
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
@@ -273,16 +279,17 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
             <div className="flex space-x-2">
               <div className="relative rounded bg-white hover:bg-white/80 flex items-center justify-center transition-all ease-linear">
                 {(modal.episodes[0].server_data[0].link_embed != "" && (
-                  <Link
-                    to={`/watch/${modal.movie.slug}?svr=${0}&ep=${0}`}
+                  <div
+                    onClick={() =>
+                      navigate(`/xem-phim/${modal.movie.slug}?svr=${0}&ep=${0}`)
+                    }
                     key={modal.movie._id + 0}
-                    onClick={handleClose}
                   >
                     <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                       <FontAwesomeIcon icon="fa-solid fa-play" />
                       <span>Phát</span>
                     </button>
-                  </Link>
+                  </div>
                 )) || (
                   <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                     <FontAwesomeIcon icon="fa-solid fa-bell" />
@@ -472,16 +479,19 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
                 </div>
                 <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
                   {modal.episodes[0].server_data.map((item, index) => (
-                    <Link
-                      to={`/watch/${modal.movie.slug}?svr=${0}&ep=${index}`}
+                    <div
+                      onClick={() =>
+                        navigate(
+                          `/xem-phim/${modal.movie.slug}?svr=${0}&ep=${index}`
+                        )
+                      }
                       className="relative rounded bg-[#242424] hover:bg-opacity-70"
                       key={modal.movie._id + index}
-                      onClick={onClose}
                     >
                       <button className="py-2 font-semibold text-center w-full">
                         {item.name}
                       </button>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -490,12 +500,4 @@ const MovieModal = ({ isOpen, onClose, modal }) => {
       </div>
     </Modal>
   );
-};
-
-MovieModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  modal: PropTypes.object,
-};
-
-export default MovieModal;
+}

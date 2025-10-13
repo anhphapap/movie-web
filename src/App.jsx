@@ -8,6 +8,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import axios from "axios";
 import { AuthContextProvider } from "./context/AuthContext";
@@ -18,8 +19,11 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TopProvider } from "./context/TopContext";
+import { MovieModalProvider } from "./context/MovieModalContext";
+import { HoverPreviewProvider } from "./context/HoverPreviewContext";
+import HoverPreview from "./components/HoverPreview";
 
-const MovieModal = lazy(() => import("./components/MovieModal"));
+// const MovieModal = lazy(() => import("./components/MovieModal"));
 const ListModal = lazy(() => import("./components/ListModal"));
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
@@ -53,24 +57,9 @@ const AppLayout = ({ children }) => {
 };
 
 function App() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState(null);
   const [isListOpen, setIsListOpen] = useState(false);
   const [listAPI, setListAPI] = useState("");
   const [nameList, setNameList] = useState("");
-
-  const openModal = async (slug) => {
-    const currentMovie = await axios.get(
-      `${import.meta.env.VITE_API_DETAILS}${slug}`
-    );
-    setModalContent(currentMovie.data);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setModalContent(null);
-  };
 
   const openList = async ({
     type_slug,
@@ -109,137 +98,139 @@ function App() {
       <TopProvider>
         <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
           <Router>
-            <Suspense
-              fallback={
-                <div className="h-screen flex items-center justify-center text-white text-lg">
-                  <FontAwesomeIcon
-                    icon="fa-solid fa-spinner"
-                    size="2xl"
-                    className="animate-spin text-white"
-                  />
-                </div>
-              }
+            <MovieModalProvider
+              allowedPaths={[
+                "/trang-chu",
+                "/phim-bo",
+                "/phim-le",
+                "/tim-kiem",
+                "/duyet-tim",
+                "/yeu-thich",
+              ]}
             >
-              {/* Modals */}
+              <HoverPreviewProvider>
+                <Suspense
+                  fallback={
+                    <div className="h-screen flex items-center justify-center text-white text-lg">
+                      <FontAwesomeIcon
+                        icon="fa-solid fa-spinner"
+                        size="2xl"
+                        className="animate-spin text-white"
+                      />
+                    </div>
+                  }
+                >
+                  {/* Modals
               <MovieModal
                 isOpen={isModalOpen}
                 onClose={closeModal}
                 modal={modalContent}
-              />
-              <ListModal
-                isOpen={isListOpen}
-                onClose={closeList}
-                openModal={openModal}
-                nameList={nameList}
-                api={listAPI}
-              />
+              /> */}
+                  <ListModal
+                    isOpen={isListOpen}
+                    onClose={closeList}
+                    nameList={nameList}
+                    api={listAPI}
+                  />
 
-              {/* Toast */}
-              <ToastContainer
-                position="bottom-right"
-                autoClose={5000}
-                hideProgressBar={false}
-                closeOnClick
-                draggable
-                pauseOnHover
-                theme="dark"
-                className="z-[99999]"
-                toastClassName={(context) =>
-                  contextClass[context?.type || "default"] +
-                  " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
-                }
-              />
+                  {/* Toast */}
+                  <ToastContainer
+                    position="bottom-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    closeOnClick
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                    className="z-[99999]"
+                    toastClassName={(context) =>
+                      contextClass[context?.type || "default"] +
+                      " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+                    }
+                  />
 
-              {/* Layout */}
-              <AppLayout>
-                <ScrollToTop />
-                <Routes>
-                  <Route
-                    path="/"
-                    element={
-                      <MainLayout
-                        openList={openList}
-                        openModal={openModal}
-                        onClose={closeModal}
+                  {/* Layout */}
+                  <AppLayout>
+                    <ScrollToTop />
+                    <Routes>
+                      <Route
+                        path="/trang-chu"
+                        element={<MainLayout openList={openList} />}
                       />
-                    }
-                  />
-                  <Route
-                    path="/phim-bo"
-                    element={
-                      <MainLayout
-                        type_slug="phim-bo"
-                        openModal={openModal}
-                        openList={openList}
-                        filter
-                        onClose={closeModal}
+                      <Route
+                        path="/"
+                        element={<Navigate to="/trang-chu" replace />}
                       />
-                    }
-                  />
-                  <Route
-                    path="/phim-le"
-                    element={
-                      <MainLayout
-                        type_slug="phim-le"
-                        openModal={openModal}
-                        openList={openList}
-                        filter
-                        onClose={closeModal}
+                      <Route
+                        path="/phim-bo"
+                        element={
+                          <MainLayout
+                            type_slug="phim-bo"
+                            openList={openList}
+                            filter
+                          />
+                        }
                       />
-                    }
-                  />
-                  <Route
-                    path="/search"
-                    element={<SearchPage openModal={openModal} />}
-                  />
-                  <Route
-                    path="/watch/:movieSlug"
-                    element={
-                      <WatchPage onClose={closeModal} closeList={closeList} />
-                    }
-                  />
-                  <Route
-                    path="/filter/:typeSlug"
-                    element={<FilterPage openModal={openModal} />}
-                  />
-                  <Route path="/donate" element={<DonatePage />} />
-                  <Route
-                    path="/login"
-                    element={
-                      <ProtectedRoute diff>
-                        <LoginPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/signup"
-                    element={
-                      <ProtectedRoute diff>
-                        <SignUpPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/account"
-                    element={
-                      <ProtectedRoute>
-                        <AccountPage />
-                      </ProtectedRoute>
-                    }
-                  />
-                  <Route
-                    path="/favourite"
-                    element={
-                      <ProtectedRoute>
-                        <FavouritePage openModal={openModal} />
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </AppLayout>
+                      <Route
+                        path="/phim-le"
+                        element={
+                          <MainLayout
+                            type_slug="phim-le"
+                            openList={openList}
+                            filter
+                          />
+                        }
+                      />
+                      <Route path="/tim-kiem" element={<SearchPage />} />
+                      <Route
+                        path="/xem-phim/:movieSlug"
+                        element={<WatchPage closeList={closeList} />}
+                      />
+                      <Route
+                        path="/duyet-tim/:typeSlug"
+                        element={<FilterPage />}
+                      />
+                      <Route path="/ung-ho" element={<DonatePage />} />
+                      <Route
+                        path="/dang-nhap"
+                        element={
+                          <ProtectedRoute diff>
+                            <LoginPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/dang-ky"
+                        element={
+                          <ProtectedRoute diff>
+                            <SignUpPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/tai-khoan"
+                        element={
+                          <ProtectedRoute>
+                            <AccountPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/yeu-thich"
+                        element={
+                          <ProtectedRoute>
+                            <FavouritePage />
+                          </ProtectedRoute>
+                        }
+                      />
+                    </Routes>
+                  </AppLayout>
 
-              <Footer />
-            </Suspense>
+                  <Footer />
+                </Suspense>
+                <HoverPreview />
+              </HoverPreviewProvider>
+            </MovieModalProvider>
           </Router>
         </div>
       </TopProvider>

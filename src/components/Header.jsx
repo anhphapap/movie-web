@@ -13,20 +13,20 @@ const Header = ({ filter = false, type_slug = "" }) => {
   const [onTab, setOnTab] = useState(-1);
 
   const navigation = [
-    { name: "Trang chủ", href: "/" },
+    { name: "Trang chủ", href: "/trang-chu" },
     { name: "Phim bộ", href: "/phim-bo" },
     { name: "Phim lẻ", href: "/phim-le" },
-    { name: "Donate", href: "/donate" },
-    { name: "Tài khoản", href: "/account" },
-    { name: "Yêu thích", href: "/favourite" },
-    { name: "Đăng ký", href: "/signup" },
-    { name: "Đăng nhập", href: "/login" },
+    { name: "Donate", href: "/ung-ho" },
+    { name: "Tài khoản", href: "/tai-khoan" },
+    { name: "Yêu thích", href: "/yeu-thich" },
+    { name: "Đăng ký", href: "/dang-ky" },
+    { name: "Đăng nhập", href: "/dang-nhap" },
   ];
 
   const handleLogOut = async () => {
     try {
       await logOut();
-      navigate("/");
+      navigate("/trang-chu");
     } catch (error) {
       alert(error);
     }
@@ -85,7 +85,10 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </button>
           </div>
           <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
-            <div className="cursor-pointer" onClick={() => navigate("/")}>
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate("/trang-chu")}
+            >
               <img
                 src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
                 className="object-cover h-full"
@@ -95,7 +98,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
           <div className="hidden md:flex items-center justify-start flex-shink-0">
             <div
               className="w-[20%] mt-1 mr-4 flex-shrink-0 cursor-pointer"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/trang-chu")}
             >
               <img
                 src="https://fontmeme.com/permalink/250104/46a7ee5646a1ff7768a3c2dadc2dba3e.png"
@@ -122,7 +125,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
               {user?.email && (
                 <div
                   onClick={() => {
-                    navigate("/favourite");
+                    navigate("/yeu-thich");
                     setOnTab(5);
                   }}
                   className={` ${
@@ -154,19 +157,19 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   />
                   <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36 border-t-2 z-10">
                     <ul className="p-3">
-                      <Link to="/account">
+                      <Link to="/tai-khoan">
                         <li className="hover:underline space-x-3 mb-3">
                           <FontAwesomeIcon icon="fa-solid fa-user" />
                           <span>Tài khoản</span>
                         </li>
                       </Link>
-                      <Link to="/favourite">
+                      <Link to="/yeu-thich">
                         <li className="hover:underline space-x-3 mb-3">
                           <FontAwesomeIcon icon="fa-solid fa-heart" />
                           <span>Yêu thích</span>
                         </li>
                       </Link>
-                      <Link to="/donate">
+                      <Link to="/ung-ho">
                         <li className="hover:underline space-x-3">
                           <FontAwesomeIcon icon="fa-solid fa-circle-dollar-to-slot" />
                           <span>Donate</span>
@@ -182,7 +185,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   </div>
                 </div>
               ) : (
-                <Link to={"/login"}>
+                <Link to={"/dang-nhap"}>
                   <button className="bg-[#e50914] px-2 md:py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear font-medium py-2">
                     Đăng nhập
                   </button>
@@ -229,7 +232,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 </div>
               </div>
               <a
-                href="/account"
+                href="/tai-khoan"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
                   onTab === 4 ? "bg-white/15 text-white" : "text-white/70"
                 }`}
@@ -238,7 +241,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 <span>Tài khoản</span>
               </a>
               <a
-                href="/favourite"
+                href="/yeu-thich"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
                   onTab === 5 ? "bg-white/15 text-white" : "text-white/70"
                 }`}
@@ -257,7 +260,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
           ) : (
             <>
               <a
-                href="/signup"
+                href="/dang-ky"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
                   onTab === 6 ? "bg-white/15 text-white" : "text-white/70"
                 }`}
@@ -265,7 +268,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 Đăng ký
               </a>
               <a
-                href="/login"
+                href="/dang-nhap"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
                   onTab === 7 ? "bg-white/15 text-white" : "text-white/70"
                 }`}

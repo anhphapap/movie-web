@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import Tooltip from "./Tooltip";
 import { Link } from "react-router-dom";
-
+import { useMovieModal } from "../context/MovieModalContext";
 const customStyles = {
   content: {
     position: "absolute",
@@ -22,7 +22,8 @@ const customStyles = {
   },
 };
 
-function ListModal({ isOpen, onClose, openModal, nameList, api }) {
+function ListModal({ isOpen, onClose, nameList, api }) {
+  const { openModal } = useMovieModal();
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [movies, setMovies] = useState([]);
@@ -63,7 +64,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
       className="w-[95%] lg:w-[80%] text-xs lg:text-lg outline-none "
     >
       <div className="flex flex-col items-center p-[3%]">
-        <h1 className="font-extrabold text-2xl sm:text-3xl md:text-5xl mb-10 sm:mb-20 mt-8 sm:mt-12 text-center">
+        <h1 className="font-bold text-2xl sm:text-3xl md:text-5xl mb-10 sm:mb-20 mt-8 sm:mt-12 text-center">
           {nameList}
         </h1>
         <div className="w-full">
@@ -138,7 +139,7 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
                     </div>
                     <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[1px] left-0 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]"></div>
                     <div className="flex justify-between absolute bottom-0 left-0 w-full px-3 pb-1 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in duration-300 group-hover:delay-[400ms]">
-                      <Link to={`/watch/${item.slug}/0`}>
+                      <Link to={`/xem-phim/${item.slug}/0`}>
                         <button className="text-black bg-white rounded-full h-[30px] aspect-square hover:bg-white/80 transition-all ease-in-out">
                           <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
                         </button>
@@ -228,8 +229,8 @@ function ListModal({ isOpen, onClose, openModal, nameList, api }) {
 ListModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
-  openModal: PropTypes.func.isRequired,
-  modal: PropTypes.object,
+  nameList: PropTypes.string.isRequired,
+  api: PropTypes.string.isRequired,
 };
 
 export default ListModal;

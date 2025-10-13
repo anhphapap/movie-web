@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-export default function useHoverDelay(enterDelay = 300, leaveDelay = 100) {
+export default function useHoverDelay(enterDelay = 500, leaveDelay = 100) {
   const [hovered, setHovered] = useState(null);
   const timer = useRef(null);
   const lastPayload = useRef(null);
