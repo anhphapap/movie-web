@@ -120,12 +120,6 @@ function App() {
                     </div>
                   }
                 >
-                  {/* Modals
-              <MovieModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                modal={modalContent}
-              /> */}
                   <ListModal
                     isOpen={isListOpen}
                     onClose={closeList}

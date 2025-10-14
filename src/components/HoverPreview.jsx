@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LazyImage from "./LazyImage";
 import { useMovieModal } from "../context/MovieModalContext";
 import { useHoverPreview } from "../context/HoverPreviewContext";
+import { createPortal } from "react-dom";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
@@ -12,11 +13,11 @@ export default function HoverPreview() {
   if (!hovered || !hovered.rect) return null;
   const { item, rect, index, typeList, firstVisible, lastVisible } = hovered;
 
-  return (
+  const content = (
     <AnimatePresence mode="wait">
       <motion.div
         key={item._id}
-        className="absolute z-50 shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
+        className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),
           left:
@@ -109,4 +110,6 @@ export default function HoverPreview() {
       </motion.div>
     </AnimatePresence>
   );
+
+  return createPortal(content, document.body);
 }

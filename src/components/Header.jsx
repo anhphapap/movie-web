@@ -11,6 +11,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [onTab, setOnTab] = useState(-1);
+  const [pathname, setPathname] = useState(window.location.pathname);
 
   const navigation = [
     { name: "Trang chủ", href: "/trang-chu" },
@@ -33,10 +34,14 @@ const Header = ({ filter = false, type_slug = "" }) => {
   };
 
   useEffect(() => {
+    setPathname(window.location.pathname);
+  }, [window.location.pathname]);
+
+  useEffect(() => {
     navigation.forEach((element, index) => {
-      if (element.href === window.location.pathname) setOnTab(index);
+      if (element.href === pathname) setOnTab(index);
     });
-  }, [filter, type_slug]);
+  }, [filter, type_slug, pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -113,7 +118,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                     setOnTab(index);
                   }}
                   className={` ${
-                    onTab === index
+                    onTab === index || (item.href === pathname && index === 0)
                       ? "font-bold text-white"
                       : "text-white/80 hover:opacity-70 cursor-pointer"
                   }`}
@@ -129,7 +134,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                     setOnTab(5);
                   }}
                   className={` ${
-                    onTab === 5
+                    "/yeu-thich" === pathname && onTab === 5
                       ? "font-bold text-white"
                       : "text-white/80 hover:opacity-70 cursor-pointer"
                   }`}
@@ -207,7 +212,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
             <a
               href={item.href}
               className={` hover:bg-white/5 hover:text-white  block rounded-md px-3 py-2 font-medium ${
-                onTab === index ? "bg-white/15 text-white" : "text-white/70"
+                onTab === index || (item.href === pathname && index === 0)
+                  ? "bg-white/15 text-white"
+                  : "text-white/70"
               }`}
               onClick={() => setOnTab(index)}
               key={item.href}
@@ -234,7 +241,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
               <a
                 href="/tai-khoan"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
-                  onTab === 4 ? "bg-white/15 text-white" : "text-white/70"
+                  "/tai-khoan" === pathname && onTab === 4
+                    ? "bg-white/15 text-white"
+                    : "text-white/70"
                 }`}
               >
                 <FontAwesomeIcon icon="fa-solid fa-user" />
@@ -243,7 +252,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
               <a
                 href="/yeu-thich"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
-                  onTab === 5 ? "bg-white/15 text-white" : "text-white/70"
+                  "/yeu-thich" === pathname && onTab === 5
+                    ? "bg-white/15 text-white"
+                    : "text-white/70"
                 }`}
               >
                 <FontAwesomeIcon icon="fa-solid fa-heart" />
@@ -262,7 +273,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
               <a
                 href="/dang-ky"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
-                  onTab === 6 ? "bg-white/15 text-white" : "text-white/70"
+                  "/dang-ky" === pathname && onTab === 6
+                    ? "bg-white/15 text-white"
+                    : "text-white/70"
                 }`}
               >
                 Đăng ký
@@ -270,7 +283,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
               <a
                 href="/dang-nhap"
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
-                  onTab === 7 ? "bg-white/15 text-white" : "text-white/70"
+                  "/dang-nhap" === pathname && onTab === 7
+                    ? "bg-white/15 text-white"
+                    : "text-white/70"
                 }`}
               >
                 Đăng nhập

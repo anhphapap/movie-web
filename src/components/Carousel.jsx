@@ -165,7 +165,7 @@ export default function Carousel({
           <h2 className="text-white font-bold">{nameList}</h2>
           <div
             ref={paginationRef}
-            className="ml-auto flex justify-center gap-[1px]"
+            className="ml-auto hidden lg:flex justify-center gap-[1px]"
           />
         </div>
 
@@ -346,7 +346,7 @@ export default function Carousel({
         </div>
         <div
           ref={paginationRef}
-          className="ml-auto flex justify-center gap-[1px]"
+          className="ml-auto hidden lg:flex justify-center gap-[1px]"
         />
       </div>
 
@@ -421,7 +421,7 @@ export default function Carousel({
             className="!overflow-visible"
           >
             {item.skeleton ? (
-              <div className="bg-neutral-600 animate-pulse w-full aspect-video rounded-lg" />
+              <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] lg:aspect-video rounded-lg" />
             ) : (
               <div
                 className="group relative cursor-pointer h-full"
