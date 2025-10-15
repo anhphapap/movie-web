@@ -21,7 +21,7 @@ export default function HoverPreview() {
   const content = (
     <AnimatePresence mode="wait">
       <motion.div
-        key={item._id}
+        key={item._id || item.slug}
         className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),

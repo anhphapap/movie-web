@@ -131,6 +131,7 @@ export default function MovieModal({ onClose, slug }) {
           savedMovies: arrayRemove({
             slug: modal.movie.slug,
             poster_url: modal.movie.poster_url,
+            thumb_url: modal.movie.thumb_url,
             name: modal.movie.name,
             year: modal.movie.year,
             episode_current: modal.movie.episode_current,
@@ -144,6 +145,7 @@ export default function MovieModal({ onClose, slug }) {
           savedMovies: arrayUnion({
             slug: modal.movie.slug,
             poster_url: modal.movie.poster_url,
+            thumb_url: modal.movie.thumb_url,
             name: modal.movie.name,
             year: modal.movie.year,
             episode_current: modal.movie.episode_current,

@@ -1,5 +1,5 @@
 // export default LazyImage;
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { buildImage } from "../utils/image";
 
 /**
@@ -9,7 +9,7 @@ import { buildImage } from "../utils/image";
  * - Tự động tối ưu format (f=auto), chất lượng (q), và preload (priority)
  */
 const LazyImage = ({
-  src,
+  src: srcProps,
   alt,
   quality = 70,
   aspect = "cover", // 'cover' | 'contain'
@@ -18,6 +18,12 @@ const LazyImage = ({
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const [src, setSrc] = useState(srcProps);
+  useEffect(() => {
+    if (srcProps.startsWith("http")) {
+      setSrc(srcProps.split("movies/")[1]);
+    }
+  }, [srcProps]);
 
   // Giới hạn pixel ratio để tránh tải ảnh quá lớn
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
