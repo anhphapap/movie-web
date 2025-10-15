@@ -9,6 +9,7 @@ import { tops } from "../utils/data";
 import { Link } from "react-router-dom";
 import Tooltip from "./Tooltip";
 import { useMovieModal } from "../context/MovieModalContext";
+import { useListModal } from "../context/ListModalContext";
 const CustomRightArrow = ({ onClick }) => {
   return (
     <button
@@ -102,7 +103,6 @@ const responsiveList = {
 const MovieCarousel = ({
   nameList,
   typeList = "list",
-  openList,
   type_slug = "phim-moi-cap-nhat",
   sort_field = "modified.time",
   country = "",
@@ -113,6 +113,7 @@ const MovieCarousel = ({
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
   const { openModal } = useMovieModal();
+  const { openList } = useListModal();
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);

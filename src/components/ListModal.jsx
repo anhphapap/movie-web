@@ -4,12 +4,13 @@ import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import Tooltip from "./Tooltip";
-import { Link } from "react-router-dom";
 import { useMovieModal } from "../context/MovieModalContext";
 import { useHoverPreview } from "../context/HoverPreviewContext";
+import { LayoutGrid } from "lucide-react";
 import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
 import LazyImage from "./LazyImage";
+import { listSortField } from "../utils/data";
 const customStyles = {
   content: {
     position: "absolute",
@@ -26,20 +27,25 @@ const customStyles = {
   },
 };
 
-function ListModal({ isOpen, onClose, nameList, api }) {
+function ListModal({ isOpen, onClose, nameList, params }) {
   const { openModal } = useMovieModal();
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sortField, setSortField] = useState("_id");
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
   const modalContainerRef = useRef(null);
   useEffect(() => {
     const fetchAPI = async () => {
-      if (api && isOpen && page <= totalPage) {
+      if (params && isOpen && page <= totalPage) {
         setLoading(true);
-        const currentList = await axios.get(api + "&page=" + page);
+        const currentList = await axios.get(
+          `${
+            import.meta.env.VITE_API_LIST
+          }${params}&page=${page}&sort_field=${sortField}`
+        );
         setMovies((prev) => [...prev, ...currentList.data.data.items]);
         if (page == 1)
           setTotalPage(
@@ -52,13 +58,13 @@ function ListModal({ isOpen, onClose, nameList, api }) {
       }
     };
     fetchAPI();
-  }, [api, nameList, page, isOpen]);
+  }, [params, nameList, page, isOpen, sortField]);
 
   useEffect(() => {
     setMovies([]);
     setPage(1);
     setTotalPage(1);
-  }, [isOpen]);
+  }, [isOpen, sortField]);
 
   const getColumns = () => {
     if (window.innerWidth >= 1280) return 5;
@@ -94,22 +100,42 @@ function ListModal({ isOpen, onClose, nameList, api }) {
     });
   };
 
-  if (movies.length === 0) return null;
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-[95%] lg:w-[80%] text-xs lg:text-lg outline-none "
+      className="w-[95%] lg:w-[80%] text-xs lg:text-lg outline-none min-h-screen"
     >
       <div
-        className="flex flex-col items-center p-[3%]"
+        className="flex flex-col items-center p-[3%] mb-10"
         ref={modalContainerRef}
       >
         <h1 className="font-bold text-2xl sm:text-3xl md:text-5xl mb-10 sm:mb-20 mt-8 sm:mt-12 text-center">
           {nameList}
         </h1>
+        <div className="flex self-end w-fit bg-black mb-5 items-center p-1 border-white border-[1px]">
+          <LayoutGrid className="w-4 h-4 mx-2" />
+          <select
+            id="sortField"
+            className="pr-4 py-[1px] text-xs font-semibold bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear self-end outline-none"
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value)}
+          >
+            {listSortField.map((cate, index) => {
+              return (
+                <option
+                  key={index + cate.value}
+                  value={cate.value}
+                  className="bg-black"
+                >
+                  {cate.name}
+                </option>
+              );
+            })}
+          </select>
+        </div>
         <div className="w-full">
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-4 xl:grid-cols-5 gap-x-1 gap-y-14 mt-5">
             {movies.map((item, index) => (
@@ -211,8 +237,8 @@ function ListModal({ isOpen, onClose, nameList, api }) {
             )}
           </div>
         </div>
-        <div className="relative border-b-[1.6px] border-white/20 w-full my-10">
-          {page < totalPage && (
+        {page < totalPage && (
+          <div className="relative border-b-[1.6px] border-white/20 w-full mt-10">
             <button
               onClick={() => setPage(page + 1)}
               className="absolute group bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414] border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
@@ -220,8 +246,8 @@ function ListModal({ isOpen, onClose, nameList, api }) {
               <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
               <Tooltip content={"Xem thêm"} />
             </button>
-          )}
-        </div>
+          </div>
+        )}
         <button
           className="aspect-square w-7 rounded-full absolute right-3 top-3 z-10 flex items-center justify-center"
           onClick={onClose}
@@ -237,7 +263,7 @@ ListModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   nameList: PropTypes.string.isRequired,
-  api: PropTypes.string.isRequired,
+  params: PropTypes.string.isRequired,
 };
 
 export default ListModal;

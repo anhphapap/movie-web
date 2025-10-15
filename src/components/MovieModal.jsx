@@ -214,6 +214,7 @@ export default function MovieModal({ onClose, slug }) {
               src={modal.movie.poster_url.split("movies/")[1]}
               alt={modal.movie.name}
               sizes="(max-width: 1280px) 100vw,(max-width: 1535px) 70vw, 50vw"
+              priority={true}
             />
           </div>
 

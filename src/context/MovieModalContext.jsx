@@ -9,26 +9,24 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
   const location = useLocation();
   const [movieSlug, setMovieSlug] = useState(null);
 
-  // 🔍 Lấy param "movie" từ URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const slug = params.get("movie");
     setMovieSlug(slug);
   }, [location.search]);
 
-  // 🚪 Mở modal (thêm query param)
   const openModal = (slug) => {
     const params = new URLSearchParams(location.search);
     params.set("movie", slug);
     navigate(`${location.pathname}?${params.toString()}`, { replace: false });
   };
 
-  // ❌ Đóng modal (xóa param)
   const closeModal = () => {
     const params = new URLSearchParams(location.search);
     params.delete("movie");
     navigate(`${location.pathname}?${params.toString()}`, { replace: false });
   };
+
   const normalize = (path) => path.replace(/\/+$/, "");
   const canOpen =
     allowedPaths.length === 0 ||

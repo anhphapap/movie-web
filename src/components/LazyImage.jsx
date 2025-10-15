@@ -62,16 +62,23 @@ const LazyImage = ({
         <link rel="preload" as="image" href={fullImage} imageSrcSet={srcSet} />
       )}
 
-      {/* Ảnh mờ (hiện trước khi ảnh thật load xong) */}
       <img
         src={blurImage}
         alt={`${alt} blurred`}
-        className={`absolute top-0 left-0 w-full h-full object-${aspect} scale-105 blur-lg brightness-90 transition-opacity duration-700 ${
-          loaded ? "opacity-0" : "opacity-100"
-        }`}
+        className={`absolute top-0 left-0 w-full h-full object-${aspect} 
+    scale-90 blur-lg brightness-90 
+    transition-all duration-500 ease-out
+    ${
+      !priority
+        ? loaded
+          ? "opacity-0 scale-100"
+          : "opacity-100 scale-95"
+        : loaded
+        ? "opacity-0"
+        : "opacity-100"
+    }`}
       />
 
-      {/* Ảnh chính */}
       <img
         src={fullImage}
         srcSet={srcSet}
@@ -80,9 +87,18 @@ const LazyImage = ({
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         onLoad={() => setLoaded(true)}
-        className={`w-full h-full object-${aspect} transition-opacity duration-700 ${
-          loaded ? "opacity-100" : "opacity-0"
-        } ${className}`}
+        className={`w-full h-full object-${aspect} 
+    transition-all duration-500 ease-out
+    ${
+      !priority
+        ? loaded
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-95"
+        : loaded
+        ? "opacity-100"
+        : "opacity-0"
+    } 
+    ${className}`}
       />
     </div>
   );

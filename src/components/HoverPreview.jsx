@@ -10,6 +10,11 @@ export default function HoverPreview() {
   const navigate = useNavigate();
   const { openModal } = useMovieModal();
 
+  const handleOpenModal = (slug) => {
+    openModal(slug);
+    onLeave();
+  };
+
   if (!hovered || !hovered.rect) return null;
   const { item, rect, index, typeList, firstVisible, lastVisible } = hovered;
 
@@ -43,12 +48,17 @@ export default function HoverPreview() {
           scale: { duration: 0.25, ease: "easeOut" },
           y: { duration: 0.25, ease: "easeOut" },
         }}
-        onClick={() => openModal(item.slug)}
+        onClick={() => handleOpenModal(item.slug)}
       >
         <div className="bg-[#141414] rounded origin-top w-[150%] cursor-pointer overflow-hidden">
           <div className="relative w-full aspect-video rounded-t overflow-hidden">
             <div className="w-full h-full">
-              <LazyImage src={item.poster_url} alt={item.name} sizes="24vw" />
+              <LazyImage
+                src={item.poster_url}
+                alt={item.name}
+                sizes="24vw"
+                priority={true}
+              />
             </div>
             {/* <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div> */}
           </div>
@@ -68,7 +78,7 @@ export default function HoverPreview() {
                 className="text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white"
                 onClick={(e) => {
                   e.stopPropagation();
-                  openModal(item.slug);
+                  handleOpenModal(item.slug);
                 }}
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="sm" />

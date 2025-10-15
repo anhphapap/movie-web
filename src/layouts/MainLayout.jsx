@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { homeContent, seriesContent, singleContent } from "../utils/data";
 import Carousel from "../components/Carousel";
 
-const MainLayout = ({ type_slug, filter = false, openList }) => {
+const MainLayout = ({ type_slug, filter = false }) => {
   const [listInfo, setListInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const locate = useLocation();
@@ -43,7 +43,6 @@ const MainLayout = ({ type_slug, filter = false, openList }) => {
               sort_field={item.sort_field}
               year={item.year}
               size={item.size}
-              openList={openList}
             />
           ) : (
             <Carousel
@@ -54,7 +53,6 @@ const MainLayout = ({ type_slug, filter = false, openList }) => {
               type_slug={item.type_slug}
               country={item.country}
               category={item.category}
-              openList={openList}
             />
           )}
         </div>

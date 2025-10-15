@@ -11,10 +11,10 @@ import { getTmdbCached } from "../utils/tmdbCache";
 import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
 import { useMovieModal } from "../context/MovieModalContext";
+import { useListModal } from "../context/ListModalContext";
 export default function Carousel({
   nameList,
   typeList = "list",
-  openList,
   type_slug = "phim-moi-cap-nhat",
   sort_field = "_id",
   country = "",
@@ -37,12 +37,10 @@ export default function Carousel({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isAppending, setIsAppending] = useState(false);
-  const [currentSlidesPerView, setCurrentSlidesPerView] = useState(
-    typeList === "top" ? 5 : 6
-  );
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
   const { openModal } = useMovieModal();
+  const { openList } = useListModal();
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -75,25 +73,27 @@ export default function Carousel({
       );
       const items = res.data.data.items || [];
 
-      setMovies((prev) => [...prev.filter((m) => !m.skeleton), ...items]);
+      setMovies((prev) => [...prev, ...items]);
 
       if (pageNum >= 3) setHasMore(false);
-      else {
-        const skeletons = Array.from(
-          { length: currentSlidesPerView },
-          (_, i) => ({
-            _id: `skeleton-${pageNum}-${i}`,
-            skeleton: true,
-          })
-        );
-        setMovies((prev) => [...prev, ...skeletons]);
-      }
+      // else {
+      //   const skeletons = Array.from({ length: 4 }, (_, i) => ({
+      //     _id: `skeleton-${pageNum}-${i}`,
+      //     skeleton: true,
+      //   }));
+      //   setMovies((prev) => [...prev, ...skeletons]);
+      // }
     } catch (err) {
       console.error(err);
     } finally {
       setIsAppending(false);
       setLoading(false);
     }
+  };
+
+  const updateNavState = (swiper) => {
+    setCanSlidePrev(!swiper.isBeginning);
+    setCanSlideNext(!swiper.isEnd);
   };
 
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function Carousel({
   if (typeList === "top") {
     return (
       <div
-        className="my-10 relative"
+        className="my-10 lg:my-14 relative"
         ref={(node) => {
           containerRef.current = node;
           ref(node);
@@ -180,8 +180,6 @@ export default function Carousel({
             nextEl: nextRef.current,
           }}
           spaceBetween={6}
-          slidesPerView={currentSlidesPerView}
-          slidesPerGroup={currentSlidesPerView}
           slidesPerGroupAuto={true}
           onResize={(swiper) => {
             setSwiperHeight(swiper.el.clientHeight);
@@ -189,7 +187,6 @@ export default function Carousel({
             setLastVisible(
               swiper.activeIndex + swiper.params.slidesPerView - 1
             );
-            setCurrentSlidesPerView(swiper.params.slidesPerView);
           }}
           onInit={(swiper) => {
             swiper.params.pagination.el = paginationRef.current;
@@ -204,7 +201,6 @@ export default function Carousel({
             setSwiperHeight(swiper.el.clientHeight);
             setCanSlidePrev(!swiper.isBeginning);
             setCanSlideNext(!swiper.isEnd);
-            setCurrentSlidesPerView(swiper.params.slidesPerView);
           }}
           onSlideChange={(swiper) => {
             setFirstVisible(swiper.activeIndex);
@@ -215,10 +211,10 @@ export default function Carousel({
             setCanSlideNext(!swiper.isEnd);
           }}
           breakpoints={{
-            1024: { slidesPerView: 5 },
-            800: { slidesPerView: 4 },
-            500: { slidesPerView: 3 },
-            0: { slidesPerView: 2 },
+            1024: { slidesPerView: 5, slidesPerGroup: 5 },
+            800: { slidesPerView: 4, slidesPerGroup: 4 },
+            500: { slidesPerView: 3, slidesPerGroup: 3 },
+            0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
           className="w-[94%] mx-[3%]"
           ref={swiperRef}
@@ -241,8 +237,8 @@ export default function Carousel({
                   }}
                   className="w-[30%] lg:w-[50%] aspect-[2/3] flex items-end lg:items-center"
                 />
-                <div className="relative w-[70%] lg:w-[50%] rounded lg:rounded-sm overflow-hidden">
-                  <div className="object-cover w-full aspect-[2/3] object-center rounded lg:rounded-sm">
+                <div className="relative w-[70%] lg:w-[50%] rounded lg:rounded-[3px] overflow-hidden">
+                  <div className="object-cover w-full aspect-[2/3] object-center rounded lg:rounded-[3px]">
                     <LazyImage
                       src={`${item.thumb_url}`}
                       alt={item.name}
@@ -316,7 +312,7 @@ export default function Carousel({
   }
   return (
     <div
-      className="my-10 relative"
+      className="my-10 lg:my-14 relative"
       ref={(node) => {
         containerRef.current = node;
         ref(node);
@@ -327,11 +323,7 @@ export default function Carousel({
           className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2"
           onClick={() =>
             openList({
-              type_slug,
-              country,
-              category,
-              year,
-              sort_field,
+              params: `${type_slug}?category=${category}&country=${country}&year=${year}`,
               nameList,
             })
           }
@@ -360,14 +352,11 @@ export default function Carousel({
           prevEl: prevRef.current,
           nextEl: nextRef.current,
         }}
-        spaceBetween={6}
-        slidesPerView={currentSlidesPerView}
-        slidesPerGroup={currentSlidesPerView}
+        spaceBetween={5}
+        slidesPerGroupAuto={true}
         onResize={(swiper) => {
           setSwiperHeight(swiper.el.clientHeight);
-          setFirstVisible(swiper.activeIndex);
-          setLastVisible(swiper.activeIndex + swiper.params.slidesPerView - 1);
-          setCurrentSlidesPerView(swiper.params.slidesPerView);
+          updateNavState(swiper);
         }}
         onInit={(swiper) => {
           swiper.params.navigation.prevEl = prevRef.current;
@@ -382,12 +371,12 @@ export default function Carousel({
           setSwiperHeight(swiper.el.clientHeight);
           setCanSlidePrev(!swiper.isBeginning);
           setCanSlideNext(!swiper.isEnd);
-          setCurrentSlidesPerView(swiper.params.slidesPerView);
         }}
         onSlideChange={(swiper) => {
           const endIndex = swiper.activeIndex + swiper.params.slidesPerView - 1;
           setFirstVisible(swiper.activeIndex);
           setLastVisible(endIndex);
+          updateNavState(swiper);
 
           if (
             hasMore &&
@@ -398,39 +387,35 @@ export default function Carousel({
             setPage(nextPage);
             fetchMoviesChunk(nextPage).then(() => {
               swiper.update();
+              setTimeout(() => updateNavState(swiper), 50);
             });
           }
-
-          setCanSlidePrev(!swiper.isBeginning);
-          setCanSlideNext(!swiper.isEnd);
         }}
+        onUpdate={(swiper) => updateNavState(swiper)}
         breakpoints={{
-          // 1400: { slidesPerView: 6 },
-          1024: { slidesPerView: 6 },
-          800: { slidesPerView: 5 },
-          500: { slidesPerView: 4 },
-          0: { slidesPerView: 3 },
+          1024: { slidesPerView: 6, slidesPerGroup: 6 },
+          800: { slidesPerView: 5, slidesPerGroup: 5 },
+          500: { slidesPerView: 4, slidesPerGroup: 4 },
+          0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
         className="w-[94%] mx-[3%]"
         ref={swiperRef}
       >
-        {movies.map((item, index) => (
-          <SwiperSlide
-            key={`${type_slug}-${item._id}-${index}`}
-            data-index={index}
-            className="!overflow-visible"
-          >
-            {item.skeleton ? (
-              <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] lg:aspect-video rounded-lg" />
-            ) : (
+        <>
+          {movies.map((item, index) => (
+            <SwiperSlide
+              key={`${type_slug}-${item._id}-${index}`}
+              data-index={index}
+              className="!overflow-visible"
+            >
               <div
                 className="group relative cursor-pointer h-full"
                 onMouseEnter={(e) => handleEnter(item, e, index)}
                 onMouseLeave={onLeave}
                 onClick={() => openModal(item.slug)}
               >
-                <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
-                  <div className="object-cover w-full h-full rounded">
+                <div className="hidden lg:block relative w-full aspect-video rounded-[3px] overflow-hidden">
+                  <div className="object-cover w-full h-full rounded-[3px]">
                     <LazyImage
                       src={item.poster_url}
                       alt={item.name}
@@ -449,10 +434,10 @@ export default function Carousel({
                 </div>
 
                 <div
-                  className="block lg:hidden relative overflow-hidden rounded"
+                  className="block lg:hidden relative overflow-hidden rounded-[3px]"
                   onClick={() => openModal(item.slug)}
                 >
-                  <div className="w-full object-cover aspect-[2/3] rounded">
+                  <div className="w-full object-cover aspect-[2/3] rounded-[3px]">
                     <LazyImage
                       src={item.thumb_url}
                       alt={item.name}
@@ -505,14 +490,24 @@ export default function Carousel({
                   </>
                 )}
               </div>
-            )}
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          ))}
+          {hasMore &&
+            Array.from({ length: 4 }, (_, index) => (
+              <SwiperSlide
+                key={`${type_slug}-${index}-skeleton`}
+                data-index={movies.length + index}
+                className="!overflow-visible"
+              >
+                <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] lg:aspect-video rounded-lg" />
+              </SwiperSlide>
+            ))}
+        </>
       </Swiper>
       <button
         ref={prevRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -left-[5.5px] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e transition-all ease-linear duration-100 cursor-pointer ${
+        className={`absolute -left-[4.5px] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-linear duration-100 cursor-pointer ${
           canSlidePrev ? "visible" : "invisible"
         }`}
         disabled={!canSlidePrev}
@@ -522,7 +517,7 @@ export default function Carousel({
       <button
         ref={nextRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -right-[5.5px] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s transition-all ease-linear duration-100 cursor-pointer ${
+        className={`absolute -right-[4.5px] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-linear duration-100 cursor-pointer ${
           canSlideNext ? "visible" : "invisible"
         }`}
         disabled={!canSlideNext}

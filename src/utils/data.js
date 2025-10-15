@@ -52,8 +52,8 @@ export const listType = [
 ];
 
 export const listSortField = [
-  { name: "Thời gian cập nhật", value: "modified.time" },
   { name: "Thời gian đăng", value: "_id" },
+  { name: "Thời gian cập nhật", value: "modified.time" },
   { name: "Năm sản xuất", value: "year" },
 ];
 
