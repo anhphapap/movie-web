@@ -11,13 +11,16 @@ const MainLayout = ({ type_slug, filter = false }) => {
   const locate = useLocation();
 
   useEffect(() => {
+    // Reset state khi location thay đổi
+    setListInfo(null);
     setLoading(true);
+
     if (locate.pathname === "/trang-chu") setListInfo(homeContent);
     if (locate.pathname === "/phim-bo") setListInfo(seriesContent);
     if (locate.pathname === "/phim-le") setListInfo(singleContent);
 
     setLoading(false);
-  }, [type_slug]);
+  }, [locate.pathname, type_slug]);
 
   if (loading || !listInfo)
     return (

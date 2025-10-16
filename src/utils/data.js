@@ -137,6 +137,7 @@ export const homeContent = [
     nameList: "Series Hàn Quốc",
     typeList: "list",
     type_slug: "phim-bo",
+    sort_field: "modified.time",
     category: "",
     country: "han-quoc",
   },

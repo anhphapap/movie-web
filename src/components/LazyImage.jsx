@@ -1,39 +1,48 @@
-// export default LazyImage;
 import { useState, useMemo, useEffect } from "react";
 import { buildImage } from "../utils/image";
 
-/**
- * LazyImage — ảnh responsive, preload và có hiệu ứng blur-up
- * - Tự chọn kích thước ảnh cho từng viewport (mobile, tablet, desktop)
- * - Có ảnh blur preview trước khi ảnh nét load xong
- * - Tự động tối ưu format (f=auto), chất lượng (q), và preload (priority)
- */
 const LazyImage = ({
   src: srcProps,
   alt,
   quality = 70,
-  aspect = "cover", // 'cover' | 'contain'
+  aspect = "cover",
   className = "",
-  priority = false, // preload cho ảnh quan trọng (banner)
+  priority = false,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw",
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [src, setSrc] = useState(srcProps);
+
   useEffect(() => {
-    if (srcProps.startsWith("http")) {
+    if (srcProps?.startsWith("https://image.tmdb.org/t/p/")) {
+      setSrc(srcProps);
+    } else if (srcProps?.startsWith("http")) {
       setSrc(srcProps.split("movies/")[1]);
+    } else {
+      setSrc(srcProps);
     }
   }, [srcProps]);
 
-  // Giới hạn pixel ratio để tránh tải ảnh quá lớn
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
 
-  // Kích thước responsive
-  const widths = [64, 128, 160, 240, 320, 480, 640, 960, 1280, 1920];
+  const isTMDB = src?.includes("image.tmdb.org/t/p/");
+  const tmdbSizes = ["w185", "w342", "w500", "w780", "w1280"];
 
-  const srcSet = useMemo(
-    () =>
-      widths
+  const srcSet = useMemo(() => {
+    if (isTMDB) {
+      const path = src.split("/t/p/")[1];
+      return tmdbSizes
+        .map(
+          (size) =>
+            `https://image.tmdb.org/t/p/${size}/${path} ${size.replace(
+              "w",
+              ""
+            )}w`
+        )
+        .join(", ");
+    } else {
+      const widths = [64, 128, 160, 240, 320, 480, 640, 960, 1280, 1920];
+      return widths
         .map(
           (w) =>
             `${buildImage(src, {
@@ -42,28 +51,28 @@ const LazyImage = ({
               f: "auto",
             })} ${w}w`
         )
-        .join(", "),
-    [src, quality, pixelRatio]
-  );
+        .join(", ");
+    }
+  }, [src, quality, pixelRatio, isTMDB]);
 
-  // Ảnh nét (full quality)
-  const fullImage = buildImage(src, {
-    w: 800,
-    q: quality,
-    f: "auto",
-  });
+  const fullImage = useMemo(() => {
+    if (isTMDB) {
+      const path = src.split("/t/p/")[1];
+      return `https://image.tmdb.org/t/p/w500${path}`;
+    }
+    return buildImage(src, { w: 800, q: quality, f: "auto" });
+  }, [src, quality, isTMDB]);
 
-  // Ảnh mờ blur-up (rất nhẹ, tải nhanh)
-  const blurImage = buildImage(src, {
-    w: 100,
-    q: 20,
-    f: "auto",
-    blur: 20,
-  });
+  const blurImage = useMemo(() => {
+    if (isTMDB) {
+      const path = src.split("/t/p/")[1];
+      return `https://image.tmdb.org/t/p/w92/${path}`;
+    }
+    return buildImage(src, { w: 100, q: 20, f: "auto", blur: 20 });
+  }, [src, isTMDB]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* preload cho ảnh LCP */}
       {priority && (
         <link rel="preload" as="image" href={fullImage} imageSrcSet={srcSet} />
       )}

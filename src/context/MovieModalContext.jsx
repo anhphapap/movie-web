@@ -8,11 +8,13 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [movieSlug, setMovieSlug] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const slug = params.get("movie");
     setMovieSlug(slug);
+    setIsModalOpen(!!slug);
   }, [location.search]);
 
   const openModal = (slug) => {
@@ -40,7 +42,7 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
     });
 
   return (
-    <MovieModalContext.Provider value={{ openModal, closeModal }}>
+    <MovieModalContext.Provider value={{ openModal, closeModal, isModalOpen }}>
       {children}
       {canOpen && movieSlug && (
         <MovieModal slug={movieSlug} onClose={closeModal} />
