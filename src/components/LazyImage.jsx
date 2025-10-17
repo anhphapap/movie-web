@@ -72,7 +72,7 @@ const LazyImage = ({
   }, [src, isTMDB]);
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden flex sm:block items-center justify-center">
       {priority && (
         <link rel="preload" as="image" href={fullImage} imageSrcSet={srcSet} />
       )}

@@ -35,7 +35,7 @@ function SignUpPage() {
     } else if (checkEmail && checkPassword) {
       try {
         await signUp(email, password, name);
-        navigate("/");
+        navigate("/trang-chu");
         toast.success("Đăng ký thành công.");
       } catch (error) {
         if (error.code === "auth/email-already-in-use")
@@ -217,9 +217,12 @@ function SignUpPage() {
           </button>
           <div className="group">
             <span>Bạn đã tham gia Needflex? </span>
-            <a href="/login" className="font-bold group-hover:underline">
+            <span
+              onClick={() => navigate("/dang-nhap")}
+              className="font-bold group-hover:underline cursor-pointer"
+            >
               Đăng nhập.
-            </a>
+            </span>
           </div>
         </form>
       </div>

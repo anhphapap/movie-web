@@ -232,7 +232,9 @@ const MovieCarousel = ({
               <div className="flex cursor-pointer group h-full" key={item._id}>
                 <div
                   className="flex items-center w-full"
-                  onClick={() => openModal(item.slug)}
+                  onClick={() =>
+                    openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                  }
                 >
                   <div
                     dangerouslySetInnerHTML={{
@@ -278,7 +280,9 @@ const MovieCarousel = ({
                     <img
                       loading="lazy"
                       alt={item.name}
-                      onClick={() => openModal(item.slug)}
+                      onClick={() =>
+                        openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                      }
                       src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                       className="aspect-video object-cover rounded group-hover:rounded-none w-full text-white text-center"
                     />
@@ -311,7 +315,9 @@ const MovieCarousel = ({
                       </Link>
                       <button
                         className="text-white border-2 border-white/40 hover:border-white bg-black/10 hover:bg-white/10 rounded-full h-[30px] aspect-square transition-all ease-in-out"
-                        onClick={() => openModal(item.slug)}
+                        onClick={() =>
+                          openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                        }
                       >
                         <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
                       </button>
@@ -405,7 +411,9 @@ const MovieCarousel = ({
             >
               <div
                 className="block lg:hidden relative overflow-hidden rounded"
-                onClick={() => openModal(item.slug)}
+                onClick={() =>
+                  openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                }
               >
                 <img
                   loading="lazy"
@@ -446,7 +454,9 @@ const MovieCarousel = ({
                     alt={item.name}
                     src={import.meta.env.VITE_API_IMAGE + item.poster_url}
                     className="aspect-video object-cover rounded group-hover:rounded-b-none w-full text-white text-center"
-                    onClick={() => openModal(item.slug)}
+                    onClick={() =>
+                      openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                    }
                   />
                   <div>
                     <div
@@ -476,7 +486,9 @@ const MovieCarousel = ({
                     </Link>
                     <button
                       className="text-white border-2 border-white/40 hover:border-white bg-black/10 hover:bg-white/10 rounded-full h-[30px] aspect-square transition-all ease-in-out"
-                      onClick={() => openModal(item.slug)}
+                      onClick={() =>
+                        openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                      }
                     >
                       <FontAwesomeIcon icon="fa-solid fa-chevron-down" />
                     </button>
@@ -484,7 +496,9 @@ const MovieCarousel = ({
                 </div>
                 <div
                   className="bg-[#141414] text-white p-3 text-xs space-y-2 shadow-black/80 -z-10 shadow rounded-b invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all ease-in-out duration-300 group-hover:delay-[400ms]"
-                  onClick={() => openModal(item.slug)}
+                  onClick={() =>
+                    openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                  }
                 >
                   <h3 className="font-bold truncate ">{item.name}</h3>
 

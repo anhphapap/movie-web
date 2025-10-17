@@ -9,7 +9,7 @@ import {
 } from "../utils/data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function FilterNavbar({ type_slug }) {
+function FilterNavbar({ type_slug, open }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ function FilterNavbar({ type_slug }) {
   return (
     <div
       className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white ${
-        isScrolled || showMenu ? "bg-[#141414]" : "bg-transparent"
+        isScrolled || showMenu || open ? "bg-[#141414]" : "bg-transparent"
       }`}
     >
       <div className="flex lg:inline-block justify-between w-full lg:w-auto pl-[3%]">

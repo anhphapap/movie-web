@@ -144,7 +144,9 @@ function ListModal({ isOpen, onClose, nameList, params }) {
                 key={`list-modal-${item._id}-${index}`}
                 onMouseEnter={(e) => handleEnter(item, e, index)}
                 onMouseLeave={onLeave}
-                onClick={() => openModal(item.slug)}
+                onClick={() =>
+                  openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                }
               >
                 <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
                   <div className="object-cover w-full h-full rounded">
@@ -167,7 +169,9 @@ function ListModal({ isOpen, onClose, nameList, params }) {
 
                 <div
                   className="block lg:hidden relative overflow-hidden rounded"
-                  onClick={() => openModal(item.slug)}
+                  onClick={() =>
+                    openModal(item.slug, item.tmdb.id, item.tmdb.type)
+                  }
                 >
                   <div className="w-full object-cover aspect-[2/3] rounded">
                     <LazyImage

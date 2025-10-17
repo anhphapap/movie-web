@@ -262,7 +262,10 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
 
   const getImages = async (api_path) => {
     const res = await axios.get(api_path);
-    const logo = res.data?.logos?.find((l) => l.aspect_ratio >= 2);
+    const logo =
+      res.data?.logos?.find(
+        (l) => l.iso_3166_1 === "US" && l.iso_639_1 === "en"
+      ) || res.data?.logos?.[0];
     const backdrop = res.data?.backdrops?.find(
       (b) =>
         b.aspect_ratio >= 1.77 &&
@@ -273,8 +276,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     return {
       backdrop: backdrop ? backdrop.file_path : null,
       logo: logo ? logo.file_path : null,
+      aspect_ratio: logo ? logo.aspect_ratio : null,
     };
   };
+  useEffect(() => {
+    console.log(movie?.tmdb_image?.aspect_ratio);
+  }, [movie]);
 
   useEffect(() => {
     let isMounted = true;
@@ -298,9 +305,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           getImages(
             `https://api.themoviedb.org/3/${selectedMovie.tmdb.type}/${
               selectedMovie.tmdb.id
-            }/images?api_key=${
-              import.meta.env.VITE_TMDB_KEY
-            }&include_image_language=en-US,null`
+            }/images?api_key=${import.meta.env.VITE_TMDB_KEY}`
           ),
         ]);
 
@@ -382,7 +387,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   return (
     <div
       ref={bannerRef}
-      className={`px-[3%] sm:mb-0 -mb-6 xs:-mb-12 pt-12 relative w-screen aspect-video sm:aspect-auto overflow-visible ${
+      className={`px-[3%] sm:mb-0 -mb-6 xs:-mb-12 pt-12 relative w-screen aspect-square sm:aspect-auto overflow-visible ${
         filter && "mt-12"
       }`}
     >
@@ -508,9 +513,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         />
       </div> */}
       <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
-      <div className="flex flex-col w-full h-full pb-4 sm:pb-0 sm:h-auto sm:aspect-[16/6] items-start justify-center sm:justify-end gap-4">
-        <div className="flex flex-col justify-end z-10 space-y-3 w-2/3 xl:w-1/2 px-[3%] sm:px-0">
-          <div className="flex items-center space-x-1 justify-start">
+      <div className="flex flex-col w-full h-full pb-4 sm:pb-0 sm:aspect-[16/6] items-center sm:items-start justify-center sm:justify-end gap-2 sm:gap-4">
+        <div className="h-full flex flex-col justify-end z-10 space-y-2 sm:space-y-3 w-full sm:w-2/3 xl:w-1/2 px-[3%] sm:px-0">
+          <div className="flex items-center space-x-1 sm:justify-start justify-center">
             <img
               className="h-[15px] sm:h-[20px] object-cover"
               src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
@@ -524,17 +529,22 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             </span>
           </div>
           <div
-            className={`w-2/3 md:w-1/2 lg:w-2/3 items-start object-cover transition-all ease-linear duration-[1000ms] ${
+            className={`w-full max-h-[43.75%] sm:h-auto sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] ${
               fadeOutImage
-                ? "delay-[3000ms] scale-75 -translate-x-[12.5%]"
+                ? "delay-[3000ms] scale-75 sm:-translate-x-[12.5%]"
                 : "delay-0 scale-100 translate-x-0"
             }`}
           >
             {movie?.tmdb_image?.logo ? (
               <LazyImage
+                className={`object-cover sm:!h-full sm:!w-auto self-center ${
+                  movie?.tmdb_image?.aspect_ratio <= 2
+                    ? "!h-full !w-auto"
+                    : "!w-full !h-auto translate-x-0"
+                }`}
                 src={"https://image.tmdb.org/t/p/" + movie.tmdb_image.logo}
                 alt={movie.movie.name}
-                sizes="(max-width: 640px) 30vw, (max-width: 1400px) 40vw, 50vw"
+                sizes="(max-width: 640px) 60vw, (max-width: 1400px) 40vw, 50vw"
                 priority
               />
             ) : (
@@ -582,7 +592,13 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             <div className="relative rounded bg-white/30 hover:bg-white/20 w-1/2 sm:w-auto flex items-center justify-center">
               <button
                 className="py-2 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
-                onClick={() => openModal(movie.movie.slug)}
+                onClick={() =>
+                  openModal(
+                    movie.movie.slug,
+                    movie.movie.tmdb.id,
+                    movie.movie.tmdb.type
+                  )
+                }
               >
                 <FontAwesomeIcon icon="fa-solid fa-circle-info" />
                 <span className="line-clamp-1 hidden sm:block">
@@ -592,7 +608,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               </button>
             </div>
           </div>
-          <div className="absolute right-[3%] sm:right-0 bottom-[40%] -translate-x-1/2 sm:-translate-x-0 sm:bottom-0 flex items-center justify-center z-10 sm:space-x-3">
+          <div className="absolute right-[3%] sm:right-0 bottom-[55%] -translate-x-1/2 sm:-translate-x-0 sm:bottom-0 flex items-center justify-center z-10 sm:space-x-3">
             {showTrailer && youtubeId && fadeOutImage && (
               <button
                 onClick={handleToggleMute}

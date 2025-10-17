@@ -10,8 +10,8 @@ export default function HoverPreview() {
   const navigate = useNavigate();
   const { openModal } = useMovieModal();
 
-  const handleOpenModal = (slug) => {
-    openModal(slug);
+  const handleOpenModal = (slug, tmdb_id, tmdb_type) => {
+    openModal(slug, tmdb_id, tmdb_type);
     onLeave();
   };
 
@@ -48,7 +48,7 @@ export default function HoverPreview() {
           scale: { duration: 0.25, ease: "easeOut" },
           y: { duration: 0.25, ease: "easeOut" },
         }}
-        onClick={() => handleOpenModal(item.slug)}
+        onClick={() => handleOpenModal(item.slug, item.tmdb.id, item.tmdb.type)}
       >
         <div className="bg-[#141414] rounded origin-top w-[150%] cursor-pointer overflow-hidden">
           <div className="relative w-full aspect-video rounded-t overflow-hidden">
@@ -78,7 +78,7 @@ export default function HoverPreview() {
                 className="text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleOpenModal(item.slug);
+                  handleOpenModal(item.slug, item.tmdb.id, item.tmdb.type);
                 }}
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="sm" />

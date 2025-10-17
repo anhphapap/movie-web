@@ -229,7 +229,9 @@ export default function Carousel({
                 className="group relative cursor-pointer h-full flex items-end lg:items-center"
                 onMouseEnter={(e) => handleEnter(item, e, index)}
                 onMouseLeave={onLeave}
-                onClick={() => openModal(item.slug)}
+                onClick={() =>
+                  openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
+                }
               >
                 <div
                   dangerouslySetInnerHTML={{
@@ -412,7 +414,9 @@ export default function Carousel({
                 className="group relative cursor-pointer h-full"
                 onMouseEnter={(e) => handleEnter(item, e, index)}
                 onMouseLeave={onLeave}
-                onClick={() => openModal(item.slug)}
+                onClick={() =>
+                  openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
+                }
               >
                 <div className="hidden lg:block relative w-full aspect-video rounded-[3px] overflow-hidden">
                   <div className="object-cover w-full h-full rounded-[3px]">
@@ -435,7 +439,9 @@ export default function Carousel({
 
                 <div
                   className="block lg:hidden relative overflow-hidden rounded-[3px]"
-                  onClick={() => openModal(item.slug)}
+                  onClick={() =>
+                    openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
+                  }
                 >
                   <div className="w-full object-cover aspect-[2/3] rounded-[3px]">
                     <LazyImage

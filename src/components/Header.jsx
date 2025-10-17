@@ -160,24 +160,27 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   />
                   <div className="hidden absolute top-[100%] right-0 group-hover:block bg-black/80 w-36 border-t-2 z-10">
                     <ul className="p-3">
-                      <Link to="/tai-khoan">
-                        <li className="hover:underline space-x-3 mb-3">
-                          <FontAwesomeIcon icon="fa-solid fa-user" />
-                          <span>Tài khoản</span>
-                        </li>
-                      </Link>
-                      <Link to="/yeu-thich">
-                        <li className="hover:underline space-x-3 mb-3">
-                          <FontAwesomeIcon icon="fa-solid fa-heart" />
-                          <span>Yêu thích</span>
-                        </li>
-                      </Link>
-                      <Link to="/ung-ho">
-                        <li className="hover:underline space-x-3">
-                          <FontAwesomeIcon icon="fa-solid fa-circle-dollar-to-slot" />
-                          <span>Donate</span>
-                        </li>
-                      </Link>
+                      <li
+                        className="hover:underline space-x-3 mb-3 cursor-pointer"
+                        onClick={() => navigate("/tai-khoan")}
+                      >
+                        <FontAwesomeIcon icon="fa-solid fa-user" />
+                        <span>Tài khoản</span>
+                      </li>
+                      <li
+                        className="hover:underline space-x-3 mb-3 cursor-pointer"
+                        onClick={() => navigate("/yeu-thich")}
+                      >
+                        <FontAwesomeIcon icon="fa-solid fa-heart" />
+                        <span>Yêu thích</span>
+                      </li>
+                      <li
+                        className="hover:underline space-x-3 cursor-pointer"
+                        onClick={() => navigate("/ung-ho")}
+                      >
+                        <FontAwesomeIcon icon="fa-solid fa-circle-dollar-to-slot" />
+                        <span>Donate</span>
+                      </li>
                     </ul>
                     <div
                       className="border-t-[1px] py-2 text-center hover:underline"
@@ -188,11 +191,12 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   </div>
                 </div>
               ) : (
-                <Link to={"/dang-nhap"}>
-                  <button className="bg-[#e50914] px-2 md:py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear font-medium py-2">
-                    Đăng nhập
-                  </button>
-                </Link>
+                <button
+                  className="bg-[#e50914] px-2 md:py-1 rounded hover:bg-[#e50914]/80 transition-colors ease-linear font-medium py-2"
+                  onClick={() => navigate("/dang-nhap")}
+                >
+                  Đăng nhập
+                </button>
               )}
             </div>
           </div>
@@ -207,18 +211,21 @@ const Header = ({ filter = false, type_slug = "" }) => {
         <Search open={true} />
         <div className="space-y-1 pb-2 px-[3%]">
           {navigation.slice(0, 4).map((item, index) => (
-            <a
-              href={item.href}
-              className={` hover:bg-white/5 hover:text-white  block rounded-md px-3 py-2 font-medium ${
+            <div
+              onClick={() => {
+                navigate(item.href);
+                setOnTab(index);
+                setShowMenu(false);
+              }}
+              className={` hover:bg-white/5 hover:text-white  block rounded-md px-3 py-2 cursor-pointer font-medium ${
                 onTab === index || (item.href === pathname && index === 0)
                   ? "bg-white/15 text-white"
                   : "text-white/70"
               }`}
-              onClick={() => setOnTab(index)}
               key={item.href}
             >
               {item.name}
-            </a>
+            </div>
           ))}
         </div>
         <div className="border-t-[0.1px] px-[3%] py-2 border-white/60 text-white md:hidden space-y-1">
@@ -236,9 +243,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   <span className="text-white/80 text-xs">{user.email}</span>
                 </div>
               </div>
-              <a
-                href="/tai-khoan"
-                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
+              <div
+                onClick={() => navigate("/tai-khoan")}
+                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/tai-khoan" === pathname && onTab === 4
                     ? "bg-white/15 text-white"
                     : "text-white/70"
@@ -246,10 +253,10 @@ const Header = ({ filter = false, type_slug = "" }) => {
               >
                 <FontAwesomeIcon icon="fa-solid fa-user" />
                 <span>Tài khoản</span>
-              </a>
-              <a
-                href="/yeu-thich"
-                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
+              </div>
+              <div
+                onClick={() => navigate("/yeu-thich")}
+                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/yeu-thich" === pathname && onTab === 5
                     ? "bg-white/15 text-white"
                     : "text-white/70"
@@ -257,7 +264,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
               >
                 <FontAwesomeIcon icon="fa-solid fa-heart" />
                 <span>Yêu thích</span>
-              </a>
+              </div>
               <div
                 className="text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer"
                 onClick={handleLogOut}
@@ -268,32 +275,34 @@ const Header = ({ filter = false, type_slug = "" }) => {
             </>
           ) : (
             <>
-              <a
-                href="/dang-ky"
-                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
+              <div
+                onClick={() => navigate("/dang-ky")}
+                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/dang-ky" === pathname && onTab === 6
                     ? "bg-white/15 text-white"
                     : "text-white/70"
                 }`}
               >
                 Đăng ký
-              </a>
-              <a
-                href="/dang-nhap"
-                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 ${
+              </div>
+              <div
+                onClick={() => navigate("/dang-nhap")}
+                className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/dang-nhap" === pathname && onTab === 7
                     ? "bg-white/15 text-white"
                     : "text-white/70"
                 }`}
               >
                 Đăng nhập
-              </a>
+              </div>
             </>
           )}
         </div>
       </div>
 
-      {filter && <FilterNavbar type_slug={type_slug.slice(1)} />}
+      {filter && (
+        <FilterNavbar type_slug={type_slug.slice(1)} open={showMenu} />
+      )}
     </div>
   );
 };

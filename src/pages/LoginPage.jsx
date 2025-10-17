@@ -21,7 +21,7 @@ function LoginPage() {
     } else if (checkEmail && checkPassword) {
       try {
         await signIn(email, password);
-        navigate("/");
+        navigate("/trang-chu");
         toast.success("Đăng nhập thành công.");
       } catch {
         toast.error("Mật khẩu hoặc tài khoản chưa chính xác.");
@@ -32,7 +32,7 @@ function LoginPage() {
   const handleGoogleLogin = async () => {
     try {
       await signInWithGoogle();
-      navigate("/");
+      navigate("/trang-chu");
       toast.success("Đăng nhập thành công.");
     } catch (error) {
       toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
@@ -143,9 +143,12 @@ function LoginPage() {
           </button>
           <div className="group">
             <span>Bạn mới tham gia Needflex? </span>
-            <a href="/signup" className="font-bold group-hover:underline">
+            <span
+              onClick={() => navigate("/dang-ky")}
+              className="font-bold group-hover:underline cursor-pointer"
+            >
               Đăng ký ngay.
-            </a>
+            </span>
           </div>
         </form>
       </div>
