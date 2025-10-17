@@ -38,14 +38,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         try {
           if (!isVisible) {
             // Tab không visible - dừng video nếu đang phát
-            console.log("Tab không visible, dừng video");
             if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
               player.pauseVideo();
               setIsVideoPaused(true);
             }
           } else {
             // Tab visible - tiếp tục phát video nếu đang pause và không có modal
-            console.log("Tab visible, kiểm tra tiếp tục phát video");
             if (
               player.getPlayerState() === window.YT.PlayerState.PAUSED &&
               !isModalOpen
@@ -79,7 +77,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   // Window Focus API - dừng video khi mất focus khỏi cửa sổ trình duyệt
   useEffect(() => {
     const handleWindowFocus = () => {
-      console.log("Cửa sổ có focus");
       setIsPageVisible(true);
 
       if (player && player.getPlayerState) {
@@ -95,7 +92,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               rect && rect.top < window.innerHeight && rect.bottom > 0;
 
             if (isInViewport) {
-              console.log("Tiếp tục phát video sau khi cửa sổ có focus");
               player.playVideo();
               setIsVideoPaused(false);
             }
@@ -143,16 +139,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         try {
           if (entry.isIntersecting) {
             // Video vào viewport - tiếp tục phát nếu chưa bị pause bởi modal
-            console.log(
-              "Video vào viewport, isModalOpen:",
-              isModalOpen,
-              "isVideoPaused:",
-              isVideoPaused
-            );
             if (!isModalOpen && isVideoPaused && player.getPlayerState) {
               const state = player.getPlayerState();
               if (state === window.YT.PlayerState.PAUSED) {
-                console.log("Tiếp tục phát video");
                 player.playVideo();
                 setIsVideoPaused(false);
               }
@@ -164,7 +153,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               player.getPlayerState &&
               player.getPlayerState() === window.YT.PlayerState.PLAYING
             ) {
-              console.log("Dừng video do scroll");
               player.pauseVideo();
               setIsVideoPaused(true);
             }
@@ -193,7 +181,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     try {
       if (isModalOpen) {
         // Modal mở - dừng video
-        console.log("Modal mở, dừng video");
         if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
           player.pauseVideo();
           setIsVideoPaused(true);
@@ -201,7 +188,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         }
       } else if (isVideoPaused) {
         // Modal đóng và video đang bị pause - tiếp tục phát nếu trong viewport
-        console.log("Modal đóng, kiểm tra tiếp tục phát video");
         const rect = bannerRef.current?.getBoundingClientRect();
         const isInViewport =
           rect && rect.top < window.innerHeight && rect.bottom > 0;
@@ -219,12 +205,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       console.warn("Error in modal video control:", error);
     }
   }, [isModalOpen, player, isVideoPaused]);
-
-  const getLogo = async (api_path) => {
-    const res = await axios.get(api_path);
-    const logo = res.data?.logos?.find((l) => l.aspect_ratio >= 2);
-    return logo ? logo.file_path : null;
-  };
 
   const [playerOptions, setPlayerOptions] = useState({
     height: "100%",
@@ -263,12 +243,38 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       clearInterval(intervalId);
       setIntervalId(null);
     }
-
-    // Reset về trạng thái ban đầu
-    setTimeout(() => {
-      setShowTrailer(true);
-    }, 300);
   }, [type_slug]);
+
+  useEffect(() => {
+    if (!movie) return;
+    if (!movie.movie.trailer_url) return;
+    const delayToTrailer = setTimeout(() => {
+      // cho ảnh hiển thị ít nhất 1.2s rồi mới bắt đầu trailer
+      if (!youtubeId) return;
+      setFadeOutImage(true); // ảnh bắt đầu fade
+      setTimeout(() => {
+        setShowTrailer(true); // trailer mount sau fade
+      }, 1000);
+    }, 1200);
+
+    return () => clearTimeout(delayToTrailer);
+  }, [movie]);
+
+  const getImages = async (api_path) => {
+    const res = await axios.get(api_path);
+    const logo = res.data?.logos?.find((l) => l.aspect_ratio >= 2);
+    const backdrop = res.data?.backdrops?.find(
+      (b) =>
+        b.aspect_ratio >= 1.77 &&
+        b.iso_639_1 === null &&
+        b.iso_3166_1 === null &&
+        b.height > 1000
+    );
+    return {
+      backdrop: backdrop ? backdrop.file_path : null,
+      logo: logo ? logo.file_path : null,
+    };
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -289,12 +295,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
 
         const [data, image] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_DETAILS}${selectedMovie.slug}`),
-          getLogo(
+          getImages(
             `https://api.themoviedb.org/3/${selectedMovie.tmdb.type}/${
               selectedMovie.tmdb.id
             }/images?api_key=${
               import.meta.env.VITE_TMDB_KEY
-            }&include_image_language=en-US&language=en-US`
+            }&include_image_language=en-US,null`
           ),
         ]);
 
@@ -380,10 +386,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         filter && "mt-12"
       }`}
     >
-      {youtubeId && showTrailer && (
+      {youtubeId && (
         <div
           className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-700 ease-in-out ${
-            fadeOutImage ? "opacity-100" : "opacity-0 pointer-events-none"
+            fadeOutImage && showTrailer
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
           }`}
         >
           <YouTube
@@ -426,7 +434,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                     const duration = ytPlayer.getDuration();
                     const current = ytPlayer.getCurrentTime();
 
-                    if (current > 2) setFadeOutImage(true);
+                    if (current > 1) setFadeOutImage(true);
 
                     if (duration - current <= 6) {
                       clearInterval(id);
@@ -434,7 +442,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                       ytPlayer.stopVideo();
 
                       setFadeOutImage(false);
-                      setTimeout(() => setShowTrailer(false), 800);
+                      setShowTrailer(false);
                     }
                   } catch (error) {
                     console.warn("Error in video interval:", error);
@@ -476,11 +484,15 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       )}
       <div
         className={`block absolute top-0 left-0 z-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
-          fadeOutImage ? "opacity-0" : "opacity-100"
+          fadeOutImage && showTrailer ? "opacity-0" : "opacity-100"
         }`}
       >
         <LazyImage
-          src={movie.movie.poster_url.split("movies/")[1]}
+          src={
+            movie?.tmdb_image?.backdrop
+              ? "https://image.tmdb.org/t/p/" + movie?.tmdb_image?.backdrop
+              : movie.movie.poster_url.split("movies/")[1]
+          }
           alt={movie.movie.name}
           priority
           sizes="100vw"
@@ -512,15 +524,15 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             </span>
           </div>
           <div
-            className={`w-2/3 md:w-1/2 lg:w-2/3 items-start object-cover transition-all ease-linear delay-[3000ms] duration-[1000ms] ${
+            className={`w-2/3 md:w-1/2 lg:w-2/3 items-start object-cover transition-all ease-linear duration-[1000ms] ${
               fadeOutImage
-                ? "scale-75 -translate-x-[12.5%]"
-                : "scale-100 translate-x-0"
+                ? "delay-[3000ms] scale-75 -translate-x-[12.5%]"
+                : "delay-0 scale-100 translate-x-0"
             }`}
           >
-            {movie?.tmdb_image ? (
+            {movie?.tmdb_image?.logo ? (
               <LazyImage
-                src={"https://image.tmdb.org/t/p/" + movie.tmdb_image}
+                src={"https://image.tmdb.org/t/p/" + movie.tmdb_image.logo}
                 alt={movie.movie.name}
                 sizes="(max-width: 640px) 30vw, (max-width: 1400px) 40vw, 50vw"
                 priority
@@ -535,8 +547,10 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             )}
           </div>
           <div
-            className={`hidden md:block transition-all ease-linear delay-[1000ms] duration-[2000ms] overflow-hidden ${
-              fadeOutImage ? "max-h-0 opacity-0 " : "max-h-full opacity-100"
+            className={`hidden md:block transition-all ease-linear  duration-[2000ms] overflow-hidden ${
+              fadeOutImage
+                ? "max-h-0 opacity-0 delay-[1000ms]"
+                : "max-h-full opacity-100 delay-0"
             }`}
           >
             <div
