@@ -59,7 +59,25 @@ const AppLayout = ({ children }) => {
 };
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const preloadApp = async () => {
+      try {
+        await Promise.all([
+          warmTmdbCache(),
+          import("./layouts/MainLayout"),
+          new Promise((res) => setTimeout(res, 800)),
+        ]);
+      } catch (err) {
+        console.warn("Preload error:", err);
+      } finally {
+        setReady(true);
+      }
+    };
+    preloadApp();
+  }, []);
+
   const contextClass = {
     success: "bg-white/10 backdrop-blur",
     error: "bg-white/10 backdrop-blur",
@@ -69,12 +87,8 @@ function App() {
     dark: "bg-white/10 backdrop-blur",
   };
 
-  useEffect(() => {
-    warmTmdbCache();
-  }, []);
-  return showSplash ? (
-    <SplashScreen onFinish={() => setShowSplash(false)} />
-  ) : (
+  if (!ready) return <SplashScreen />;
+  return (
     <AuthContextProvider>
       <TopProvider>
         <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">

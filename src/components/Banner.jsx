@@ -366,7 +366,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   if (loading || !movie) {
     return (
       <div
-        className={`pt-12 relative w-screen aspect-square sm:aspect-auto overflow-hidden sm:overflow-visible mt-6`}
+        className={`pt-12 relative w-screen aspect-auto overflow-hidden sm:overflow-visible mt-6`}
       >
         <div className="w-full sm:aspect-[16/5.5] aspect-square bg-neutral-900 animate-pulse"></div>
       </div>
