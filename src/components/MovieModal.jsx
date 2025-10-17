@@ -43,6 +43,8 @@ export default function MovieModal({ onClose, slug }) {
   const [fadeOutImage, setFadeOutImage] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const [modal, setModal] = useState(null);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const navigate = useNavigate();
   const { topSet } = useTop();
   useEffect(() => {
@@ -50,6 +52,92 @@ export default function MovieModal({ onClose, slug }) {
       if (intervalId) clearInterval(intervalId);
     };
   }, [intervalId]);
+
+  // Page Visibility API - dừng video khi chuyển tab hoặc mất focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsPageVisible(isVisible);
+
+      if (player && player.getPlayerState) {
+        try {
+          if (!isVisible) {
+            // Tab không visible - dừng video nếu đang phát
+            console.log("Modal: Tab không visible, dừng video");
+            if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+              player.pauseVideo();
+              setIsVideoPaused(true);
+            }
+          } else {
+            // Tab visible - tiếp tục phát video nếu đang pause
+            console.log("Modal: Tab visible, kiểm tra tiếp tục phát video");
+            if (player.getPlayerState() === window.YT.PlayerState.PAUSED) {
+              console.log("Modal: Tiếp tục phát video sau khi quay lại tab");
+              player.playVideo();
+              setIsVideoPaused(false);
+            }
+          }
+        } catch (error) {
+          console.warn("Modal: Error in visibility change:", error);
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện visibility change
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [player, isVideoPaused]);
+
+  // Window Focus API - dừng video khi mất focus khỏi cửa sổ trình duyệt
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      console.log("Modal: Cửa sổ có focus");
+      setIsPageVisible(true);
+
+      if (player && player.getPlayerState) {
+        try {
+          // Cửa sổ có focus - tiếp tục phát video nếu đang pause
+          if (player.getPlayerState() === window.YT.PlayerState.PAUSED) {
+            console.log("Modal: Tiếp tục phát video sau khi cửa sổ có focus");
+            player.playVideo();
+            setIsVideoPaused(false);
+          }
+        } catch (error) {
+          console.warn("Modal: Error in window focus:", error);
+        }
+      }
+    };
+
+    const handleWindowBlur = () => {
+      console.log("Modal: Cửa sổ mất focus");
+      setIsPageVisible(false);
+
+      if (player && player.getPlayerState) {
+        try {
+          // Cửa sổ mất focus - dừng video nếu đang phát
+          if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+            console.log("Modal: Dừng video do mất focus cửa sổ");
+            player.pauseVideo();
+            setIsVideoPaused(true);
+          }
+        } catch (error) {
+          console.warn("Modal: Error in window blur:", error);
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện focus và blur của cửa sổ
+    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [player]);
   const { user } = UserAuth();
   const [playerOptions, setPlayerOptions] = useState({
     height: "100%",
@@ -73,11 +161,25 @@ export default function MovieModal({ onClose, slug }) {
     setShowTrailer(false);
     setPlayer(null);
     setFadeOutImage(false);
+    setIsVideoPaused(false);
+    setIsPageVisible(true);
     onClose();
   };
 
   useEffect(() => {
     if (!slug) return;
+
+    // Reset state khi slug thay đổi
+    setPlayer(null);
+    setShowTrailer(false);
+    setFadeOutImage(false);
+    setIsVideoPaused(false);
+    setIsPageVisible(true);
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+
     const fetchMovie = async () => {
       const res = await axios.get(`${import.meta.env.VITE_API_DETAILS}${slug}`);
       setModal(res.data);
@@ -237,6 +339,9 @@ export default function MovieModal({ onClose, slug }) {
                   setPlayer(ytPlayer);
                   ytPlayer.playVideo();
                   if (isMuted) ytPlayer.mute();
+
+                  // Set trạng thái video đang phát
+                  setIsVideoPaused(false);
 
                   const id = setInterval(() => {
                     const duration = ytPlayer.getDuration();

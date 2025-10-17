@@ -18,6 +18,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [intervalId, setIntervalId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
   const bannerRef = useRef(null);
   const { openModal, isModalOpen } = useMovieModal();
   const navigate = useNavigate();
@@ -26,6 +27,112 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       if (intervalId) clearInterval(intervalId);
     };
   }, [intervalId]);
+
+  // Page Visibility API - dừng video khi chuyển tab hoặc mất focus
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      setIsPageVisible(isVisible);
+
+      if (player && player.getPlayerState) {
+        try {
+          if (!isVisible) {
+            // Tab không visible - dừng video nếu đang phát
+            console.log("Tab không visible, dừng video");
+            if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+              player.pauseVideo();
+              setIsVideoPaused(true);
+            }
+          } else {
+            // Tab visible - tiếp tục phát video nếu đang pause và không có modal
+            console.log("Tab visible, kiểm tra tiếp tục phát video");
+            if (
+              player.getPlayerState() === window.YT.PlayerState.PAUSED &&
+              !isModalOpen
+            ) {
+              // Kiểm tra xem banner có trong viewport không
+              const rect = bannerRef.current?.getBoundingClientRect();
+              const isInViewport =
+                rect && rect.top < window.innerHeight && rect.bottom > 0;
+
+              if (isInViewport) {
+                console.log("Tiếp tục phát video sau khi quay lại tab");
+                player.playVideo();
+                setIsVideoPaused(false);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn("Error in visibility change:", error);
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện visibility change
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [player, isModalOpen, isVideoPaused]);
+
+  // Window Focus API - dừng video khi mất focus khỏi cửa sổ trình duyệt
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      console.log("Cửa sổ có focus");
+      setIsPageVisible(true);
+
+      if (player && player.getPlayerState) {
+        try {
+          // Cửa sổ có focus - tiếp tục phát video nếu đang pause và không có modal
+          if (
+            player.getPlayerState() === window.YT.PlayerState.PAUSED &&
+            !isModalOpen
+          ) {
+            // Kiểm tra xem banner có trong viewport không
+            const rect = bannerRef.current?.getBoundingClientRect();
+            const isInViewport =
+              rect && rect.top < window.innerHeight && rect.bottom > 0;
+
+            if (isInViewport) {
+              console.log("Tiếp tục phát video sau khi cửa sổ có focus");
+              player.playVideo();
+              setIsVideoPaused(false);
+            }
+          }
+        } catch (error) {
+          console.warn("Error in window focus:", error);
+        }
+      }
+    };
+
+    const handleWindowBlur = () => {
+      console.log("Cửa sổ mất focus");
+      setIsPageVisible(false);
+
+      if (player && player.getPlayerState) {
+        try {
+          // Cửa sổ mất focus - dừng video nếu đang phát
+          if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
+            console.log("Dừng video do mất focus cửa sổ");
+            player.pauseVideo();
+            setIsVideoPaused(true);
+          }
+        } catch (error) {
+          console.warn("Error in window blur:", error);
+        }
+      }
+    };
+
+    // Lắng nghe sự kiện focus và blur của cửa sổ
+    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [player, isModalOpen]);
 
   // Intersection Observer để dừng video khi scroll ra khỏi viewport
   useEffect(() => {
@@ -67,8 +174,8 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         }
       },
       {
-        threshold: 0.9, // Video dừng khi 50% ra khỏi viewport
-        rootMargin: "0px", // Không có margin để phản ứng chính xác
+        threshold: 0.2,
+        rootMargin: "0px",
       }
     );
 
@@ -151,6 +258,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     setFadeOutImage(false);
     setLoading(false);
     setIsVideoPaused(false);
+    setIsPageVisible(true);
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
@@ -241,6 +349,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       setLoading(false);
       setMovie(null);
       setIsVideoPaused(false);
+      setIsPageVisible(true);
     };
   }, [type_slug]);
 

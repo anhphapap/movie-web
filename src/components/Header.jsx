@@ -4,6 +4,7 @@ import Search from "./Search";
 import FilterNavbar from "./FilterNavbar";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
+import logo_full from "../assets/images/logo_full_240.png";
 
 const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -105,10 +106,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
               className="w-[20%] mt-1 mr-4 flex-shrink-0 cursor-pointer"
               onClick={() => navigate("/trang-chu")}
             >
-              <img
-                src="https://fontmeme.com/permalink/250104/46a7ee5646a1ff7768a3c2dadc2dba3e.png"
-                className="object-cover h-full"
-              ></img>
+              <img src={logo_full} className="object-cover h-full"></img>
             </div>
             <nav className=" space-x-4 flex flex-shrink-0">
               {navigation.slice(0, 4).map((item, index) => (

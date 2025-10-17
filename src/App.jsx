@@ -23,6 +23,7 @@ import { MovieModalProvider } from "./context/MovieModalContext";
 import { HoverPreviewProvider } from "./context/HoverPreviewContext";
 import HoverPreview from "./components/HoverPreview";
 import { ListModalProvider } from "./context/ListModalContext";
+import SplashScreen from "./pages/SplashScreen";
 
 // const MovieModal = lazy(() => import("./components/MovieModal"));
 // const ListModal = lazy(() => import("./components/ListModal"));
@@ -58,6 +59,7 @@ const AppLayout = ({ children }) => {
 };
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const contextClass = {
     success: "bg-white/10 backdrop-blur",
     error: "bg-white/10 backdrop-blur",
@@ -70,8 +72,9 @@ function App() {
   useEffect(() => {
     warmTmdbCache();
   }, []);
-
-  return (
+  return showSplash ? (
+    <SplashScreen onFinish={() => setShowSplash(false)} />
+  ) : (
     <AuthContextProvider>
       <TopProvider>
         <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
