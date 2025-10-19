@@ -18,8 +18,8 @@ export const TopProvider = ({ children }) => {
       try {
         await warmTmdbCache();
 
-        const movieData = await getTmdbCached("movie", "week");
-        const tvData = await getTmdbCached("tv", "week");
+        const movieData = await getTmdbCached("movie", "day");
+        const tvData = await getTmdbCached("tv", "day");
 
         const combined = [...movieData, ...tvData];
         setTopMovies(combined);

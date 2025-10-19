@@ -77,28 +77,33 @@ const Header = ({ filter = false, type_slug = "" }) => {
         id="header"
       >
         <div className="flex flex-row-reverse md:flex-row md:flex items-center justify-between w-full">
-          <div className="flex items-center md:hidden">
-            <button
-              type="button"
-              className="relative inline-flex items-center justify-center text-white p-2 rounded hover:bg-white/10"
-              onClick={() => setShowMenu(!showMenu)}
-            >
-              {showMenu ? (
-                <FontAwesomeIcon icon="fa-solid fa-xmark" color="red" />
-              ) : (
-                <FontAwesomeIcon icon="fa-solid fa-bars" />
-              )}
-            </button>
+          <div className="flex md:hidden">
+            <Search full={true} />
           </div>
-          <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
-            <div
-              className="cursor-pointer"
-              onClick={() => navigate("/trang-chu")}
-            >
-              <img
-                src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
-                className="object-cover h-full"
-              ></img>
+          <div className="md:hidden flex items-center gap-2">
+            <div className="flex items-center md:hidden">
+              <button
+                type="button"
+                className="relative inline-flex items-center justify-center text-white p-2 rounded hover:bg-white/10"
+                onClick={() => setShowMenu(!showMenu)}
+              >
+                {showMenu ? (
+                  <FontAwesomeIcon icon="fa-solid fa-xmark" color="red" />
+                ) : (
+                  <FontAwesomeIcon icon="fa-solid fa-bars" />
+                )}
+              </button>
+            </div>
+            <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
+              <div
+                className="cursor-pointer"
+                onClick={() => navigate("/trang-chu")}
+              >
+                <img
+                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  className="object-cover h-full"
+                ></img>
+              </div>
             </div>
           </div>
           <div className="hidden md:flex items-center justify-start flex-shink-0">
@@ -208,7 +213,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         }`}
         id="mobile-menu"
       >
-        <Search open={true} />
+        {/* <Search open={true} /> */}
         <div className="space-y-1 pb-2 px-[3%]">
           {navigation.slice(0, 4).map((item, index) => (
             <div

@@ -1,8 +1,8 @@
 import { fetchTrending } from "./fetchTrending";
 
 export async function warmTmdbCache() {
-  const cacheKeyMovie = "tmdb_movie_week";
-  const cacheKeyTv = "tmdb_tv_week";
+  const cacheKeyMovie = "tmdb_movie_day";
+  const cacheKeyTv = "tmdb_tv_day";
 
   const cachedMovie = sessionStorage.getItem(cacheKeyMovie);
   const cachedTv = sessionStorage.getItem(cacheKeyTv);
@@ -12,8 +12,8 @@ export async function warmTmdbCache() {
 
   try {
     const [movieData, tvData] = await Promise.all([
-      fetchTrending("movie", "week"),
-      fetchTrending("tv", "week"),
+      fetchTrending("movie", "day"),
+      fetchTrending("tv", "day"),
     ]);
 
     sessionStorage.setItem(cacheKeyMovie, JSON.stringify(movieData));
@@ -23,7 +23,7 @@ export async function warmTmdbCache() {
   }
 }
 
-export async function getTmdbCached(type = "movie", timeWindow = "week") {
+export async function getTmdbCached(type = "movie", timeWindow = "day") {
   const key = `tmdb_${type}_${timeWindow}`;
   const cached = sessionStorage.getItem(key);
   if (cached) return JSON.parse(cached);

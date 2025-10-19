@@ -169,22 +169,29 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   };
 
   const getImages = async (api_path) => {
-    const res = await axios.get(api_path);
-    const logo =
-      res.data?.logos?.find(
-        (l) => l.iso_3166_1 === "US" && l.iso_639_1 === "en"
-      ) || res.data?.logos?.[0];
-    const backdrop = res.data?.backdrops?.find(
-      (b) =>
-        b.aspect_ratio >= 1.77 &&
-        b.iso_639_1 === null &&
-        b.iso_3166_1 === null &&
-        b.height > 1000
-    );
-    return {
-      backdrop: backdrop ? backdrop.file_path : null,
-      logo: logo ? logo.file_path : null,
-    };
+    try {
+      const res = await axios.get(api_path);
+      const logo =
+        res.data?.logos?.find(
+          (l) => l.iso_3166_1 === "US" && l.iso_639_1 === "en"
+        ) || res.data?.logos?.[0];
+      const backdrop = res.data?.backdrops?.find(
+        (b) =>
+          b.aspect_ratio >= 1.77 &&
+          b.iso_639_1 === null &&
+          b.iso_3166_1 === null &&
+          b.height > 1000
+      );
+      return {
+        backdrop: backdrop ? backdrop.file_path : null,
+        logo: logo ? logo.file_path : null,
+      };
+    } catch (error) {
+      return {
+        backdrop: null,
+        logo: null,
+      };
+    }
   };
 
   useEffect(() => {

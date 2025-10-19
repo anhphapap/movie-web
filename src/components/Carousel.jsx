@@ -105,7 +105,7 @@ export default function Carousel({
         (async () => {
           const data = await getTmdbCached(
             type_slug === "phim-bo" ? "tv" : "movie",
-            "week"
+            "day"
           );
           if (mounted) {
             setMovies(data);
@@ -322,7 +322,7 @@ export default function Carousel({
     >
       <div className="px-[3%] flex justify-between items-center w-full mb-3">
         <div
-          className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2"
+          className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2 w-full lg:w-auto"
           onClick={() =>
             openList({
               params: `${type_slug}?category=${category}&country=${country}&year=${year}`,

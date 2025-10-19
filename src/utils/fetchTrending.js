@@ -1,4 +1,4 @@
-export async function fetchTrending(type = "movie", timeWindow = "week") {
+export async function fetchTrending(type = "movie", timeWindow = "day") {
   const TMDB_API_KEY = import.meta.env.VITE_TMDB_KEY;
   const TMDB_URL = `https://api.themoviedb.org/3/trending/${type}/${timeWindow}?language=vi-VN&api_key=${TMDB_API_KEY}`;
 

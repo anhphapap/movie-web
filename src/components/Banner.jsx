@@ -291,7 +291,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         setLoading(true);
 
         const listType = type_slug === "phim-bo" ? "tv" : "movie";
-        const movies = await getTmdbCached(listType, "week");
+        const movies = await getTmdbCached(listType, "day");
 
         if (!movies || movies.length === 0) {
           console.warn("No movies found");
