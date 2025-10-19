@@ -19,6 +19,7 @@ import {
 import { formatTime } from "../utils/data";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "./Tooltip";
+import LazyImage from "./LazyImage";
 
 const VideoPlayer = ({
   src,
@@ -467,17 +468,17 @@ const VideoPlayer = ({
                         {showEpisodes === index && (
                           <div className={`flex group-hover:flex p-3 gap-3`}>
                             <div className="relative ">
-                              <img
+                              <LazyImage
                                 src={poster}
                                 alt={ep.name}
-                                className="w-40 aspect-video object-cover rounded-md"
+                                sizes="10vw"
                               />
                               {showEpisodes !== parseInt(episode) && (
                                 <div
                                   className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-md cursor-pointer hover:scale-110 transition-all ease-linear duration-100"
                                   onClick={() =>
                                     navigate(
-                                      `/watch/${movieSlug}?svr=${svr}&ep=${index}`
+                                      `/xem-phim/${movieSlug}?svr=${svr}&ep=${index}`
                                     )
                                   }
                                 >
@@ -500,7 +501,11 @@ const VideoPlayer = ({
               <button
                 className="hover:scale-125 transition-all ease-linear duration-100 group relative"
                 onClick={() =>
-                  navigate(`/watch/${movieSlug}/${parseInt(episode) + 1}`)
+                  navigate(
+                    `/xem-phim/${movieSlug}?svr=${svr}&ep=${
+                      parseInt(episode) + 1
+                    }`
+                  )
                 }
               >
                 <SkipForward size={24} />

@@ -8,6 +8,7 @@ import LazyImage from "./LazyImage";
 import { useHoverPreview } from "../context/HoverPreviewContext";
 import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
+import SEO from "./SEO";
 const MovieList = ({
   type_slug = "phim-moi-cap-nhat",
   sort_field = "_id",
@@ -17,7 +18,8 @@ const MovieList = ({
   search = false,
   keyword = "",
 }) => {
-  const [movies, setMovies] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [seoOnPage, setSeoOnPage] = useState(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [titleHead, setTitleHead] = useState(null);
@@ -48,15 +50,8 @@ const MovieList = ({
       if (page > totalPages) {
         setHasMore(false);
       } else {
-        const movieList = listResponse.data.data.items || [];
-
-        setMovies((prev) => {
-          const existingIds = new Set(prev.map((movie) => movie._id));
-          const uniqueMovies = movieList.filter(
-            (movie) => !existingIds.has(movie._id)
-          );
-          return [...prev, ...uniqueMovies];
-        });
+        setMovies([...movies, ...listResponse.data.data.items]);
+        if (!seoOnPage) setSeoOnPage(listResponse.data.data.seoOnPage);
 
         if (!titleHead) {
           const yearNow = new Date().getFullYear();
@@ -143,6 +138,9 @@ const MovieList = ({
 
   return (
     <div className="text-white mt-36 px-[3%]">
+      {seoOnPage && (
+        <SEO seoData={seoOnPage} baseUrl={window.location.origin} />
+      )}
       {(!loading && movies.length == 0 && (
         <h1>Không tìm thấy bộ phim nào !</h1>
       )) || (
@@ -156,7 +154,7 @@ const MovieList = ({
         </h1>
       )}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-1 gap-y-14 mt-5">
-        {movies.map((item, index) => (
+        {movies?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
             key={item._id}

@@ -21,7 +21,7 @@ export default function HoverPreview() {
   const content = (
     <AnimatePresence mode="wait">
       <motion.div
-        key={item._id || item.slug}
+        key={item._id + "hoverpreview" || item.slug + "hoverpreview"}
         className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),
@@ -69,7 +69,7 @@ export default function HoverPreview() {
                 className="bg-white rounded-full pl-[2px] h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/watch/${item.slug}?svr=${0}&ep=${0}`);
+                  navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
                 }}
               >
                 <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
@@ -103,7 +103,7 @@ export default function HoverPreview() {
 
             <div className="text-white/80 text-sm flex items-center gap-2 flex-wrap">
               {item.category.slice(0, 3).map((cat, idx) => (
-                <>
+                <div key={cat.name + "hoverpreview"}>
                   {idx !== 0 && (
                     <FontAwesomeIcon
                       icon="fa-solid fa-circle"
@@ -112,7 +112,7 @@ export default function HoverPreview() {
                     />
                   )}
                   <span key={cat.name}>{cat.name}</span>
-                </>
+                </div>
               ))}
             </div>
           </div>

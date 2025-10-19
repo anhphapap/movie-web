@@ -24,8 +24,8 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
   const openModal = (slug, tmdb_id, tmdb_type) => {
     const params = new URLSearchParams(location.search);
     params.set("movie", slug);
-    params.set("tmdb_id", tmdb_id);
-    params.set("tmdb_type", tmdb_type);
+    params.set("tmdb_id", tmdb_id || null);
+    params.set("tmdb_type", tmdb_type || null);
     navigate(`${location.pathname}?${params.toString()}`, { replace: false });
   };
 

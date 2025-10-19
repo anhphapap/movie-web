@@ -54,7 +54,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 rect && rect.top < window.innerHeight && rect.bottom > 0;
 
               if (isInViewport) {
-                console.log("Tiếp tục phát video sau khi quay lại tab");
                 player.playVideo();
                 setIsVideoPaused(false);
               }
@@ -247,7 +246,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
 
   useEffect(() => {
     if (!movie) return;
-    if (!movie.movie.trailer_url) return;
+    if (!movie.item.trailer_url) return;
     const delayToTrailer = setTimeout(() => {
       // cho ảnh hiển thị ít nhất 1.2s rồi mới bắt đầu trailer
       if (!youtubeId) return;
@@ -279,9 +278,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       aspect_ratio: logo ? logo.aspect_ratio : null,
     };
   };
-  useEffect(() => {
-    console.log(movie?.tmdb_image?.aspect_ratio);
-  }, [movie]);
 
   useEffect(() => {
     let isMounted = true;
@@ -309,7 +305,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           ),
         ]);
 
-        if (isMounted) setMovie({ ...data.data, tmdb_image: image });
+        if (isMounted) setMovie({ ...data.data.data, tmdb_image: image });
       } catch (err) {
         console.error("Error fetching movie banner:", err);
       } finally {
@@ -383,7 +379,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       </div>
     );
   }
-  const youtubeId = getYoutubeId(movie.movie.trailer_url);
+  const youtubeId = getYoutubeId(movie.item.trailer_url);
   return (
     <div
       ref={bannerRef}
@@ -496,9 +492,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           src={
             movie?.tmdb_image?.backdrop
               ? "https://image.tmdb.org/t/p/" + movie?.tmdb_image?.backdrop
-              : movie.movie.poster_url.split("movies/")[1]
+              : movie.item.poster_url.split("movies/")[1]
           }
-          alt={movie.movie.name}
+          alt={movie.item.name}
           priority
           sizes="100vw"
         />
@@ -506,8 +502,8 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
 
       {/* <div className="absolute top-0 left-0 w-full sm:hidden">
         <LazyImage
-          src={movie.movie.thumb_url.split("movies/")[1]}
-          alt={movie.movie.name}
+          src={movie.item.thumb_url.split("movies/")[1]}
+          alt={movie.item.name}
           priority
           sizes="100vw"
         />
@@ -521,9 +517,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
             ></img>
             <span className="font-bold text-white text-xs tracking-[3px]">
-              {movie.movie.type === "series"
+              {movie.item.type === "series"
                 ? "LOẠT PHIM"
-                : movie.movie.type === "hoathinh"
+                : movie.item.type === "hoathinh"
                 ? "HOẠT HÌNH"
                 : "PHIM"}
             </span>
@@ -543,7 +539,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                     : "!w-full !h-auto translate-x-0"
                 }`}
                 src={"https://image.tmdb.org/t/p/" + movie.tmdb_image.logo}
-                alt={movie.movie.name}
+                alt={movie.item.name}
                 sizes="(max-width: 640px) 60vw, (max-width: 1400px) 40vw, 50vw"
                 priority
               />
@@ -552,7 +548,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 className="uppercase text-2xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold tracking-tighter italic text-red-600 truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
               >
-                {movie.movie.origin_name}
+                {movie.item.origin_name}
               </h1>
             )}
           </div>
@@ -564,7 +560,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             }`}
           >
             <div
-              dangerouslySetInnerHTML={{ __html: movie.movie.content }}
+              dangerouslySetInnerHTML={{ __html: movie.item.content }}
               className=" text-white truncate line-clamp-3 text-pretty"
             />
           </div>
@@ -572,11 +568,11 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         <div className="flex justify-between items-center w-full px-[3%] sm:px-0">
           <div className="flex sm:space-x-3 space-x-1 w-full sm:w-auto">
             <div className="relative rounded bg-white hover:bg-white/80 w-1/2 sm:w-auto flex items-center justify-center">
-              {movie.episodes[0].server_data[0].link_embed !== "" ? (
+              {movie.item.episodes[0].server_data[0].link_embed !== "" ? (
                 <button
                   className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
                   onClick={() =>
-                    navigate(`/xem-phim/${movie.movie.slug}?svr=${0}&ep=${0}`)
+                    navigate(`/xem-phim/${movie.item.slug}?svr=${0}&ep=${0}`)
                   }
                 >
                   <FontAwesomeIcon icon="fa-solid fa-play" />
@@ -594,9 +590,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 className="py-2 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
                 onClick={() =>
                   openModal(
-                    movie.movie.slug,
-                    movie.movie.tmdb.id,
-                    movie.movie.tmdb.type
+                    movie.item.slug,
+                    movie.item.tmdb.id,
+                    movie.item.tmdb.type
                   )
                 }
               >
@@ -628,7 +624,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               </button>
             )}
             <div className="sm:flex hidden text-white justify-center h-4 sm:h-8 lg:h-10 items-center pr-10 lg:pr-14 pl-2 bg-[#515151]/60 border-l-4 border-[#e50914]">
-              <span className="font-semibold">{movie.movie.quality}</span>
+              <span className="font-semibold">{movie.item.quality}</span>
             </div>
           </div>
         </div>

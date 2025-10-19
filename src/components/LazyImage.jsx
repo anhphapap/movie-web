@@ -11,6 +11,7 @@ const LazyImage = ({
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw",
 }) => {
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
   const [src, setSrc] = useState(srcProps);
 
   useEffect(() => {
@@ -73,14 +74,28 @@ const LazyImage = ({
 
   return (
     <div className="relative w-full h-full overflow-hidden flex sm:block items-center justify-center">
-      {priority && (
-        <link rel="preload" as="image" href={fullImage} imageSrcSet={srcSet} />
-      )}
-
-      <img
-        src={blurImage}
-        alt={`${alt} blurred`}
-        className={`absolute top-0 left-0 w-full h-full object-${aspect} 
+      {error ? (
+        // Fallback khi không load được ảnh
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-zinc-900 to-zinc-800 flex items-end justify-center p-2">
+          <h3 className="text-white font-semibold text-sm line-clamp-2 text-center uppercase">
+            {alt}
+          </h3>
+        </div>
+      ) : (
+        <>
+          {priority && (
+            <link
+              rel="preload"
+              as="image"
+              href={fullImage}
+              imageSrcSet={srcSet}
+            />
+          )}
+          <img
+            src={blurImage}
+            alt={`${alt} blurred`}
+            onError={() => setError(true)}
+            className={`absolute top-0 left-0 w-full h-full object-${aspect} 
     scale-90 blur-lg brightness-90 
     transition-all duration-500 ease-out
     ${
@@ -92,17 +107,17 @@ const LazyImage = ({
         ? "opacity-0"
         : "opacity-100"
     }`}
-      />
-
-      <img
-        src={fullImage}
-        srcSet={srcSet}
-        sizes={sizes}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        onLoad={() => setLoaded(true)}
-        className={`w-full h-full object-${aspect} 
+          />
+          <img
+            src={fullImage}
+            srcSet={srcSet}
+            sizes={sizes}
+            alt={alt}
+            loading={priority ? "eager" : "lazy"}
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+            onError={() => setError(true)}
+            className={`w-full h-full object-${aspect} 
     transition-all duration-500 ease-out
     ${
       !priority
@@ -114,7 +129,9 @@ const LazyImage = ({
         : "opacity-0"
     } 
     ${className}`}
-      />
+          />
+        </>
+      )}
     </div>
   );
 };

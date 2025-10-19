@@ -208,13 +208,13 @@ const Header = ({ filter = false, type_slug = "" }) => {
         </div>
       </div>
       <div
-        className={`bg-[#141414] md:hidden border-b-[1px] border-white ${
+        className={`bg-[#141414] md:hidden border-y-[1px] border-white ${
           showMenu ? "block" : "hidden"
         }`}
         id="mobile-menu"
       >
         {/* <Search open={true} /> */}
-        <div className="space-y-1 pb-2 px-[3%]">
+        <div className="space-y-1 py-2 px-[3%]">
           {navigation.slice(0, 4).map((item, index) => (
             <div
               onClick={() => {

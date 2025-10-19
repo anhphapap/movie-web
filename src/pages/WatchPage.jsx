@@ -16,6 +16,7 @@ import {
 } from "firebase/firestore";
 import VideoPlayer from "../components/VideoPlayer";
 import LazyImage from "../components/LazyImage";
+import SEO from "../components/SEO";
 
 const WatchPage = () => {
   const { movieSlug } = useParams();
@@ -56,27 +57,19 @@ const WatchPage = () => {
     const fetchMovie = async () => {
       setLoading(true);
       try {
-        var Response = await axios.get(
-          `${import.meta.env.VITE_API_DETAILS}${movieSlug}`
-        );
-        var currentMovie = Response.data || [];
-        setMovie(currentMovie);
+        const [movieResponse, peoplesResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_DETAILS}${movieSlug}`),
+          axios.get(`${import.meta.env.VITE_API_DETAILS}${movieSlug}/peoples`),
+        ]);
+        setMovie(movieResponse.data.data || []);
+        setPeoples(peoplesResponse.data.data.peoples || []);
       } catch (error) {
-        toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
         console.error("Error fetching movie:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
-
-    const fetchPeoples = async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_DETAILS}${movieSlug}/peoples`
-      );
-      setPeoples(response.data.data.peoples);
-    };
-
     fetchMovie();
-    fetchPeoples();
   }, [movieSlug]);
 
   const handleSaveMovie = async () => {
@@ -91,26 +84,26 @@ const WatchPage = () => {
       if (saved) {
         await updateDoc(userRef, {
           savedMovies: arrayRemove({
-            slug: movie.movie.slug,
-            poster_url: movie.movie.poster_url,
-            name: movie.movie.name,
-            year: movie.movie.year,
-            episode_current: movie.movie.episode_current,
-            quality: movie.movie.quality,
-            category: movie.movie.category,
+            slug: movie.item.slug,
+            poster_url: movie.item.poster_url,
+            name: movie.item.name,
+            year: movie.item.year,
+            episode_current: movie.item.episode_current,
+            quality: movie.item.quality,
+            category: movie.item.category,
           }),
         });
         toast.success("Đã xóa khỏi danh sách yêu thích.");
       } else {
         await updateDoc(userRef, {
           savedMovies: arrayUnion({
-            slug: movie.movie.slug,
-            poster_url: movie.movie.poster_url,
-            name: movie.movie.name,
-            year: movie.movie.year,
-            episode_current: movie.movie.episode_current,
-            quality: movie.movie.quality,
-            category: movie.movie.category,
+            slug: movie.item.slug,
+            poster_url: movie.item.poster_url,
+            name: movie.item.name,
+            year: movie.item.year,
+            episode_current: movie.item.episode_current,
+            quality: movie.item.quality,
+            category: movie.item.category,
           }),
         });
         toast.success("Đã thêm vào danh sách yêu thích.");
@@ -123,7 +116,7 @@ const WatchPage = () => {
     }
   };
 
-  if (loading || !movie?.movie)
+  if (loading || !movie?.item)
     return (
       <div className="w-screen h-screen flex items-center justify-center">
         <FontAwesomeIcon
@@ -133,8 +126,26 @@ const WatchPage = () => {
         />
       </div>
     );
+  // Custom SEO cho trang xem phim với thông tin tập
+  const watchPageSEO = movie?.seoOnPage
+    ? {
+        ...movie.seoOnPage,
+        titleHead: `Xem phim ${movie.item.name} - Tập ${movie.item.episodes[svr].server_data[ep].name}`,
+        descriptionHead: `Xem phim ${movie.item.name} tập ${
+          movie.item.episodes[svr].server_data[ep].name
+        } ${movie.item.quality} Vietsub. ${
+          movie.seoOnPage.descriptionHead ||
+          movie.item.content?.replace(/<[^>]*>/g, "").substring(0, 100) ||
+          ""
+        }`,
+      }
+    : null;
+
   return (
     <div className="min-h-screen text-white relative px-[3%] mt-16">
+      {watchPageSEO && (
+        <SEO seoData={watchPageSEO} baseUrl={window.location.origin} />
+      )}
       <div className="flex items-center gap-4 my-6 pt-2 px-2">
         <button
           className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
@@ -143,23 +154,23 @@ const WatchPage = () => {
           <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
         </button>
         <h1 className="text-2xl font-bold">
-          Xem phim {movie.movie.name} - Tập{" "}
-          {movie.episodes[svr].server_data[ep].name}
+          Xem phim {movie.item.name} - Tập{" "}
+          {movie.item.episodes[svr].server_data[ep].name}
         </h1>
       </div>
       <div className="rounded sm:rounded-xl overflow-hidden">
         <div className="relative w-full bg-black aspect-video">
           <div className="absolute top-0 left-0 w-full aspect-video">
             <VideoPlayer
-              src={movie.episodes[svr].server_data[ep].link_m3u8}
-              poster={movie.movie.poster_url}
-              title={movie.movie.name}
+              src={movie.item.episodes[svr].server_data[ep].link_m3u8}
+              poster={movie.item.poster_url}
+              title={movie.item.name}
               episode={ep}
               svr={svr}
-              episodeName={movie.episodes[svr].server_data[ep].name}
-              episodes={movie.episodes[svr].server_data}
-              movieSlug={movie.movie.slug}
-              content={movie.movie.content}
+              episodeName={movie.item.episodes[svr].server_data[ep].name}
+              episodes={movie.item.episodes[svr].server_data}
+              movieSlug={movie.item.slug}
+              content={movie.item.content}
             />
           </div>
         </div>
@@ -213,59 +224,59 @@ const WatchPage = () => {
           <div className="items-start justify-between gap-3 hidden lg:flex">
             <div className="w-[15%] rounded-md overflow-hidden">
               <LazyImage
-                src={movie.movie.thumb_url.split("movies/")[1]}
-                alt={movie.movie.name}
+                src={movie.item.thumb_url}
+                alt={movie.item.name}
                 sizes="14vw"
               />
             </div>
             <div className="w-[50%] p-2 space-y-2 ">
               <h1 className="font-bold text-xl lg:text-2xl">
-                {movie.movie.name}
+                {movie.item.name}
               </h1>
               <span className="text-white/70 text-base">
-                {movie.movie.origin_name}
+                {movie.item.origin_name}
               </span>
               <div className="flex items-center flex-wrap gap-2">
-                {movie.movie.imdb?.vote_count > 0 && (
+                {movie.item.imdb?.vote_count > 0 && (
                   <a
                     className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 text-sm bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
-                    href={`https://www.imdb.com/title/${movie.movie.imdb.id}`}
+                    href={`https://www.imdb.com/title/${movie.item.imdb.id}`}
                     target="_blank"
                   >
                     <span className="text-yellow-500 font-medium">IMDb</span>
                     <span className="font-semibold">
-                      {movie.movie.imdb?.vote_average.toFixed(1)}
+                      {movie.item.imdb?.vote_average.toFixed(1)}
                     </span>
                   </a>
                 )}
-                {movie.movie.tmdb?.vote_count > 0 && (
+                {movie.item.tmdb?.vote_count > 0 && (
                   <a
                     className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 text-sm bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
                     href={`https://www.themoviedb.org/${
-                      movie.movie.type == "single" ? "movie" : "tv"
-                    }/${movie.movie.tmdb.id}`}
+                      movie.item.type == "single" ? "movie" : "tv"
+                    }/${movie.item.tmdb.id}`}
                     target="_blank"
                   >
                     <span className="text-[#01b4e4] font-medium">TMDB</span>
                     <span className="font-semibold">
-                      {movie.movie.tmdb?.vote_average.toFixed(1)}
+                      {movie.item.tmdb?.vote_average.toFixed(1)}
                     </span>
                   </a>
                 )}
                 <span className="bg-white text-black font-medium rounded-md py-1 px-2 text-sm">
-                  {movie.movie.episode_current}
+                  {movie.item.episode_current}
                 </span>
                 <span className="border-[1px] rounded-md py-1 px-2 text-sm">
-                  {movie.movie.year}
+                  {movie.item.year}
                 </span>
-                {movie.movie.time !== "? phút/tập" && (
+                {movie.item.time !== "? phút/tập" && (
                   <span className="border-[1px] rounded-md py-1 px-2 text-sm">
-                    {movie.movie.time}
+                    {movie.item.time}
                   </span>
                 )}
               </div>
               <div className="flex items-center space-x-2 flex-wrap">
-                {movie.movie.category.map((category, index) => (
+                {movie.item.category.map((category, index) => (
                   <span
                     key={index}
                     className=" rounded-md py-1 px-2 text-xs bg-white/10"
@@ -274,8 +285,8 @@ const WatchPage = () => {
                   </span>
                 ))}
               </div>
-              {movie.movie.type == "series" &&
-                (movie.movie.status == "ongoing" ? (
+              {movie.item.type == "series" &&
+                (movie.item.status == "ongoing" ? (
                   <div className="flex items-center space-x-1 bg-orange-500/20 rounded-full px-2 py-1 w-fit ">
                     <LoaderCircle
                       className="text-orange-500 animate-spin"
@@ -283,8 +294,8 @@ const WatchPage = () => {
                     />
                     <span className="text-sm pr-1 text-orange-500">
                       {"Đã chiếu: "}
-                      {movie.movie.episode_current.split(" ")[1]} /{" "}
-                      {movie.movie.episode_total}
+                      {movie.item.episode_current.split(" ")[1]} /{" "}
+                      {movie.item.episode_total}
                     </span>
                   </div>
                 ) : (
@@ -296,27 +307,28 @@ const WatchPage = () => {
                     />
                     <span className="text-sm text-green-500 pr-1">
                       {"Đã hoàn thành: "}
-                      {movie.movie.episode_total.split(" ")[0]} /{" "}
-                      {movie.movie.episode_total}
+                      {movie.item.episode_total.split(" ")[0]} /{" "}
+                      {movie.item.episode_total}
                     </span>
                   </div>
                 ))}
             </div>
             <div
               className="w-[35%] text-white/70 text-pretty text-sm line-clamp-6 mt-2"
-              dangerouslySetInnerHTML={{ __html: movie.movie.content }}
+              dangerouslySetInnerHTML={{ __html: movie.item.content }}
             />
           </div>
           <div>
-            {/* {movie.movie.type != "single" && */}
-            {movie.episodes[server].server_data[server].link_embed != "" && (
+            {/* {movie.item.type != "single" && */}
+            {movie.item.episodes[server].server_data[server].link_embed !=
+              "" && (
               <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
                 <div className="flex gap-4 items-center">
                   <span className="text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
                     <Server size={16} strokeWidth={3} />
                     Server
                   </span>
-                  {movie.episodes.map((item, index) => (
+                  {movie.item.episodes.map((item, index) => (
                     <div
                       key={index}
                       className={`${
@@ -332,35 +344,37 @@ const WatchPage = () => {
                   ))}
                 </div>
                 <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
-                  {movie.episodes[server].server_data.map((item, index) => (
-                    <div
-                      onClick={() =>
-                        navigate(
-                          `/xem-phim/${movie.movie.slug}?svr=${server}&ep=${index}`
-                        )
-                      }
-                      className={`relative rounded bg-[#242424] group ${
-                        index == ep && svr == server
-                          ? "bg-white/15 "
-                          : "hover:bg-opacity-70"
-                      }`}
-                      key={movie.movie._id + index}
-                    >
-                      <button
-                        className={`py-2 transition-all ease-linear  gap-2 flex items-center justify-center ${
+                  {movie.item.episodes[server].server_data.map(
+                    (item, index) => (
+                      <div
+                        onClick={() =>
+                          navigate(
+                            `/xem-phim/${movie.item.slug}?svr=${server}&ep=${index}`
+                          )
+                        }
+                        className={`relative rounded bg-[#242424] group ${
                           index == ep && svr == server
-                            ? "text-black bg-white"
-                            : "text-white/70 group-hover:text-white"
-                        } text-center w-full rounded`}
+                            ? "bg-white/15 "
+                            : "hover:bg-opacity-70"
+                        }`}
+                        key={movie.item._id + index}
                       >
-                        <FontAwesomeIcon
-                          icon="fa-solid fa-play"
-                          className="text-xs"
-                        />
-                        <span className="text-base"> Tập {item.name}</span>
-                      </button>
-                    </div>
-                  ))}
+                        <button
+                          className={`py-2 transition-all ease-linear  gap-2 flex items-center justify-center ${
+                            index == ep && svr == server
+                              ? "text-black bg-white"
+                              : "text-white/70 group-hover:text-white"
+                          } text-center w-full rounded`}
+                        >
+                          <FontAwesomeIcon
+                            icon="fa-solid fa-play"
+                            className="text-xs"
+                          />
+                          <span className="text-base"> Tập {item.name}</span>
+                        </button>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             )}
@@ -377,20 +391,18 @@ const WatchPage = () => {
                   people.profile_path && (
                     <div
                       key={index}
-                      className="flex flex-col space-y-2 rounded-md overflow-hidden items-center"
+                      className="flex flex-col space-y-2 rounded-md overflow-hidden items-stretch justify-around"
                     >
-                      <img
-                        src={
-                          "https://image.tmdb.org/t/p/w185" +
-                          people.profile_path
-                        }
+                      <LazyImage
+                        src={"https://image.tmdb.org/t/p" + people.profile_path}
                         alt={people.name}
-                        className="w-[80px] aspect-square object-cover rounded-full"
+                        sizes="8vw"
+                        className="!w-full !h-auto rounded-full aspect-square"
                       />
-                      <span className="text-sm font-semibold text-center">
+                      <span className="text-sm font-semibold text-center text-pretty">
                         {people.name}
                       </span>
-                      <span className="text-sm text-center">
+                      <span className="text-sm text-center text-pretty">
                         {people.character}
                       </span>
                     </div>
