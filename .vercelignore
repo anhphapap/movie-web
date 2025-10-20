@@ -1,0 +1,15 @@
+node_modules
+.git
+.env*
+*.log
+.cache
+src
+public
+*.md
+.eslintrc.*
+.prettierrc
+vite.config.js
+postcss.config.js
+tailwind.config.js
+package-lock.json
+
