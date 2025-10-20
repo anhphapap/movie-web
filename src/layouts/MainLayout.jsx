@@ -37,7 +37,7 @@ const MainLayout = ({ type_slug, filter = false }) => {
     <>
       <Banner type_slug={type_slug} filter={filter} />
       {listInfo.map((item, index) => (
-        <div key={`${index}-${item.type_slug}`}>
+        <div key={`${locate.pathname}-${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
             <Carousel
               nameList={item.nameList}

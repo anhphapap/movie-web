@@ -41,6 +41,7 @@ export default function Carousel({
   const { topSet } = useTop();
   const { openModal } = useMovieModal();
   const { openList } = useListModal();
+  const fetchedRef = useRef(false);
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0.2,
@@ -96,32 +97,37 @@ export default function Carousel({
     setCanSlideNext(!swiper.isEnd);
   };
 
-  useEffect(() => {
-    if (!inView) return;
-    const fetchMovies = async () => {
-      setLoading(true);
-      if (typeList === "top") {
-        let mounted = true;
-        (async () => {
-          const data = await getTmdbCached(
-            type_slug === "phim-bo" ? "tv" : "movie",
-            "day"
-          );
-          if (mounted) {
-            setMovies(data);
-            setLoading(false);
-          }
-        })();
-        return () => {
-          mounted = false;
-        };
-      } else {
-        fetchMoviesChunk(1);
-      }
-    };
+  const fetchMovies = async () => {
+    setLoading(true);
+    if (typeList === "top") {
+      let mounted = true;
+      (async () => {
+        const data = await getTmdbCached(
+          type_slug === "phim-bo" ? "tv" : "movie",
+          "day"
+        );
+        if (mounted) {
+          setMovies(data);
+          setLoading(false);
+        }
+      })();
+      return () => {
+        mounted = false;
+      };
+    } else {
+      fetchMoviesChunk(1);
+    }
+  };
 
+  useEffect(() => {
+    if (!inView || fetchedRef.current) return;
+    fetchedRef.current = true;
     fetchMovies();
   }, [type_slug, inView]);
+
+  useEffect(() => {
+    if (page > 1) fetchMoviesChunk(page);
+  }, [page]);
 
   const handleEnter = (item, e, index) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -155,13 +161,13 @@ export default function Carousel({
   if (typeList === "top") {
     return (
       <div
-        className="my-10 lg:my-14 relative"
+        className="my-10 lg:my-14 relative w-[94%] mx-[3%]"
         ref={(node) => {
           containerRef.current = node;
           ref(node);
         }}
       >
-        <div className="px-[3%] flex justify-between items-center w-full mb-3">
+        <div className="flex justify-between items-center w-full mb-3">
           <h2 className="text-white font-bold">{nameList}</h2>
           <div
             ref={paginationRef}
@@ -170,6 +176,7 @@ export default function Carousel({
         </div>
 
         <Swiper
+          key={`top-${type_slug}`}
           modules={[Pagination, Navigation]}
           pagination={{
             el: paginationRef.current,
@@ -180,7 +187,6 @@ export default function Carousel({
             nextEl: nextRef.current,
           }}
           spaceBetween={6}
-          slidesPerGroupAuto={true}
           onResize={(swiper) => {
             setSwiperHeight(swiper.el.clientHeight);
             setFirstVisible(swiper.activeIndex);
@@ -216,7 +222,7 @@ export default function Carousel({
             500: { slidesPerView: 3, slidesPerGroup: 3 },
             0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
-          className="w-[94%] mx-[3%]"
+          className="w-full"
           ref={swiperRef}
         >
           {movies.map((item, index) => (
@@ -292,7 +298,7 @@ export default function Carousel({
         <button
           ref={prevRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -left-[5.5px] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e transition-all ease-linear duration-100 cursor-pointer ${
+          className={`absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e transition-all ease-linear duration-100 cursor-pointer ${
             canSlidePrev ? "visible" : "invisible"
           }`}
           disabled={!canSlidePrev}
@@ -302,7 +308,7 @@ export default function Carousel({
         <button
           ref={nextRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -right-[5.5px] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s transition-all ease-linear duration-100 cursor-pointer ${
+          className={`absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s transition-all ease-linear duration-100 cursor-pointer ${
             canSlideNext ? "visible" : "invisible"
           }`}
           disabled={!canSlideNext}
@@ -314,13 +320,13 @@ export default function Carousel({
   }
   return (
     <div
-      className="my-10 lg:my-14 relative"
+      className="my-10 lg:my-14 relative w-[94%] mx-[3%]"
       ref={(node) => {
         containerRef.current = node;
         ref(node);
       }}
     >
-      <div className="px-[3%] flex justify-between items-center w-full mb-3">
+      <div className="flex justify-between items-center w-full mb-3">
         <div
           className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2 w-full lg:w-auto"
           onClick={() =>
@@ -346,6 +352,7 @@ export default function Carousel({
 
       <Swiper
         modules={[Pagination, Navigation]}
+        key={`${type_slug}-${category}-${country}-${year}`}
         pagination={{
           el: paginationRef.current,
           clickable: true,
@@ -355,7 +362,6 @@ export default function Carousel({
           nextEl: nextRef.current,
         }}
         spaceBetween={5}
-        slidesPerGroupAuto={true}
         onResize={(swiper) => {
           setSwiperHeight(swiper.el.clientHeight);
           updateNavState(swiper);
@@ -385,12 +391,11 @@ export default function Carousel({
             !isAppending &&
             endIndex >= movies.length - swiper.params.slidesPerView * 1.5
           ) {
-            const nextPage = page + 1;
-            setPage(nextPage);
-            fetchMoviesChunk(nextPage).then(() => {
-              swiper.update();
-              setTimeout(() => updateNavState(swiper), 50);
-            });
+            setPage((prev) => prev + 1);
+            // fetchMoviesChunk(nextPage).then(() => {
+            //   swiper.update();
+            //   setTimeout(() => updateNavState(swiper), 50);
+            // });
           }
         }}
         onUpdate={(swiper) => updateNavState(swiper)}
@@ -400,7 +405,7 @@ export default function Carousel({
           500: { slidesPerView: 4, slidesPerGroup: 4 },
           0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
-        className="w-[94%] mx-[3%]"
+        className="w-full"
         ref={swiperRef}
       >
         <>
@@ -513,7 +518,7 @@ export default function Carousel({
       <button
         ref={prevRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -left-[4.5px] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-linear duration-100 cursor-pointer ${
+        className={`absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-linear duration-100 cursor-pointer ${
           canSlidePrev ? "visible" : "invisible"
         }`}
         disabled={!canSlidePrev}
@@ -523,7 +528,7 @@ export default function Carousel({
       <button
         ref={nextRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -right-[4.5px] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-linear duration-100 cursor-pointer ${
+        className={`absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-linear duration-100 cursor-pointer ${
           canSlideNext ? "visible" : "invisible"
         }`}
         disabled={!canSlideNext}

@@ -326,7 +326,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                   : modal.item.poster_url
               }
               alt={modal.item.name}
-              sizes="(max-width: 1280px) 100vw,(max-width: 1535px) 70vw, 50vw"
+              sizes="(max-width: 640px): 50vw,(max-width: 1280px) 100vw,(max-width: 1535px) 70vw, 50vw"
               priority={true}
             />
           </div>
