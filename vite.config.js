@@ -24,8 +24,9 @@ export default defineConfig({
             if (id.includes("@fortawesome")) return "vendor-fontawesome";
             if (id.includes("firebase")) return "vendor-firebase";
             if (id.includes("swiper")) return "vendor-swiper";
-            if (id.includes("react-dom")) return "vendor-react-dom";
-            if (id.includes("react")) return "vendor-react";
+            // React và React-DOM phải cùng chunk để tránh conflict
+            if (id.includes("react") || id.includes("react-dom"))
+              return "vendor-react";
             return "vendor";
           }
         },
