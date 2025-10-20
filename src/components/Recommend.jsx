@@ -90,7 +90,7 @@ export default function Recommend({
                   navigate(`/xem-phim/${movie.slug}?svr=${0}&ep=${0}`)
                 }
               >
-                <div className="relative w-full aspect-video">
+                <div className="relative w-full aspect-video overflow-hidden">
                   <LazyImage
                     src={movie.poster_url}
                     alt={movie.name}

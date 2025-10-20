@@ -1,39 +1,27 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
+// Vite build config tối ưu cho React (SPA, Vercel)
 export default defineConfig({
   plugins: [react()],
-
   build: {
-    outDir: "dist",
-    minify: "esbuild",
+    minify: "esbuild", // nhanh và ổn định
     sourcemap: false,
-    cssCodeSplit: true,
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
+        // ⚠️ KHÔNG tách react / react-dom ra nữa
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            // Split FontAwesome thành nhiều chunk nhỏ hơn
-            if (id.includes("@fortawesome/free-solid-svg-icons"))
-              return "vendor-fa-solid";
-            if (id.includes("@fortawesome/free-regular-svg-icons"))
-              return "vendor-fa-regular";
-            if (id.includes("@fortawesome/free-brands-svg-icons"))
-              return "vendor-fa-brands";
             if (id.includes("@fortawesome")) return "vendor-fontawesome";
             if (id.includes("firebase")) return "vendor-firebase";
             if (id.includes("swiper")) return "vendor-swiper";
-            // React và React-DOM phải cùng chunk để tránh conflict
-            if (id.includes("react") || id.includes("react-dom"))
-              return "vendor-react";
             return "vendor";
           }
         },
       },
     },
   },
-
   optimizeDeps: {
     include: [
       "react",
@@ -42,7 +30,6 @@ export default defineConfig({
       "@fortawesome/react-fontawesome",
     ],
   },
-
   server: {
     port: 5173,
     open: true,
