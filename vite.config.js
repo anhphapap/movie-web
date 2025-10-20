@@ -10,16 +10,12 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
+        // ⚠️ KHÔNG tách react / react-dom ra nữa
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            // React phải load đầu tiên
-            if (id.includes("react") || id.includes("react-dom") || id.includes("scheduler")) {
-              return "vendor-react";
-            }
             if (id.includes("@fortawesome")) return "vendor-fontawesome";
             if (id.includes("firebase")) return "vendor-firebase";
             if (id.includes("swiper")) return "vendor-swiper";
-            if (id.includes("react-router")) return "vendor-router";
             return "vendor";
           }
         },
