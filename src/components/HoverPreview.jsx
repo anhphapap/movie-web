@@ -59,7 +59,18 @@ export default function HoverPreview() {
           width: rect.width,
         }}
         onMouseEnter={() => onEnter(hovered)}
-        onMouseLeave={onLeave}
+        onMouseLeave={(e) => {
+          const rect = hovered?.rect;
+          if (!rect) return onLeave();
+          const { clientX, clientY } = e;
+          const insideThumb =
+            clientX >= rect.left &&
+            clientX <= rect.left + rect.width &&
+            clientY >= rect.top &&
+            clientY <= rect.top + rect.height;
+
+          if (!insideThumb) onLeave();
+        }}
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{
