@@ -1,7 +1,7 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node@2.15.10" },
+    { "src": "api/**/*.js", "use": "@vercel/node@3" },
     { "src": "package.json", "use": "@vercel/static-build" }
   ],
   "buildCommand": "npm run build",
