@@ -21,6 +21,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Captions, Server } from "lucide-react";
 import SEO from "./SEO";
+import { useFavorites } from "../context/FavouritesProvider";
 const customStyles = {
   content: {
     position: "absolute",
@@ -37,10 +38,9 @@ const customStyles = {
 };
 
 export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
   const [player, setPlayer] = useState(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [showTrailer, setShowTrailer] = useState(false);
   const [fadeOutImage, setFadeOutImage] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
@@ -48,6 +48,8 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [server, setServer] = useState(0);
+  const { favorites, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = favorites.some((m) => m.slug === slug);
   const navigate = useNavigate();
   const { topSet } = useTop();
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
     width: "100%",
     playerVars: {
       autoplay: 1,
-      mute: 0,
+      mute: 1,
       controls: 0,
       modestbranding: 1,
       rel: 0,
@@ -235,24 +237,6 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
       setModal({ ...data.data.data, tmdb_image: image });
     };
     fetchMovie();
-    const checkSaved = async () => {
-      if (user?.email) {
-        setLoading(true);
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (
-          userSnap.exists() &&
-          userSnap.data().savedMovies.some((movie) => movie.slug === slug)
-        ) {
-          setSaved(true);
-        } else {
-          setSaved(false);
-        }
-        setLoading(false);
-      }
-    };
-    checkSaved();
     if (!isMuted) {
       setPlayerOptions({
         ...playerOptions,
@@ -268,53 +252,19 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
     return () => clearTimeout(t);
   }, [slug, user]);
 
-  const handleSaveMovie = async () => {
-    if (!user?.email) {
-      toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
-      return;
-    }
-    if (!modal) return;
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-
-      if (saved) {
-        await updateDoc(userRef, {
-          savedMovies: arrayRemove({
-            slug: modal.item.slug,
-            poster_url: modal.item.poster_url,
-            thumb_url: modal.item.thumb_url,
-            name: modal.item.name,
-            year: modal.item.year,
-            episode_current: modal.item.episode_current,
-            quality: modal.item.quality,
-            category: modal.item.category,
-            tmdb: modal.item.tmdb,
-          }),
-        });
-        toast.success("Đã xóa khỏi danh sách yêu thích.");
-      } else {
-        await updateDoc(userRef, {
-          savedMovies: arrayUnion({
-            slug: modal.item.slug,
-            poster_url: modal.item.poster_url,
-            thumb_url: modal.item.thumb_url,
-            name: modal.item.name,
-            year: modal.item.year,
-            episode_current: modal.item.episode_current,
-            quality: modal.item.quality,
-            category: modal.item.category,
-            tmdb: modal.item.tmdb,
-          }),
-        });
-        toast.success("Đã thêm vào danh sách yêu thích.");
-      }
-
-      setSaved(!saved);
-    } catch (error) {
-      console.log(error);
-      toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
-    }
+  const handleSaveMovie = () => {
+    toggleFavorite({
+      slug: modal.item.slug,
+      poster_url: modal.item.poster_url,
+      thumb_url: modal.item.thumb_url,
+      name: modal.item.name,
+      year: modal.item.year,
+      episode_current: modal.item.episode_current,
+      quality: modal.item.quality,
+      category: modal.item.category,
+      tmdb: modal.item.tmdb,
+      modified: modal.item.modified,
+    });
   };
 
   const handleToggleMute = () => {
@@ -499,14 +449,20 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                 </div>
                 <button
                   className={`group relative p-1 sm:p-2 lg:p-3 h-full aspect-square rounded-full bg-transparent border-2 flex items-center justify-center ${
-                    saved ? "border-white" : "border-white/40"
+                    isFavourite ? "border-red-500" : "border-white/40"
                   } hover:border-white hover:bg-white/10 transition-all ease-linear`}
                   onClick={handleSaveMovie}
                 >
-                  <Tooltip content={saved ? "Bỏ thích" : "Yêu thích"} />
+                  <Tooltip content={isFavourite ? "Bỏ thích" : "Yêu thích"} />
                   <FontAwesomeIcon
-                    icon={`fa-${saved ? "solid" : "regular"} fa-heart`}
-                    className="sm:text-lg"
+                    icon={
+                      loadingFav
+                        ? "fa-solid fa-spinner"
+                        : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
+                    }
+                    className={`sm:text-lg ${
+                      isFavourite ? "text-red-500" : "text-white"
+                    } ${loadingFav ? "animate-spin" : ""}`}
                   />
                 </button>
               </div>
@@ -531,7 +487,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
             </div>
           </div>
         </div>
-        <div className="flex flex-col p-[5%] space-y-10">
+        <div className="flex flex-col p-[5%] space-y-4">
           <div className="flex items-start space-y-3 sm:space-y-0 sm:space-x-[3%] flex-col sm:flex-row">
             <div className="flex flex-col space-y-4 w-full sm:w-[70%]">
               <div className="flex flex-col space-y-4">
@@ -670,7 +626,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
             {modal.item.type != "single" &&
               modal.item.episodes[server].server_data[server].link_embed !=
                 "" && (
-                <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
+                <div className="flex flex-col space-y-5 border-t-[0.5px] border-white/10 pt-4">
                   <div className="flex gap-4 items-center">
                     <span className="text-base lg:text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
                       <Server size={16} strokeWidth={3} />
@@ -691,7 +647,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                       </div>
                     ))}
                   </div>
-                  <div className="grid grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:grid-cols-5 lg:grid-cols-6">
                     {modal.item.episodes[server].server_data.map(
                       (item, index) => (
                         <div

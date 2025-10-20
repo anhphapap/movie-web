@@ -1,11 +1,9 @@
 import { useParams, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MovieList from "../components/MovieList";
-import { useMovieModal } from "../context/MovieModalContext";
 const FilterPage = () => {
   const { typeSlug } = useParams();
   const [searchParams] = useSearchParams();
-  const { openModal } = useMovieModal();
   const [country, setCountry] = useState(searchParams.get("country") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "");
   const [year, setYear] = useState(searchParams.get("year") || "");
@@ -27,7 +25,6 @@ const FilterPage = () => {
       year={year}
       category={category}
       sort_field={sortField}
-      openModal={openModal}
     />
   );
 };

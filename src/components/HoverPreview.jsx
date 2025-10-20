@@ -1,15 +1,40 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import LazyImage from "./LazyImage";
 import { useMovieModal } from "../context/MovieModalContext";
 import { useHoverPreview } from "../context/HoverPreviewContext";
 import { createPortal } from "react-dom";
+import { useTop } from "../context/TopContext";
+import Top10Badge from "../assets/images/Top10Badge.svg";
+import { useFavorites } from "../context/FavouritesProvider";
+import Tooltip from "./Tooltip";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
+  const location = useLocation();
   const { openModal } = useMovieModal();
-
+  const { topSet } = useTop();
+  const { favorites, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = favorites.some((m) => m.slug === hovered?.item?.slug);
+  const handleToggleFavorite = (e, item) => {
+    e.stopPropagation();
+    toggleFavorite({
+      slug: item.slug,
+      poster_url: item.poster_url,
+      thumb_url: item.thumb_url,
+      name: item.name,
+      year: item.year,
+      episode_current: item.episode_current,
+      quality: item.quality,
+      category: item.category,
+      tmdb: item.tmdb,
+      modified: item.modified,
+    });
+    if (location.pathname === "/yeu-thich") {
+      onLeave();
+    }
+  };
   const handleOpenModal = (slug, tmdb_id, tmdb_type) => {
     openModal(slug, tmdb_id, tmdb_type);
     onLeave();
@@ -59,29 +84,91 @@ export default function HoverPreview() {
                 sizes="24vw"
                 priority={true}
               />
+              {item.sub_docquyen && (
+                <img
+                  loading="lazy"
+                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  className="absolute top-3 left-3 w-4"
+                />
+              )}
+              {topSet?.has(item.slug) && (
+                <div className="absolute top-0 right-1">
+                  <img
+                    src={Top10Badge}
+                    alt="Top 10"
+                    className="w-12 aspect-auto"
+                  />
+                </div>
+              )}
+              {new Date().getTime() - new Date(item.modified?.time).getTime() <
+                1000 * 60 * 60 * 24 * 3 && (
+                <>
+                  {item.episode_current.toLowerCase().includes("hoàn tất") ||
+                  item.episode_current.toLowerCase().includes("full") ? (
+                    <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-sm font-semibold text-center shadow-black/80 shadow">
+                      Mới thêm
+                    </span>
+                  ) : item.episode_current.toLowerCase().includes("trailer") ? (
+                    <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-sm font-semibold text-center shadow-black/80 shadow">
+                      Sắp ra mắt
+                    </span>
+                  ) : (
+                    <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex rounded-t overflow-hidden w-auto">
+                      <span className="text-nowrap text-white bg-[#e50914] py-[2px] px-2 text-sm font-semibold text-center shadow-black/80 shadow">
+                        Tập mới
+                      </span>
+                      <span className="text-nowrap text-black bg-white py-[2px] px-2 text-sm font-semibold text-center shadow-black/80 shadow">
+                        Xem ngay
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             {/* <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div> */}
           </div>
 
           <div className="px-4 py-4 flex flex-col gap-2">
             <div className="flex justify-between px-1">
-              <div
-                className="bg-white rounded-full pl-[2px] h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
-                }}
-              >
-                <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+              <div className="flex items-center gap-2">
+                <div
+                  className="bg-white rounded-full pl-[2px] h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
+                  }}
+                >
+                  <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+                </div>
+                <div
+                  className={`relative group text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
+                    isFavourite ? "border-red-500" : "hover:border-white"
+                  }`}
+                  onClick={(e) => handleToggleFavorite(e, item)}
+                >
+                  <FontAwesomeIcon
+                    icon={
+                      loadingFav
+                        ? "fa-solid fa-spinner"
+                        : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
+                    }
+                    size="sm"
+                    className={`${
+                      isFavourite ? "text-red-500" : "text-white"
+                    } ${loadingFav ? "animate-spin" : ""}`}
+                  />
+                  <Tooltip
+                    content={isFavourite ? "Bỏ thích" : "Yêu thích"}
+                    size="sm"
+                  />
+                </div>
               </div>
               <div
-                className="text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenModal(item.slug, item.tmdb.id, item.tmdb.type);
-                }}
+                className={`relative group text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white hover:bg-white/10"
+                `}
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="sm" />
+                <Tooltip content="Xem chi tiết" size="sm" />
               </div>
             </div>
 
