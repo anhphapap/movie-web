@@ -12,16 +12,12 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            // ⚠️ Check react-router TRƯỚC react để tránh conflict
-            if (id.includes("react-router")) return "vendor-router";
-            // React core - PHẢI được tách riêng, check nhiều patterns
-            if (id.includes("react-dom")) return "vendor-react";
-            if (id.match(/[\\/]react[\\/]/)) return "vendor-react";
-            if (id.includes("scheduler")) return "vendor-react";
-            // Các libraries khác
-            if (id.includes("@fortawesome")) return "vendor-fontawesome";
+            // Tách các thư viện lớn ra
             if (id.includes("firebase")) return "vendor-firebase";
+            if (id.includes("@fortawesome")) return "vendor-fontawesome";
             if (id.includes("swiper")) return "vendor-swiper";
+            // Để React, React-DOM, React-Router trong vendor chung
+            // Vì chúng phụ thuộc lẫn nhau, không nên split
             return "vendor";
           }
         },
