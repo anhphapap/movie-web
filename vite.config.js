@@ -14,9 +14,9 @@ export default defineConfig({
           if (id.includes("node_modules")) {
             // ⚠️ Check react-router TRƯỚC react để tránh conflict
             if (id.includes("react-router")) return "vendor-router";
-            // React core - PHẢI được tách riêng
+            // React core - PHẢI được tách riêng, check nhiều patterns
             if (id.includes("react-dom")) return "vendor-react";
-            if (id.includes("react/")) return "vendor-react";
+            if (id.match(/[\\/]react[\\/]/)) return "vendor-react";
             if (id.includes("scheduler")) return "vendor-react";
             // Các libraries khác
             if (id.includes("@fortawesome")) return "vendor-fontawesome";
