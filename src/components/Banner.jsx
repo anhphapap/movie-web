@@ -8,7 +8,6 @@ import axios from "axios";
 import { useMovieModal } from "../context/MovieModalContext";
 import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
-import { useInView } from "react-intersection-observer";
 
 const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
@@ -22,9 +21,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [isPageVisible, setIsPageVisible] = useState(true);
   const bannerRef = useRef(null);
   const { openModal, isModalOpen } = useMovieModal();
-  const { ref: trailerRef, inView: trailerVisible } = useInView({
-    threshold: 0.5,
-  });
   const navigate = useNavigate();
   useEffect(() => {
     return () => {
@@ -330,13 +326,8 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         playerVars: { ...playerOptions.playerVars, mute: 1 },
       });
     }
-    // const t = setTimeout(() => setShowTrailer(true), 300);
-    useEffect(() => {
-      if (trailerVisible && youtubeId) {
-        const timer = setTimeout(() => setShowTrailer(true), 1000);
-        return () => clearTimeout(timer);
-      }
-    }, [trailerVisible, youtubeId]);
+    const t = setTimeout(() => setShowTrailer(true), 300);
+
     return () => {
       isMounted = false;
       clearTimeout(t);
@@ -398,7 +389,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     >
       {youtubeId && (
         <div
-          ref={trailerRef}
           className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-700 ease-in-out ${
             fadeOutImage && showTrailer
               ? "opacity-100"
@@ -430,37 +420,37 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 // Set trạng thái video đang phát
                 setIsVideoPaused(false);
 
-                // const id = setInterval(() => {
-                //   try {
-                //     // Kiểm tra player vẫn tồn tại
-                //     if (
-                //       !ytPlayer ||
-                //       !ytPlayer.getDuration ||
-                //       !ytPlayer.getCurrentTime
-                //     ) {
-                //       clearInterval(id);
-                //       return;
-                //     }
+                const id = setInterval(() => {
+                  try {
+                    // Kiểm tra player vẫn tồn tại
+                    if (
+                      !ytPlayer ||
+                      !ytPlayer.getDuration ||
+                      !ytPlayer.getCurrentTime
+                    ) {
+                      clearInterval(id);
+                      return;
+                    }
 
-                //     const duration = ytPlayer.getDuration();
-                //     const current = ytPlayer.getCurrentTime();
+                    const duration = ytPlayer.getDuration();
+                    const current = ytPlayer.getCurrentTime();
 
-                //     if (current > 1) setFadeOutImage(true);
+                    if (current > 1) setFadeOutImage(true);
 
-                //     if (duration - current <= 6) {
-                //       clearInterval(id);
-                //       setIntervalId(null);
-                //       ytPlayer.stopVideo();
+                    if (duration - current <= 6) {
+                      clearInterval(id);
+                      setIntervalId(null);
+                      ytPlayer.stopVideo();
 
-                //       setFadeOutImage(false);
-                //       setShowTrailer(false);
-                //     }
-                //   } catch (error) {
-                //     console.warn("Error in video interval:", error);
-                //     clearInterval(id);
-                //     setIntervalId(null);
-                //   }
-                // }, 500);
+                      setFadeOutImage(false);
+                      setShowTrailer(false);
+                    }
+                  } catch (error) {
+                    console.warn("Error in video interval:", error);
+                    clearInterval(id);
+                    setIntervalId(null);
+                  }
+                }, 500);
 
                 setIntervalId(id);
                 ytPlayer._checkTime = id;
@@ -468,28 +458,24 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 console.error("Error in onReady:", error);
               }
             }}
-            onProgress={(e) => {
-              if (e.getCurrentTime() > e.getDuration() - 5)
-                setFadeOutImage(true);
-            }}
             onStateChange={(e) => {
               try {
                 if (e.data === window.YT.PlayerState.ENDED) {
-                  // if (intervalId) {
-                  //   clearInterval(intervalId);
-                  //   setIntervalId(null);
-                  // }
+                  if (intervalId) {
+                    clearInterval(intervalId);
+                    setIntervalId(null);
+                  }
 
                   setFadeOutImage(false);
                   setTimeout(() => setShowTrailer(false), 800);
                 }
 
-                // if (e.data === window.YT.PlayerState.PAUSED) {
-                //   if (intervalId) {
-                //     clearInterval(intervalId);
-                //     setIntervalId(null);
-                //   }
-                // }
+                if (e.data === window.YT.PlayerState.PAUSED) {
+                  if (intervalId) {
+                    clearInterval(intervalId);
+                    setIntervalId(null);
+                  }
+                }
               } catch (error) {
                 console.warn("Error in onStateChange:", error);
               }
