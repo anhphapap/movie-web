@@ -9,14 +9,22 @@ export default defineConfig({
     minify: "esbuild",
     sourcemap: false,
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 1200, // nới nhẹ cảnh báo chunk
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
+            // Split FontAwesome thành nhiều chunk nhỏ hơn
+            if (id.includes("@fortawesome/free-solid-svg-icons"))
+              return "vendor-fa-solid";
+            if (id.includes("@fortawesome/free-regular-svg-icons"))
+              return "vendor-fa-regular";
+            if (id.includes("@fortawesome/free-brands-svg-icons"))
+              return "vendor-fa-brands";
             if (id.includes("@fortawesome")) return "vendor-fontawesome";
             if (id.includes("firebase")) return "vendor-firebase";
             if (id.includes("swiper")) return "vendor-swiper";
+            if (id.includes("react-dom")) return "vendor-react-dom";
             if (id.includes("react")) return "vendor-react";
             return "vendor";
           }
