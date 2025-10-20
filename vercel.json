@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "builds": [{ "src": "package.json", "use": "@vercel/static-build" }],
-  "outputDirectory": "dist",
   "functions": {
     "api/**/*.js": {
       "runtime": "nodejs18.x"
     }
   },
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "source": "/(.*).(jpg|jpeg|png|webp|avif|ico)",
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|avif|ico)",
       "headers": [
         { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
       ]
