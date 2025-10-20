@@ -5,6 +5,13 @@ const cache = new Map(); // bộ nhớ tạm (Vercel edge instance riêng biệt
 const CACHE_TTL = 1000 * 60 * 30; // 30 phút
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end(); // Preflight OK
+  }
   try {
     const { type = "movie", time = "day" } = req.query;
     const key = `${type}_${time}`;

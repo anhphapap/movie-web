@@ -1,9 +1,21 @@
 export async function fetchTrending(type = "movie", timeWindow = "day") {
   try {
+    // ✅ Nếu đang chạy local (localhost hoặc 127.0.0.1)
+    const isLocal =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1");
+
+    // ✅ Tự động chọn base URL
+    const baseURL = isLocal
+      ? "https://movie-web-lake-eta.vercel.app" // API production thật
+      : ""; // để Vercel dùng route /api/... nội bộ
+
     const tmdbRes = await fetch(
-      `/api/tmdb/trending?type=${type}&time=${timeWindow}`,
+      `${baseURL}/api/tmdb/trending?type=${type}&time=${timeWindow}`,
       { cache: "force-cache" }
     );
+
     const { results = [] } = await tmdbRes.json();
 
     // Giới hạn sớm (tránh gọi quá nhiều)
