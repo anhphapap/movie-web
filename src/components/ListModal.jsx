@@ -242,7 +242,7 @@ function ListModal({ isOpen, onClose, nameList, params }) {
           </div>
         </div>
         {page < totalPage && (
-          <div className="relative border-b-[1.6px] border-white/20 w-full mt-10">
+          <div className="relative group/tooltip border-b-[1.6px] border-white/20 w-full mt-10">
             <button
               onClick={() => setPage(page + 1)}
               className="absolute group bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414] border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"

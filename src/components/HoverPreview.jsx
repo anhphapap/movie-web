@@ -141,7 +141,7 @@ export default function HoverPreview() {
                   <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
                 </div>
                 <div
-                  className={`relative group text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
+                  className={`relative group/tooltip text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
                     isFavourite ? "border-red-500" : "hover:border-white"
                   }`}
                   onClick={(e) => handleToggleFavorite(e, item)}
@@ -164,7 +164,7 @@ export default function HoverPreview() {
                 </div>
               </div>
               <div
-                className={`relative group text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white hover:bg-white/10"
+                className={`relative group/tooltip text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white hover:bg-white/10"
                 `}
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="sm" />

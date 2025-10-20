@@ -7,7 +7,6 @@ import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { tops } from "../utils/data";
 import { Link } from "react-router-dom";
-import Tooltip from "./Tooltip";
 import { useMovieModal } from "../context/MovieModalContext";
 import { useListModal } from "../context/ListModalContext";
 const CustomRightArrow = ({ onClick }) => {

@@ -2,7 +2,9 @@ import React from "react";
 
 function Tooltip({ content, size = "md" }) {
   return (
-    <div className=" absolute invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all ease-linear duration-200 bottom-[130%] left-1/2 -translate-x-1/2">
+    <div
+      className={` absolute invisible opacity-0 group-hover/tooltip:visible group-hover/tooltip:opacity-100 transition-all ease-linear duration-200 bottom-[130%] left-1/2 -translate-x-1/2`}
+    >
       <div
         className={`rounded relative bg-stone-300 z-20 whitespace-nowrap text-black ${
           size === "sm" ? "text-xs px-2 py-1" : "text-base px-3 py-2"

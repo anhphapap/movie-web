@@ -22,6 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { Captions, Server } from "lucide-react";
 import SEO from "./SEO";
 import { useFavorites } from "../context/FavouritesProvider";
+import Recommend from "./Recommend";
 const customStyles = {
   content: {
     position: "absolute",
@@ -448,7 +449,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                   )}
                 </div>
                 <button
-                  className={`group relative p-1 sm:p-2 lg:p-3 h-full aspect-square rounded-full bg-transparent border-2 flex items-center justify-center ${
+                  className={`group/tooltip relative p-1 sm:p-2 lg:p-3 h-full aspect-square rounded-full bg-transparent border-2 flex items-center justify-center ${
                     isFavourite ? "border-red-500" : "border-white/40"
                   } hover:border-white hover:bg-white/10 transition-all ease-linear`}
                   onClick={handleSaveMovie}
@@ -677,6 +678,12 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                 </div>
               )}
           </div>
+          <Recommend
+            type={modal.breadCrumb[0].slug.split("/danh-sach")[1]}
+            country={modal.item.country[0].slug}
+            category={modal.item.category[0].slug}
+            slug={modal.item.slug}
+          />
         </div>
       </div>
     </Modal>

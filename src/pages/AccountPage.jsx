@@ -62,7 +62,7 @@ function AccountPage() {
           ) : (
             <>
               <p
-                className="ml-4 space-x-1 cursor-pointer group relative"
+                className="ml-4 space-x-1 cursor-pointer group/tooltip relative"
                 onClick={() => setChange(true)}
               >
                 <span className="font-bold text-xl md:text-3xl">

@@ -176,7 +176,7 @@ const WatchPage = () => {
         </div>
         <div className="bg-black px-4 py-2 sm:py-3 space-x-2">
           <button
-            className={`relative group px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
+            className={`relative group/tooltip px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
               saved ? " text-white" : "text-white/80  hover:text-white"
             }`}
             onClick={handleSaveMovie}
@@ -189,7 +189,7 @@ const WatchPage = () => {
             <Tooltip content={saved ? "Bỏ thích" : "Yêu thích"} />
           </button>
           <button
-            className={`relative group px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
+            className={`relative group/tooltip px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
               autoEpisodes ? " text-white" : "text-white/80  hover:text-white"
             }`}
             onClick={() => setAutoEpisodes(!autoEpisodes)}
@@ -202,7 +202,7 @@ const WatchPage = () => {
             <Tooltip content={"Tự động chuyển tập"} />
           </button>
           <button
-            className={`relative group px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
+            className={`relative group/tooltip px-3 py-2 rounded-md transition-all ease-linear hover:bg-white/10 ${
               cinema
                 ? " text-white"
                 : "text-white/80 hover:bg-white/10 hover:text-white"

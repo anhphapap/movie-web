@@ -361,7 +361,7 @@ const VideoPlayer = ({
                 }
                 setPlaying(!playing);
               }}
-              className="hover:scale-125 transition-all ease-linear duration-100 group relative"
+              className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative"
             >
               {playing ? <Pause size={24} /> : <Play size={24} />}
               <Tooltip content={playing ? "Dừng" : "Phát"} size="sm" />
@@ -371,7 +371,7 @@ const VideoPlayer = ({
                 handleSeek10s(-10);
                 showCenterOverlay("backward");
               }}
-              className="hover:scale-125 transition-all ease-linear duration-100 group relative"
+              className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative"
             >
               <RotateCcw size={24} />
               <Tooltip content={"10s trước"} size="sm" />
@@ -381,7 +381,7 @@ const VideoPlayer = ({
                 handleSeek10s(10);
                 showCenterOverlay("forward");
               }}
-              className="hover:scale-125 transition-all ease-linear duration-100 group relative"
+              className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative"
             >
               <RotateCw size={24} />
               <Tooltip content={"10s sau"} size="sm" />
@@ -499,7 +499,7 @@ const VideoPlayer = ({
             )}
             {episodes.length > 0 && (
               <button
-                className="hover:scale-125 transition-all ease-linear duration-100 group relative"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative"
                 onClick={() =>
                   navigate(
                     `/xem-phim/${movieSlug}?svr=${svr}&ep=${
@@ -542,7 +542,7 @@ const VideoPlayer = ({
             {/* Fullscreen */}
             <button
               onClick={toggleFullscreen}
-              className="hover:scale-125 transition-all ease-linear duration-100 group relative"
+              className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative"
             >
               {fullscreen ? <Minimize size={24} /> : <Maximize size={24} />}
               <Tooltip
