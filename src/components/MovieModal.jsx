@@ -201,7 +201,6 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   useEffect(() => {
     if (!slug) return;
 
-    // Reset state khi slug thay đổi
     setPlayer(null);
     setShowTrailer(false);
     setFadeOutImage(false);
@@ -442,7 +441,12 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                       </button>
                     </div>
                   )) || (
-                    <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2">
+                    <button
+                      className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2"
+                      onClick={() => {
+                        toast.warning("Tính năng đang được phát triển.");
+                      }}
+                    >
                       <FontAwesomeIcon icon="fa-solid fa-bell" />
                       <span>Nhắc tôi</span>
                     </button>

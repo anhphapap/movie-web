@@ -9,6 +9,7 @@ import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
 import { useFavorites } from "../context/FavouritesProvider";
 import Tooltip from "./Tooltip";
+import { toast } from "react-toastify";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
@@ -143,17 +144,36 @@ export default function HoverPreview() {
             <div className="flex justify-between px-1">
               <div className="flex items-center gap-2">
                 <div
-                  className="bg-white rounded-full pl-[2px] h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer"
+                  className={`bg-white rounded-full h-[40px] w-[40px] flex items-center justify-center hover:bg-white/80 cursor-pointer ${
+                    item.episode_current.toLowerCase().includes("trailer")
+                      ? "pl-0"
+                      : "pl-[2px]"
+                  }`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
+                    if (
+                      item.episode_current.toLowerCase().includes("trailer")
+                    ) {
+                      toast.warning("Tính năng đang được phát triển.");
+                    } else {
+                      navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
+                    }
                   }}
                 >
-                  <FontAwesomeIcon icon="fa-solid fa-play" size="sm" />
+                  <FontAwesomeIcon
+                    icon={`fa-solid ${
+                      item.episode_current.toLowerCase().includes("trailer")
+                        ? "fa-bell"
+                        : "fa-play"
+                    }`}
+                    size="sm"
+                  />
                 </div>
                 <div
-                  className={`relative group/tooltip text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
-                    isFavourite ? "border-red-500" : "hover:border-white"
+                  className={`relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
+                    isFavourite
+                      ? "border-red-500"
+                      : "hover:border-white border-white/40"
                   }`}
                   onClick={(e) => handleToggleFavorite(e, item)}
                 >

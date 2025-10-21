@@ -8,6 +8,7 @@ import axios from "axios";
 import { useMovieModal } from "../context/MovieModalContext";
 import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
+import { toast } from "react-toastify";
 
 const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
@@ -579,7 +580,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                   <span>Phát</span>
                 </button>
               ) : (
-                <button className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2">
+                <button
+                  className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
+                  onClick={() => {
+                    toast.warning("Tính năng đang được phát triển.");
+                  }}
+                >
                   <FontAwesomeIcon icon="fa-solid fa-bell" />
                   <span>Nhắc tôi</span>
                 </button>

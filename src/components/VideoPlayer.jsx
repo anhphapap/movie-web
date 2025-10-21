@@ -40,6 +40,10 @@ const VideoPlayer = ({
   episodes = [],
   movieSlug,
   content,
+  autoEpisodes = true,
+  onVideoEnd,
+  onNavigateToNextEpisode,
+  shouldAutoPlay = false,
 }) => {
   const containerRef = useRef(null);
   const videoRef = useRef(null);
@@ -110,7 +114,10 @@ const VideoPlayer = ({
     setVideoReady(false);
     setPlaying(false);
     setShowControls(false);
-    setHasPlayedOnce(false);
+    // Không reset hasPlayedOnce nếu đang auto play
+    if (!shouldAutoPlay) {
+      setHasPlayedOnce(false);
+    }
 
     if (Hls.isSupported()) {
       const hls = new Hls({
@@ -138,12 +145,30 @@ const VideoPlayer = ({
       // Video sẵn sàng
       hls.on(Hls.Events.MANIFEST_LOADED, () => {
         setVideoReady(true);
+        // Auto play nếu cần
+        if (shouldAutoPlay) {
+          setTimeout(() => {
+            video.play();
+            setPlaying(true);
+            setShowControls(true);
+            setHasPlayedOnce(true);
+          }, 100);
+        }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
 
       const handleCanPlay = () => {
         setVideoReady(true);
+        // Auto play nếu cần
+        if (shouldAutoPlay) {
+          setTimeout(() => {
+            video.play();
+            setPlaying(true);
+            setShowControls(true);
+            setHasPlayedOnce(true);
+          }, 100);
+        }
       };
 
       video.addEventListener("canplay", handleCanPlay);
@@ -156,7 +181,7 @@ const VideoPlayer = ({
         hlsRef.current.destroy();
       }
     };
-  }, [src]);
+  }, [src, shouldAutoPlay]);
 
   // Monitor buffering
   useEffect(() => {
@@ -181,16 +206,24 @@ const VideoPlayer = ({
       }
     };
 
+    const handleEnded = () => {
+      if (onVideoEnd) {
+        onVideoEnd();
+      }
+    };
+
     video.addEventListener("waiting", handleBuffering);
     video.addEventListener("canplay", handleCanPlay);
     video.addEventListener("progress", handleProgress);
+    video.addEventListener("ended", handleEnded);
 
     return () => {
       video.removeEventListener("waiting", handleBuffering);
       video.removeEventListener("canplay", handleCanPlay);
       video.removeEventListener("progress", handleProgress);
+      video.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [onVideoEnd]);
 
   // Pause overlay management - Professional implementation
   const resetPauseOverlayTimer = useCallback(() => {
@@ -476,18 +509,6 @@ const VideoPlayer = ({
         setTimeout(() => setShowSwipeControl(null), 500);
         return;
       }
-
-      // Horizontal swipe = Seek
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 0) {
-          handleSeek10s(10);
-          showCenterOverlay("forward");
-        } else {
-          handleSeek10s(-10);
-          showCenterOverlay("backward");
-        }
-        return;
-      }
     }
 
     // 2. TAP GESTURES
@@ -715,10 +736,10 @@ const VideoPlayer = ({
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 to-transparent z-10">
           <button
             onClick={handleInitialPlay}
-            className="group bg-red-600 hover:bg-red-700 rounded-full p-6 lg:p-8 transition-all duration-300 hover:scale-110 shadow-2xl active:scale-95"
+            className="group bg-black/20 border-2 border-white rounded-full p-3 sm:p-6 transition-all duration-300 hover:scale-110 shadow-2xl active:scale-95"
             aria-label="Phát video"
           >
-            <Play size={isMobile ? 48 : 64} className="text-white fill-white" />
+            <Play size={isMobile ? 32 : 64} className="text-white fill-white" />
           </button>
         </div>
       )}
@@ -814,7 +835,7 @@ const VideoPlayer = ({
       )}
 
       {/* Pause overlay */}
-      {showOverlay && (
+      {showOverlay && hasPlayedOnce && (
         <div className="absolute inset-0 bg-black/60 flex flex-col justify-center px-[10%] transition-opacity duration-500">
           <div className="text-white max-w-2xl pt-12 lg:pt-0">
             <p className="text-xs lg:text-base mb-2 text-white/70">Đang xem</p>
@@ -970,7 +991,8 @@ const VideoPlayer = ({
             <div className="flex items-center space-x-1 lg:space-x-4 flex-wrap">
               {/* Play */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (playing) {
                     videoRef.current.pause();
                     showCenterOverlay("pause");
@@ -980,65 +1002,94 @@ const VideoPlayer = ({
                   }
                   setPlaying(!playing);
                 }}
-                className="hover:scale-110 transition-all ease-linear duration-100 group/tooltip relative p-1.5 lg:p-0"
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                }}
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
                 aria-label={playing ? "Dừng" : "Phát"}
               >
                 {playing ? (
-                  <Pause size={isMobile ? 22 : 24} />
+                  <Pause size={isMobile ? 32 : 36} />
                 ) : (
-                  <Play size={isMobile ? 22 : 24} />
+                  <Play size={isMobile ? 32 : 36} />
                 )}
                 <Tooltip
                   content={playing ? "Dừng (Space)" : "Phát (Space)"}
                   size="sm"
+                  className="bottom-[100%]"
+                  color="dark"
                 />
               </button>
 
               {/* Backward */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   handleSeek10s(-10);
                   showCenterOverlay("backward");
                 }}
-                className="hover:scale-110 transition-all ease-linear duration-100 group/tooltip relative p-1.5 lg:p-0"
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                }}
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
                 aria-label="Quay lại 10 giây"
               >
-                <RotateCcw size={isMobile ? 20 : 24} />
-                <Tooltip content={"10s trước (←)"} size="sm" />
+                <RotateCcw size={isMobile ? 30 : 34} />
+                <Tooltip
+                  content={"10s trước (←)"}
+                  size="sm"
+                  className="bottom-[100%]"
+                  color="dark"
+                />
               </button>
 
               {/* Forward */}
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   handleSeek10s(10);
                   showCenterOverlay("forward");
                 }}
-                className="hover:scale-110 transition-all ease-linear duration-100 group/tooltip relative p-1.5 lg:p-0"
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                }}
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
                 aria-label="Tiến 10 giây"
               >
-                <RotateCw size={isMobile ? 20 : 24} />
-                <Tooltip content={"10s sau (→)"} size="sm" />
+                <RotateCw size={isMobile ? 30 : 34} />
+                <Tooltip
+                  content={"10s sau (→)"}
+                  size="sm"
+                  className="bottom-[100%]"
+                  color="dark"
+                />
               </button>
 
-              {/* Volume - Disabled (use edge swipe instead) */}
-              {false && (
-                <div className="flex items-center relative group">
+              {/* Volume - Desktop only (mobile uses edge swipe) */}
+              {!isMobile && (
+                <div className="flex items-center relative group group/tooltip">
                   <button
-                    onClick={handleMute}
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-1 lg:p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMute();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2"
                     aria-label={muted ? "Bật tiếng" : "Tắt tiếng"}
                   >
                     {muted ? (
-                      <VolumeX size={isMobile ? 18 : 24} />
+                      <VolumeX size={34} />
                     ) : volume < 0.3 ? (
-                      <Volume size={isMobile ? 18 : 24} />
+                      <Volume size={34} />
                     ) : volume < 0.7 ? (
-                      <Volume1 size={isMobile ? 18 : 24} />
+                      <Volume1 size={34} />
                     ) : (
-                      <Volume2 size={isMobile ? 18 : 24} />
+                      <Volume2 size={34} />
                     )}
                   </button>
-                  <div className="cursor-pointer -rotate-90 absolute bottom-[56px] left-1/2 z-10 -translate-x-1/2 bg-black/80 backdrop-blur flex justify-center items-center p-1 group-hover:visible group-hover:opacity-100 opacity-0 invisible">
+                  <div className="cursor-pointer -rotate-90 absolute top-[-70px] left-1/2 z-10 -translate-x-1/2 bg-black/80 backdrop-blur flex justify-center items-center p-2 rounded-md group-hover:visible group-hover:opacity-100 opacity-0 invisible transition-all duration-200">
                     <input
                       type="range"
                       min={0}
@@ -1065,13 +1116,13 @@ const VideoPlayer = ({
               {episodes.length > 0 && (
                 <div className="group/episodes hidden lg:block">
                   <button
-                    className="mt-1.5 group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-1 lg:p-0"
+                    className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
                     aria-label="Danh sách tập"
                   >
-                    <ListVideo size={24} />
+                    <ListVideo size={34} />
                   </button>
                   <div
-                    className="absolute -bottom-24 right-0 bg-[#262626]/95 backdrop-blur h-[400px] w-2/5 text-white rounded-md text-sm
+                    className="absolute -bottom-20 right-0 bg-[#262626]/95 backdrop-blur h-[400px] w-1/3 text-white rounded-md text-sm
                   opacity-0 invisible group-hover/episodes:opacity-100 group-hover/episodes:visible 
                   transition-all duration-200 z-[9999] -translate-y-1/2 border border-white/10"
                   >
@@ -1092,7 +1143,10 @@ const VideoPlayer = ({
                         >
                           <div
                             className="flex items-center justify-between py-3 px-5 cursor-pointer"
-                            onClick={() => setShowEpisodes(index)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowEpisodes(index);
+                            }}
                           >
                             <span className="text-zinc-300 text-xs">
                               {index + 1}
@@ -1104,7 +1158,7 @@ const VideoPlayer = ({
 
                           {showEpisodes === index && (
                             <div className={`flex group-hover:flex p-2 gap-2`}>
-                              <div className="relative w-12 h-8">
+                              <div className="relative w-36">
                                 <LazyImage
                                   src={poster}
                                   alt={ep.name}
@@ -1113,11 +1167,12 @@ const VideoPlayer = ({
                                 {showEpisodes !== parseInt(episode) && (
                                   <div
                                     className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer hover:scale-105 transition-all ease-linear duration-100"
-                                    onClick={() =>
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       navigate(
                                         `/xem-phim/${movieSlug}?svr=${svr}&ep=${index}`
-                                      )
-                                    }
+                                      );
+                                    }}
                                   >
                                     <Play
                                       size={20}
@@ -1136,38 +1191,55 @@ const VideoPlayer = ({
               )}
 
               {/* Next episode */}
-              {episodes.length > 0 && (
-                <button
-                  className="hover:scale-110 transition-all ease-linear duration-100 group/tooltip relative p-1.5 lg:p-0"
-                  onClick={() =>
-                    navigate(
-                      `/xem-phim/${movieSlug}?svr=${svr}&ep=${
-                        parseInt(episode) + 1
-                      }`
-                    )
-                  }
-                  aria-label="Xem tập tiếp theo"
-                >
-                  <SkipForward size={isMobile ? 20 : 24} />
-                  <Tooltip
-                    content={"Tập " + (parseInt(episode) + 2) + " (N)"}
-                    size="sm"
-                  />
-                </button>
-              )}
+              {episodes.length > 0 &&
+                parseInt(episode) < episodes.length - 1 && (
+                  <button
+                    className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onNavigateToNextEpisode) {
+                        onNavigateToNextEpisode();
+                      } else {
+                        navigate(
+                          `/xem-phim/${movieSlug}?svr=${svr}&ep=${
+                            parseInt(episode) + 1
+                          }`
+                        );
+                      }
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    aria-label="Xem tập tiếp theo"
+                  >
+                    <SkipForward size={isMobile ? 30 : 34} />
+                    <Tooltip
+                      content={"Tập " + (parseInt(episode) + 2) + " (N)"}
+                      size="sm"
+                      className="bottom-[100%]"
+                      color="dark"
+                    />
+                  </button>
+                )}
 
               {/* Playback speed */}
               <div className="relative group">
                 <div className="relative group/speed">
                   <button
-                    onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                    className="hover:scale-110 transition-all ease-linear duration-100 lg:mt-1.5 p-1.5 lg:p-0 group-hover/speed:scale-110 group/tooltip relative"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSpeedMenu(!showSpeedMenu);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative"
                     aria-label="Tốc độ phát"
                   >
-                    <Gauge size={isMobile ? 20 : 24} />
+                    <Gauge size={isMobile ? 30 : 34} />
                   </button>
                   <div
-                    className={`absolute bottom-10 right-1/2 bg-black/90 backdrop-blur text-white rounded-md p-1 text-xs lg:text-sm
+                    className={`absolute bottom-12 right-1/2 bg-black/90 backdrop-blur text-white rounded-md p-1 text-xs lg:text-sm
                   transition-all duration-200 translate-x-1/2 border border-white/10 ${
                     showSpeedMenu
                       ? "opacity-100 visible"
@@ -1177,7 +1249,8 @@ const VideoPlayer = ({
                     {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                       <div
                         key={rate}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           changePlaybackRate(rate);
                           setShowSpeedMenu(false);
                         }}
@@ -1199,17 +1272,20 @@ const VideoPlayer = ({
               <div className="relative group hidden lg:block">
                 <div className="relative group/quality hidden lg:block">
                   <button
-                    onClick={() =>
-                      setShowQualityMenuState(!showQualityMenuState)
-                    }
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-1 pt-2 group-hover/quality:scale-125 group/tooltip relative"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowQualityMenuState(!showQualityMenuState);
+                    }}
+                    onTouchEnd={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative"
                     aria-label="Chất lượng"
                   >
-                    <SlidersHorizontal size={24} />
-                    <Tooltip content={`${currentQuality}`} size="sm" />
+                    <SlidersHorizontal size={34} />
                   </button>
                   <div
-                    className={`absolute bottom-10 right-1/2 bg-black/90 backdrop-blur text-white rounded-md p-1 text-sm
+                    className={`absolute bottom-12 right-1/2 bg-black/90 backdrop-blur text-white rounded-md p-1 text-sm
                   transition-all duration-200 translate-x-1/2 border border-white/10 min-w-max ${
                     showQualityMenuState
                       ? "opacity-100 visible"
@@ -1219,7 +1295,8 @@ const VideoPlayer = ({
                     {qualities.map((q) => (
                       <div
                         key={q.name}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           changeQuality(q.height === 0 ? "auto" : q.height);
                           setShowQualityMenuState(false);
                         }}
@@ -1241,29 +1318,48 @@ const VideoPlayer = ({
               {/* Picture in Picture */}
               {pipSupported && (
                 <button
-                  onClick={togglePiP}
-                  className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-1 lg:p-0 hidden lg:block"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePiP();
+                  }}
+                  onTouchEnd={(e) => {
+                    e.stopPropagation();
+                  }}
+                  className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 hidden lg:block"
                   aria-label="Picture in Picture"
                 >
-                  <PictureInPicture size={24} />
-                  <Tooltip content={"PiP (P)"} size="sm" />
+                  <PictureInPicture size={34} />
+                  <Tooltip
+                    content={"PiP (P)"}
+                    size="sm"
+                    className="bottom-[100%]"
+                    color="dark"
+                  />
                 </button>
               )}
 
               {/* Fullscreen */}
               <button
-                onClick={toggleFullscreen}
-                className="hover:scale-110 transition-all ease-linear duration-100 group/tooltip relative p-1.5 lg:p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFullscreen();
+                }}
+                onTouchEnd={(e) => {
+                  e.stopPropagation();
+                }}
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
                 aria-label={fullscreen ? "Thu nhỏ" : "Phóng to"}
               >
                 {fullscreen ? (
-                  <Minimize size={isMobile ? 20 : 24} />
+                  <Minimize size={isMobile ? 30 : 34} />
                 ) : (
-                  <Maximize size={isMobile ? 20 : 24} />
+                  <Maximize size={isMobile ? 30 : 34} />
                 )}
                 <Tooltip
                   content={fullscreen ? "Thu nhỏ (F)" : "Phóng to (F)"}
                   size="sm"
+                  className="bottom-[100%]"
+                  color="dark"
                 />
               </button>
             </div>
