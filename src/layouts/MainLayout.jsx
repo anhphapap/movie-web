@@ -36,6 +36,7 @@ const MainLayout = ({ type_slug, filter = false }) => {
   return (
     <>
       <Banner type_slug={type_slug} filter={filter} />
+
       {listInfo.map((item, index) => (
         <div key={`${locate.pathname}-${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (

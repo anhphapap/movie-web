@@ -24,6 +24,9 @@ const WatchPage = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const ep = queryParams.get("ep") || 0;
   const svr = queryParams.get("svr") || 0;
+
+  // Đọc resume data từ localStorage
+  const [resumeData, setResumeData] = useState(null);
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -54,6 +57,26 @@ const WatchPage = () => {
     };
     checkSaved();
   }, [user, movieSlug, movie]);
+
+  // Load resume data từ localStorage
+  useEffect(() => {
+    const savedResumeData = localStorage.getItem("resumeVideo");
+    if (savedResumeData) {
+      try {
+        const parsed = JSON.parse(savedResumeData);
+        // Chỉ sử dụng nếu cùng movie và trong vòng 24h
+        const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000;
+        if (parsed.slug === movieSlug && isRecent) {
+          setResumeData(parsed);
+        }
+        // Clear sau khi sử dụng
+        localStorage.removeItem("resumeVideo");
+      } catch (error) {
+        console.error("Error parsing resume data:", error);
+        localStorage.removeItem("resumeVideo");
+      }
+    }
+  }, [movieSlug]);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -91,6 +114,19 @@ const WatchPage = () => {
     }
   }, [ep]);
 
+  // Clear resume data sau khi video đã seek xong
+  useEffect(() => {
+    if (resumeData) {
+      // Clear sau 3 giây để đảm bảo video đã seek và play xong
+      const timer = setTimeout(() => {
+        setResumeData(null);
+        localStorage.removeItem("resumeVideo");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [resumeData]);
+
   // Validate and reset server if invalid
   useEffect(() => {
     if (
@@ -117,6 +153,7 @@ const WatchPage = () => {
           savedMovies: arrayRemove({
             slug: movie.item.slug,
             poster_url: movie.item.poster_url,
+            thumb_url: movie.item.thumb_url,
             name: movie.item.name,
             year: movie.item.year,
             episode_current: movie.item.episode_current,
@@ -132,6 +169,7 @@ const WatchPage = () => {
           savedMovies: arrayUnion({
             slug: movie.item.slug,
             poster_url: movie.item.poster_url,
+            thumb_url: movie.item.thumb_url,
             name: movie.item.name,
             year: movie.item.year,
             episode_current: movie.item.episode_current,
@@ -303,6 +341,7 @@ const WatchPage = () => {
       {watchPageSEO && (
         <SEO seoData={watchPageSEO} baseUrl={window.location.origin} />
       )}
+
       {!cinema && (
         <div className="flex items-center gap-4 my-6 pt-2 px-2">
           <button
@@ -325,15 +364,10 @@ const WatchPage = () => {
         <div className="relative w-full bg-black aspect-video">
           <div className="absolute top-0 left-0 w-full aspect-video">
             <VideoPlayer
-              src={movie.item.episodes[svr].server_data[ep].link_m3u8}
-              poster={movie.item.poster_url}
-              title={movie.item.name}
+              movie={movie.item}
               episode={ep}
               svr={svr}
-              episodeName={movie.item.episodes[svr].server_data[ep].name}
-              episodes={movie.item.episodes[svr].server_data}
-              movieSlug={movie.item.slug}
-              content={movie.item.content}
+              resumeData={resumeData}
               autoEpisodes={autoEpisodes}
               onVideoEnd={() => {
                 if (

@@ -10,14 +10,17 @@ import Top10Badge from "../assets/images/Top10Badge.svg";
 import { useFavorites } from "../context/FavouritesProvider";
 import Tooltip from "./Tooltip";
 import { toast } from "react-toastify";
+import { useWatching } from "../context/WatchingContext";
+import { formatSecondsToMinutes, formatTime } from "../utils/data";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
   const location = useLocation();
   const { openModal } = useMovieModal();
   const { topSet } = useTop();
-  const { favorites, toggleFavorite, loadingFav } = useFavorites();
-  const isFavourite = favorites.some((m) => m.slug === hovered?.item?.slug);
+  const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = favoriteSlugs.includes(hovered?.item?.slug);
+  const { toggleWatching } = useWatching();
   const handleToggleFavorite = (e, item) => {
     e.stopPropagation();
     toggleFavorite({
@@ -31,6 +34,7 @@ export default function HoverPreview() {
       category: item.category,
       tmdb: item.tmdb,
       modified: item.modified,
+      addedAt: new Date().toISOString(),
     });
     if (location.pathname === "/yeu-thich") {
       onLeave();
@@ -40,14 +44,35 @@ export default function HoverPreview() {
     openModal(slug, tmdb_id, tmdb_type);
     onLeave();
   };
+  const handlePlayMovie = (e, isTrailer = false) => {
+    e.stopPropagation();
+    if (isWatching) {
+      const resumeData = {
+        slug: hovered.item.slug,
+        currentTime: hovered.item.currentTime || 0,
+        duration: hovered.item.duration || 0,
+        progress: hovered.item.progress || 0,
+        timestamp: Date.now(),
+      };
 
+      localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
+      navigate(
+        `/xem-phim/${hovered.item.slug}?svr=${hovered.item.svr}&ep=${hovered.item.episode}`
+      );
+    } else if (isTrailer) {
+      toast.warning("Tính năng đang được phát triển.");
+    } else {
+      navigate(`/xem-phim/${hovered.item.slug}?svr=${0}&ep=${0}`);
+    }
+  };
   if (!hovered || !hovered.rect) return null;
-  const { item, rect, index, typeList, firstVisible, lastVisible } = hovered;
+  const { item, rect, index, typeList, firstVisible, lastVisible, isWatching } =
+    hovered;
 
   const content = (
     <AnimatePresence mode="wait">
       <motion.div
-        key={item._id + "hoverpreview" || item.slug + "hoverpreview"}
+        key={item.slug + "hoverpreview" || item._id + "hoverpreview"}
         className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),
@@ -139,7 +164,6 @@ export default function HoverPreview() {
             </div>
             {/* <div className="bg-gradient-to-t from-[#141414] to-transparent absolute w-full h-[40%] -bottom-[2px] left-0 z-10"></div> */}
           </div>
-
           <div className="px-4 py-4 flex flex-col gap-2">
             <div className="flex justify-between px-1">
               <div className="flex items-center gap-2">
@@ -149,16 +173,12 @@ export default function HoverPreview() {
                       ? "pl-0"
                       : "pl-[2px]"
                   }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (
+                  onClick={(e) =>
+                    handlePlayMovie(
+                      e,
                       item.episode_current.toLowerCase().includes("trailer")
-                    ) {
-                      toast.warning("Tính năng đang được phát triển.");
-                    } else {
-                      navigate(`/xem-phim/${item.slug}?svr=${0}&ep=${0}`);
-                    }
-                  }}
+                    )
+                  }
                 >
                   <FontAwesomeIcon
                     icon={`fa-solid ${
@@ -193,6 +213,25 @@ export default function HoverPreview() {
                     size="sm"
                   />
                 </div>
+                {isWatching && (
+                  <div
+                    className={
+                      "relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white border-white/40"
+                    }
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWatching(item);
+                      onLeave();
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-xmark"
+                      size="sm"
+                      className="text-white"
+                    />
+                    <Tooltip content="Xoá khỏi hàng" size="sm" />
+                  </div>
+                )}
               </div>
               <div
                 className={`relative group/tooltip text-white border-2 cursor-pointer border-white/40 bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white hover:bg-white/10"
@@ -203,36 +242,58 @@ export default function HoverPreview() {
               </div>
             </div>
 
-            <h3 className="font-bold truncate text-base text-white">
-              {item.name}
+            <h3
+              className={`font-bold text-base text-white ${
+                isWatching ? "" : "truncate"
+              }`}
+            >
+              {!isWatching
+                ? item.name
+                : `${item.name} - Tập ${item.episodeName}`}
             </h3>
-
-            <div className="flex space-x-2 items-center text-white/80 text-sm">
-              <span className="lowercase">{item.year}</span>
-              <span className="hidden lg:block">
-                {item.episode_current.toLowerCase().includes("hoàn tất")
-                  ? "Hoàn tất"
-                  : item.episode_current}
-              </span>
-              <span className="px-1 border rounded font-bold uppercase h-[20px] flex items-center justify-center">
-                {item.quality}
-              </span>
-            </div>
-
-            <div className="text-white/80 text-sm flex items-center gap-2 flex-wrap">
-              {item.category.slice(0, 3).map((cat, idx) => (
-                <div key={cat.name + "hoverpreview"}>
-                  {idx !== 0 && (
-                    <FontAwesomeIcon
-                      icon="fa-solid fa-circle"
-                      size="2xs"
-                      className="opacity-50 scale-50"
-                    />
-                  )}
-                  <span key={cat.name}>{cat.name}</span>
+            {!isWatching ? (
+              <>
+                <div className="flex space-x-2 items-center text-white/80 text-sm">
+                  <span className="lowercase">{item.year}</span>
+                  <span className="hidden lg:block">
+                    {item.episode_current.toLowerCase().includes("hoàn tất")
+                      ? "Hoàn tất"
+                      : item.episode_current}
+                  </span>
+                  <span className="px-1 border rounded font-bold uppercase h-[20px] flex items-center justify-center">
+                    {item.quality}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <div className="text-white/80 text-sm flex items-center gap-2 flex-wrap">
+                  {item.category.slice(0, 3).map((cat, idx) => (
+                    <>
+                      {idx !== 0 && (
+                        <FontAwesomeIcon
+                          icon="fa-solid fa-circle"
+                          size="2xs"
+                          className="opacity-50 scale-50"
+                          key={cat.name + "circle"}
+                        />
+                      )}
+                      <span key={cat.name + "name"}>{cat.name}</span>
+                    </>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 w-full">
+                <div className="h-[3px] bg-[#5b5b5b] w-full">
+                  <div
+                    className="h-full bg-[#d80f16] transition-all duration-300"
+                    style={{ width: `${item.progress || 0}%` }}
+                  />
+                </div>
+                <span className="text-white/80 text-sm whitespace-nowrap text-nowrap font-medium">
+                  {formatSecondsToMinutes(item.currentTime || 0)}/
+                  {formatSecondsToMinutes(item.duration || 0)}ph
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </motion.div>

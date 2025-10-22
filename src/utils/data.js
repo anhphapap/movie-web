@@ -126,6 +126,10 @@ export const listAvatar = [
 
 export const homeContent = [
   {
+    nameList: "Danh sách tiếp tục xem của ",
+    typeList: "watching",
+  },
+  {
     nameList: "Top 10 phim bộ",
     typeList: "top",
     type_slug: "phim-bo",
@@ -342,6 +346,12 @@ export const formatTime = (time) => {
       "0"
     )}`;
   }
+};
+
+export const formatSecondsToMinutes = (seconds) => {
+  if (!seconds || isNaN(seconds)) return "00:00";
+  const minutes = Math.floor(seconds / 60);
+  return minutes;
 };
 
 export const getYoutubeId = (url) => {

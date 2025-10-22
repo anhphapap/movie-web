@@ -24,22 +24,19 @@ import {
   PictureInPicture,
   SlidersHorizontal,
   Sun,
+  Clock,
 } from "lucide-react";
 import { formatTime } from "../utils/data";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "./Tooltip";
 import LazyImage from "./LazyImage";
+import { useWatching } from "../context/WatchingContext";
 
 const VideoPlayer = ({
-  src,
-  poster,
-  title = "Tiêu đề phim",
   episode,
   svr,
-  episodeName,
-  episodes = [],
-  movieSlug,
-  content,
+  movie,
+  resumeData = null,
   autoEpisodes = true,
   onVideoEnd,
   onNavigateToNextEpisode,
@@ -57,6 +54,8 @@ const VideoPlayer = ({
   const lastTapY = useRef(0);
   const singleTapTimer = useRef(null);
   const navigate = useNavigate();
+  const { toggleWatching, updateWatchingProgress, isInWatching } =
+    useWatching();
 
   // State
   const [playing, setPlaying] = useState(false);
@@ -123,7 +122,7 @@ const VideoPlayer = ({
       const hls = new Hls({
         startLevel: -1, // auto
       });
-      hls.loadSource(src);
+      hls.loadSource(movie?.episodes[svr]?.server_data[episode]?.link_m3u8);
       hls.attachMedia(video);
       hlsRef.current = hls;
 
@@ -145,7 +144,8 @@ const VideoPlayer = ({
       // Video sẵn sàng
       hls.on(Hls.Events.MANIFEST_LOADED, () => {
         setVideoReady(true);
-        // Auto play nếu cần
+
+        // Autoplay bình thường
         if (shouldAutoPlay) {
           setTimeout(() => {
             video.play();
@@ -156,11 +156,12 @@ const VideoPlayer = ({
         }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-      video.src = src;
+      video.src = movie?.episodes[svr]?.server_data[episode]?.link_m3u8;
 
       const handleCanPlay = () => {
         setVideoReady(true);
-        // Auto play nếu cần
+
+        // Autoplay bình thường
         if (shouldAutoPlay) {
           setTimeout(() => {
             video.play();
@@ -181,7 +182,27 @@ const VideoPlayer = ({
         hlsRef.current.destroy();
       }
     };
-  }, [src, shouldAutoPlay]);
+  }, [movie, svr, episode, shouldAutoPlay]);
+
+  // Xử lý resume data riêng biệt
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !resumeData || !videoReady) return;
+
+    // Chỉ seek nếu video đã sẵn sàng và có resume data
+    if (resumeData.currentTime > 0) {
+      setTimeout(() => {
+        video.currentTime = resumeData.currentTime;
+        setProgress(resumeData.currentTime);
+        if (!playing) {
+          video.play();
+          setPlaying(true);
+          setShowControls(true);
+          setHasPlayedOnce(true);
+        }
+      }, 500);
+    }
+  }, [resumeData, videoReady, playing]);
 
   // Monitor buffering
   useEffect(() => {
@@ -307,12 +328,53 @@ const VideoPlayer = ({
       setPlaying(true);
       setShowControls(true);
       setHasPlayedOnce(true);
+
+      // Lưu phim vào danh sách đang xem
+      const movieData = {
+        slug: movie.slug,
+        poster_url: movie.poster_url,
+        thumb_url: movie.thumb_url,
+        name: movie.name,
+        tmdb: movie.tmdb,
+        modified: movie.modified,
+        episode_current: movie.episode_current,
+        episode: episode,
+        svr: svr,
+        episodeName: movie.episodes[svr].server_data[episode].name,
+        currentTime: 0,
+        duration: video.duration || 0,
+        progress: 0,
+        lastWatched: new Date().toISOString(),
+      };
+
+      // Chỉ thêm nếu chưa có trong danh sách, tránh toggle gây xóa
+      if (!isInWatching(movie.slug)) {
+        toggleWatching(movieData);
+      }
     }
   };
 
   const handleTimeUpdate = () => {
-    setProgress(videoRef.current.currentTime);
-    setDuration(videoRef.current.duration);
+    const currentTime = videoRef.current.currentTime;
+    const videoDuration = videoRef.current.duration;
+
+    setProgress(currentTime);
+    setDuration(videoDuration);
+
+    // Lưu tiến độ xem phim mỗi 5 giây
+    if (
+      videoDuration > 0 &&
+      currentTime > 0 &&
+      Math.floor(currentTime) % 5 === 0
+    ) {
+      updateWatchingProgress(
+        movie.slug,
+        currentTime,
+        videoDuration,
+        episode,
+        svr
+      );
+    }
   };
 
   const handleSeek = (e) => {
@@ -720,7 +782,7 @@ const VideoPlayer = ({
       {/* Video */}
       <video
         ref={videoRef}
-        poster={import.meta.env.VITE_API_IMAGE + poster}
+        poster={import.meta.env.VITE_API_IMAGE + movie?.poster_url}
         className={`w-full h-full bg-black transition-all duration-300 ${
           fullscreen ? "object-contain" : "object-cover"
         }`}
@@ -733,14 +795,19 @@ const VideoPlayer = ({
 
       {/* Initial play button - CHỈ hiện lần đầu vào, chưa play bao giờ */}
       {videoReady && !hasPlayedOnce && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/60 to-transparent z-10">
-          <button
-            onClick={handleInitialPlay}
-            className="group bg-black/20 border-2 border-white rounded-full p-3 sm:p-6 transition-all duration-300 hover:scale-110 shadow-2xl active:scale-95"
-            aria-label="Phát video"
-          >
-            <Play size={isMobile ? 32 : 64} className="text-white fill-white" />
-          </button>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
+          <div className="flex flex-col items-center gap-4">
+            <button
+              onClick={handleInitialPlay}
+              className="group bg-black/40 border-2 border-white rounded-full p-3 sm:p-6 transition-all duration-300 hover:scale-110 shadow-2xl active:scale-95"
+              aria-label="Phát video"
+            >
+              <Play
+                size={isMobile ? 32 : 64}
+                className="text-white fill-white"
+              />
+            </button>
+          </div>
         </div>
       )}
 
@@ -839,14 +906,16 @@ const VideoPlayer = ({
         <div className="absolute inset-0 bg-black/60 flex flex-col justify-center px-[10%] transition-opacity duration-500">
           <div className="text-white max-w-2xl pt-12 lg:pt-0">
             <p className="text-xs lg:text-base mb-2 text-white/70">Đang xem</p>
-            <h1 className="text-2xl lg:text-5xl font-bold mb-1">{title}</h1>
+            <h1 className="text-2xl lg:text-5xl font-bold mb-1">
+              {movie.name}
+            </h1>
             <p className="text-sm lg:text-xl font-semibold mb-3">
               Loạt phim truyền hình ngắn
             </p>
-            <p className="text-xl lg:text-3xl font-semibold mb-3">{`Tập ${episodeName}`}</p>
+            <p className="text-xl lg:text-3xl font-semibold mb-3">{`Tập ${movie.episodes[svr].server_data[episode].name}`}</p>
             <p
               className="text-xs lg:text-base opacity-90 mb-6 text-pretty line-clamp-3 invisible lg:visible text-white/70"
-              dangerouslySetInnerHTML={{ __html: content }}
+              dangerouslySetInnerHTML={{ __html: movie.content }}
             />
           </div>
           <p className="absolute bottom-[10%] right-[10%] text-white/70 text-xs lg:text-base">
@@ -1108,12 +1177,13 @@ const VideoPlayer = ({
               {/* Title - chỉ desktop */}
             </div>
             <span className="hidden lg:block ml-4 text-xs lg:text-base font-semibold truncate">
-              {title} - {"Tập " + episodeName}
+              {movie.name} -{" "}
+              {"Tập " + movie.episodes[svr].server_data[episode].name}
             </span>
 
             <div className="flex items-center space-x-1 lg:space-x-4">
               {/* Episodes */}
-              {episodes.length > 0 && (
+              {movie.episodes[svr].server_data.length > 0 && (
                 <div className="group/episodes hidden lg:block">
                   <button
                     className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
@@ -1132,7 +1202,7 @@ const VideoPlayer = ({
                       </span>
                     </div>
                     <div className="flex flex-col overflow-y-auto h-full bg-[#262626]">
-                      {episodes.map((ep, index) => (
+                      {movie.episodes[svr].server_data.map((ep, index) => (
                         <div
                           key={index}
                           className={`transition ${
@@ -1152,7 +1222,8 @@ const VideoPlayer = ({
                               {index + 1}
                             </span>
                             <span className="ml-4 flex-1 text-white font-medium text-xs">
-                              {"Tập " + ep.name}
+                              {"Tập " +
+                                movie.episodes[svr].server_data[index].name}
                             </span>
                           </div>
 
@@ -1160,8 +1231,10 @@ const VideoPlayer = ({
                             <div className={`flex group-hover:flex p-2 gap-2`}>
                               <div className="relative w-36">
                                 <LazyImage
-                                  src={poster}
-                                  alt={ep.name}
+                                  src={movie.poster_url}
+                                  alt={
+                                    movie.episodes[svr].server_data[index].name
+                                  }
                                   sizes="5vw"
                                 />
                                 {showEpisodes !== parseInt(episode) && (
@@ -1170,7 +1243,7 @@ const VideoPlayer = ({
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       navigate(
-                                        `/xem-phim/${movieSlug}?svr=${svr}&ep=${index}`
+                                        `/xem-phim/${movie.slug}?svr=${svr}&ep=${index}`
                                       );
                                     }}
                                   >
@@ -1191,8 +1264,9 @@ const VideoPlayer = ({
               )}
 
               {/* Next episode */}
-              {episodes.length > 0 &&
-                parseInt(episode) < episodes.length - 1 && (
+              {movie.episodes[svr].server_data.length > 0 &&
+                parseInt(episode) <
+                  movie.episodes[svr].server_data.length - 1 && (
                   <button
                     className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
                     onClick={(e) => {
@@ -1201,7 +1275,7 @@ const VideoPlayer = ({
                         onNavigateToNextEpisode();
                       } else {
                         navigate(
-                          `/xem-phim/${movieSlug}?svr=${svr}&ep=${
+                          `/xem-phim/${movie.slug}?svr=${svr}&ep=${
                             parseInt(episode) + 1
                           }`
                         );
@@ -1214,7 +1288,7 @@ const VideoPlayer = ({
                   >
                     <SkipForward size={isMobile ? 30 : 34} />
                     <Tooltip
-                      content={"Tập " + (parseInt(episode) + 2) + " (N)"}
+                      content={`Tập ${parseInt(episode) + 2} (N)`}
                       size="sm"
                       className="bottom-[100%]"
                       color="dark"

@@ -1,88 +1,151 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
+  collection,
   onSnapshot,
+  doc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+  query,
+  orderBy,
+  limit,
+  startAfter,
+  getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { UserAuth } from "./AuthContext";
 import { toast } from "react-toastify";
+
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
   const { user } = UserAuth();
-  const [favorites, setFavorites] = useState([]);
+
+  // ❤️ Dùng để check nhanh trên UI
+  const [favoriteSlugs, setFavoriteSlugs] = useState([]);
   const [loadingFav, setLoadingFav] = useState(true);
 
-  // ⚙️ Lấy cache ban đầu từ sessionStorage (nếu có)
+  // 📄 Dùng cho trang “Phim yêu thích”
+  const [favoritesPage, setFavoritesPage] = useState([]);
+  const [lastDoc, setLastDoc] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingPage, setLoadingPage] = useState(false);
+
+  // 🪄 Cache slug từ sessionStorage khi load lại web
   useEffect(() => {
-    const cached = sessionStorage.getItem("favorites");
-    if (cached) setFavorites(JSON.parse(cached));
+    const cached = sessionStorage.getItem("favoriteSlugs");
+    if (cached) setFavoriteSlugs(JSON.parse(cached));
   }, []);
 
-  // 🔹 Khi user đăng nhập, lắng nghe realtime Firestore
+  // 🔹 Lắng nghe realtime chỉ để đồng bộ nếu có thay đổi ở thiết bị khác
   useEffect(() => {
     if (!user) {
-      setFavorites([]);
-      sessionStorage.removeItem("favorites");
+      setFavoriteSlugs([]);
+      setFavoritesPage([]);
       setLoadingFav(false);
       return;
     }
 
-    const ref = doc(db, "users", user.uid);
-
-    const unsubscribe = onSnapshot(ref, (snap) => {
-      if (snap.exists()) {
-        const saved = snap.data().savedMovies || [];
-        setFavorites(saved);
-        sessionStorage.setItem("favorites", JSON.stringify(saved)); // ⚡ cache ngay
-      }
+    const ref = collection(db, "users", user.uid, "favorites");
+    const unsub = onSnapshot(ref, (snap) => {
+      const slugs = snap.docs.map((d) => d.id);
+      setFavoriteSlugs(slugs);
+      sessionStorage.setItem("favoriteSlugs", JSON.stringify(slugs));
       setLoadingFav(false);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, [user]);
 
-  // 🔹 Thêm / xóa phim yêu thích
+  // 🔹 Toggle yêu thích (update local ngay)
   const toggleFavorite = async (movie) => {
-    setLoadingFav(true);
     if (!user) {
       toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
-      setLoadingFav(false);
       return;
     }
-    const ref = doc(db, "users", user.uid);
-    const exists = favorites.some((m) => m.slug === movie.slug);
 
-    // Cập nhật UI ngay (optimistic update)
-    const updated = exists
-      ? favorites.filter((m) => m.slug !== movie.slug)
-      : [...favorites, movie];
-    setFavorites(updated);
-    sessionStorage.setItem("favorites", JSON.stringify(updated));
+    const ref = doc(db, "users", user.uid, "favorites", movie.slug);
+    const isFav = favoriteSlugs.includes(movie.slug);
 
-    // Cập nhật Firestore async
     try {
-      if (exists) {
-        await updateDoc(ref, { savedMovies: arrayRemove(movie) });
+      if (isFav) {
+        // Xóa khỏi Firestore
+        await deleteDoc(ref);
         toast.success("Đã xóa khỏi danh sách yêu thích.");
+
+        // ⚡ Update local ngay
+        setFavoriteSlugs((prev) => prev.filter((slug) => slug !== movie.slug));
+        setFavoritesPage((prev) => prev.filter((m) => m.slug !== movie.slug));
       } else {
-        await updateDoc(ref, { savedMovies: arrayUnion(movie) });
+        // Thêm vào Firestore
+        await setDoc(ref, { ...movie, addedAt: serverTimestamp() });
         toast.success("Đã thêm vào danh sách yêu thích.");
+
+        // ⚡ Update local ngay
+        setFavoriteSlugs((prev) => [...prev, movie.slug]);
+        setFavoritesPage((prev) => [{ ...movie }, ...prev]);
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
-    } finally {
-      setLoadingFav(false);
+      console.error(error);
+      toast.error("Lỗi khi cập nhật danh sách yêu thích.");
     }
   };
 
+  // 🔹 Load từng trang danh sách phim yêu thích (phân trang)
+  const loadFavoritesPage = async (pageSize = 12) => {
+    if (!user || loadingPage || !hasMore) return;
+    setLoadingPage(true);
+
+    try {
+      const ref = collection(db, "users", user.uid, "favorites");
+      let q = query(ref, orderBy("addedAt", "desc"), limit(pageSize));
+      if (lastDoc)
+        q = query(
+          ref,
+          orderBy("addedAt", "desc"),
+          startAfter(lastDoc),
+          limit(pageSize)
+        );
+
+      const snap = await getDocs(q);
+      const movies = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const lastVisible = snap.docs[snap.docs.length - 1] || null;
+
+      // 🧠 tránh trùng item
+      setFavoritesPage((prev) => {
+        const existing = new Set(prev.map((m) => m.slug));
+        const unique = movies.filter((m) => !existing.has(m.slug));
+        return [...prev, ...unique];
+      });
+
+      setLastDoc(lastVisible);
+      setHasMore(movies.length === pageSize);
+    } catch (error) {
+      console.error("Lỗi khi load favorites:", error);
+      toast.error("Không thể tải danh sách yêu thích.");
+    } finally {
+      setLoadingPage(false);
+    }
+  };
+
+  // 🔹 Reset khi user đổi tài khoản
+  useEffect(() => {
+    setFavoritesPage([]);
+    setLastDoc(null);
+    setHasMore(true);
+  }, [user]);
+
   return (
     <FavoritesContext.Provider
-      value={{ favorites, toggleFavorite, loadingFav }}
+      value={{
+        favoriteSlugs,
+        toggleFavorite,
+        loadingFav,
+        favoritesPage,
+        loadFavoritesPage,
+        loadingPage,
+        hasMore,
+      }}
     >
       {children}
     </FavoritesContext.Provider>

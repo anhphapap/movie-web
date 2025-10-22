@@ -18,8 +18,8 @@ export default function Recommend({
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const { favorites, toggleFavorite, loadingFav } = useFavorites();
-  const isFavourite = (slug) => favorites.some((m) => m.slug === slug);
+  const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = (slug) => favoriteSlugs.includes(slug);
   const navigate = useNavigate();
   const { ref, inView } = useInView({
     triggerOnce: true,
@@ -39,6 +39,7 @@ export default function Recommend({
       category: movie.category,
       tmdb: movie.tmdb,
       modified: movie.modified,
+      addedAt: new Date().toISOString(),
     });
   };
 

@@ -131,19 +131,21 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 </div>
               ))}
               {user?.email && (
-                <div
-                  onClick={() => {
-                    navigate("/yeu-thich");
-                    setOnTab(5);
-                  }}
-                  className={` ${
-                    "/yeu-thich" === pathname && onTab === 5
-                      ? "font-bold text-white"
-                      : "text-white/80 hover:opacity-70 cursor-pointer"
-                  }`}
-                >
-                  Yêu thích
-                </div>
+                <>
+                  <div
+                    onClick={() => {
+                      navigate("/yeu-thich");
+                      setOnTab(5);
+                    }}
+                    className={` ${
+                      "/yeu-thich" === pathname && onTab === 5
+                        ? "font-bold text-white"
+                        : "text-white/80 hover:opacity-70 cursor-pointer"
+                    }`}
+                  >
+                    Yêu thích
+                  </div>
+                </>
               )}
             </nav>
           </div>

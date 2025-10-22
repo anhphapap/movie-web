@@ -49,8 +49,8 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [server, setServer] = useState(0);
-  const { favorites, toggleFavorite, loadingFav } = useFavorites();
-  const isFavourite = favorites.some((m) => m.slug === slug);
+  const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = favoriteSlugs.includes(slug);
   const navigate = useNavigate();
   const { topSet } = useTop();
   useEffect(() => {
@@ -264,6 +264,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
       category: modal.item.category,
       tmdb: modal.item.tmdb,
       modified: modal.item.modified,
+      addedAt: new Date().toISOString(),
     });
   };
 
