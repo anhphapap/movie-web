@@ -54,7 +54,8 @@ export default function Recommend({
       const res = await axios.get(api);
       const items = res.data.data.items || [];
       setMovies((prev) => [...prev, ...items]);
-      setHasMore(page < totalPage);
+      if (items.length < 6) setHasMore(false);
+      else setHasMore(page < totalPage);
     } catch (err) {
       console.error(err);
     } finally {
@@ -179,7 +180,7 @@ export default function Recommend({
                     />
                   </div>
                 </div>
-                <h2 className="text-white text-base font-bold truncate p-2 sm:p-4 !pt-0">
+                <h2 className="text-white text-sm sm:text-base font-bold truncate p-2 sm:p-4 !pt-0">
                   {movie.name}
                 </h2>
               </div>
@@ -187,7 +188,7 @@ export default function Recommend({
         {loading &&
           Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="animate-pulse">
-              <div className="w-full h-full bg-gray-700 rounded aspect-video"></div>
+              <div className="w-full h-full bg-gray-700 rounded aspect-square"></div>
             </div>
           ))}
       </div>

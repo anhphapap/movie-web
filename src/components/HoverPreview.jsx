@@ -64,6 +64,7 @@ export default function HoverPreview() {
     } else {
       navigate(`/xem-phim/${hovered.item.slug}?svr=${0}&ep=${0}`);
     }
+    onLeave();
   };
   if (!hovered || !hovered.rect) return null;
   const { item, rect, index, typeList, firstVisible, lastVisible, isWatching } =

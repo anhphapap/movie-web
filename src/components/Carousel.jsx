@@ -15,6 +15,7 @@ import { useListModal } from "../context/ListModalContext";
 import { useWatching } from "../context/WatchingContext";
 import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { CircleX, Info, X } from "lucide-react";
 export default function Carousel({
   nameList,
   typeList = "list",
@@ -181,6 +182,11 @@ export default function Carousel({
       typeList,
       isWatching,
     });
+  };
+
+  const handleRemoveWatching = (e, item) => {
+    e.stopPropagation();
+    toggleWatching(item);
   };
 
   if (loading || loadingPage) {
@@ -682,20 +688,49 @@ export default function Carousel({
                   onLeave();
                 }}
               >
-                <div className="absolute -bottom-3 left-[20%] right-[20%] h-[3px] bg-[#5b5b5b] overflow-hidden">
+                <div className="absolute -bottom-3 left-[20%] right-[20%] h-[3px] bg-[#5b5b5b] overflow-hidden hidden lg:block">
                   <div
                     className="h-full bg-[#d80f16] transition-all duration-300"
                     style={{ width: `${item.progress || 0}%` }}
                   />
                 </div>
                 <div className="hidden lg:block relative w-full aspect-video rounded-[3px] overflow-hidden">
-                  <div className="object-cover w-full h-full rounded-[3px]">
+                  <div className="object-cover w-full h-full rounded-[3px] relative">
                     <LazyImage
                       src={item.poster_url}
                       alt={item.name}
                       sizes="16vw"
                       quality={65}
                     />
+                    {new Date().getTime() -
+                      new Date(item.modified?.time).getTime() <
+                      1000 * 60 * 60 * 24 * 3 && (
+                      <>
+                        {item.episode_current
+                          .toLowerCase()
+                          .includes("hoàn tất") ||
+                        item.episode_current.toLowerCase().includes("full") ? (
+                          <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                            Mới thêm
+                          </span>
+                        ) : item.episode_current
+                            .toLowerCase()
+                            .includes("trailer") ? (
+                          <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                            Sắp ra mắt
+                          </span>
+                        ) : (
+                          <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-auto">
+                            <span className="text-nowrap text-white bg-[#e50914] xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                              Tập mới
+                            </span>
+                            <span className="text-nowrap text-black bg-white xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                              Xem ngay
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   {item.sub_docquyen && (
@@ -707,20 +742,99 @@ export default function Carousel({
                   )}
                 </div>
 
-                <div
-                  className="block lg:hidden relative overflow-hidden rounded-[3px]"
-                  onClick={() =>
-                    openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
-                  }
-                >
-                  <div className="w-full object-cover aspect-[2/3] rounded-[3px]">
+                <div className="block lg:hidden relative overflow-hidden rounded-[3px]">
+                  <div
+                    className="w-full object-cover aspect-[2/3] rounded-[3px] relative"
+                    onClick={() => {
+                      handlePlayMovie(item);
+                    }}
+                  >
                     <LazyImage
                       src={item.thumb_url}
                       alt={item.name}
                       sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
                       quality={65}
                     />
+                    <div className="absolute bottom-0 left-0 w-full h-full flex items-center justify-center from-black/30 to-transparent bg-gradient-to-br">
+                      <div className="h-12 w-12 flex items-center justify-center bg-black/40 rounded-full border-2 border-white">
+                        <FontAwesomeIcon
+                          icon="fa-solid fa-play"
+                          size="2x"
+                          className="text-white translate-x-[2px]"
+                        />
+                      </div>
+                    </div>
+                    {new Date().getTime() -
+                      new Date(item.modified?.time).getTime() <
+                      1000 * 60 * 60 * 24 * 3 && (
+                      <>
+                        {item.episode_current
+                          .toLowerCase()
+                          .includes("hoàn tất") ||
+                        item.episode_current.toLowerCase().includes("full") ? (
+                          <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                            Mới thêm
+                          </span>
+                        ) : item.episode_current
+                            .toLowerCase()
+                            .includes("trailer") ? (
+                          <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                            Sắp ra mắt
+                          </span>
+                        ) : (
+                          <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-auto">
+                            <span className="text-nowrap text-white bg-[#e50914] xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                              Tập mới
+                            </span>
+                            <span className="text-nowrap text-black bg-white xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                              Xem ngay
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
+                  <div className="flex flex-col gap-2 py-2 bg-[#1a1a18] rounded-b-[3px]">
+                    <div className="h-[3px] bg-[#5b5b5b] overflow-hidden w-[90%] mx-auto rounded-full">
+                      <div
+                        className="h-full bg-[#d80f16] transition-all duration-300"
+                        style={{ width: `${item.progress || 0}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between h-fit">
+                      <button
+                        onClick={(e) => handleRemoveWatching(e, item)}
+                        className="w-1/2 flex items-center justify-center border-r border-white/70"
+                      >
+                        <CircleX
+                          className="text-white sm:size-8 size-6"
+                          strokeWidth={2}
+                        />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(item.slug, item.tmdb?.id, item.tmdb?.type);
+                        }}
+                        className="w-1/2 flex items-center justify-center "
+                      >
+                        <Info
+                          className="text-white sm:size-8 size-6"
+                          strokeWidth={2}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="absolute top-1 left-2 text-white text-xs font-medium">
+                    Tập {item.episodeName}
+                  </div>
+
+                  {/* <button
+                    onClick={(e) => handleRemoveWatching(e, item)}
+                    className="absolute top-1 right-1 bg-black/30 backdrop-blur-[1px] rounded-[3px] p-1.5 opacity-100 transition-opacity duration-300 "
+                  >
+                    <X size={16} className="text-white" strokeWidth={3} />
+                  </button> */}
                   {item.sub_docquyen && (
                     <img
                       loading="lazy"
@@ -737,33 +851,6 @@ export default function Carousel({
                       className="w-10 sm:w-12 lg:w-10 aspect-auto"
                     />
                   </div>
-                )}
-                {new Date().getTime() -
-                  new Date(item.modified?.time).getTime() <
-                  1000 * 60 * 60 * 24 * 3 && (
-                  <>
-                    {item.episode_current.toLowerCase().includes("hoàn tất") ||
-                    item.episode_current.toLowerCase().includes("full") ? (
-                      <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
-                        Mới thêm
-                      </span>
-                    ) : item.episode_current
-                        .toLowerCase()
-                        .includes("trailer") ? (
-                      <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
-                        Sắp ra mắt
-                      </span>
-                    ) : (
-                      <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-auto">
-                        <span className="text-nowrap text-white bg-[#e50914] xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
-                          Tập mới
-                        </span>
-                        <span className="text-nowrap text-black bg-white xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
-                          Xem ngay
-                        </span>
-                      </div>
-                    )}
-                  </>
                 )}
               </div>
             </SwiperSlide>

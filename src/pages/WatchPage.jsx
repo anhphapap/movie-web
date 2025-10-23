@@ -27,6 +27,7 @@ const WatchPage = () => {
 
   // Đọc resume data từ localStorage
   const [resumeData, setResumeData] = useState(null);
+  const [episodesRange, setEpisodesRange] = useState(0);
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -106,6 +107,7 @@ const WatchPage = () => {
 
   // Reset autoplay flag after navigation
   useEffect(() => {
+    setEpisodesRange(parseInt(ep / 100) * 100);
     if (shouldAutoPlayRef.current) {
       // Reset after a short delay to ensure video has loaded
       setTimeout(() => {
@@ -611,25 +613,62 @@ const WatchPage = () => {
                         </div>
                       ))}
                     </div>
+                    {movie.item.episodes[server].server_data.length > 100 && (
+                      <div className="flex gap-3 flex-wrap ">
+                        {Array.from({
+                          length: Math.ceil(
+                            movie.item.episodes[server].server_data.length / 100
+                          ),
+                        }).map((item, index) => (
+                          <button
+                            className={`text-xs rounded py-1.5 px-3 ${
+                              episodesRange == index * 100
+                                ? "bg-white text-black border-white"
+                                : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
+                            } transition-all ease-linear`}
+                            key={index}
+                            onClick={() => setEpisodesRange(index * 100)}
+                          >
+                            Tập{" "}
+                            {
+                              movie.item.episodes[server].server_data[
+                                index * 100
+                              ].name
+                            }{" "}
+                            -{" "}
+                            {movie.item.episodes[server].server_data?.[
+                              index * 100 + 99
+                            ]?.name ||
+                              movie.item.episodes[server].server_data[
+                                movie.item.episodes[server].server_data.length -
+                                  1
+                              ].name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
-                      {movie.item.episodes[server].server_data.map(
-                        (item, index) => (
+                      {movie.item.episodes[server].server_data
+                        .slice(episodesRange, episodesRange + 100)
+                        .map((item, index) => (
                           <div
                             onClick={() =>
                               navigate(
-                                `/xem-phim/${movie.item.slug}?svr=${server}&ep=${index}`
+                                `/xem-phim/${
+                                  movie.item.slug
+                                }?svr=${server}&ep=${episodesRange + index}`
                               )
                             }
                             className={`relative rounded bg-[#242424] group ${
-                              index == ep && svr == server
+                              episodesRange + index == ep && svr == server
                                 ? "bg-white/15 "
                                 : "hover:bg-opacity-70"
                             }`}
-                            key={movie.item._id + index}
+                            key={movie.item._id + episodesRange + index}
                           >
                             <button
                               className={`py-2 transition-all ease-linear  sm:gap-2 gap-1 flex items-center justify-center text-nowrap ${
-                                index == ep && svr == server
+                                episodesRange + index == ep && svr == server
                                   ? "text-black bg-white"
                                   : "text-white/70 group-hover:text-white"
                               } text-center w-full rounded`}
@@ -644,8 +683,7 @@ const WatchPage = () => {
                               </span>
                             </button>
                           </div>
-                        )
-                      )}
+                        ))}
                     </div>
                   </div>
                 )}

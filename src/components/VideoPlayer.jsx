@@ -372,7 +372,8 @@ const VideoPlayer = ({
         currentTime,
         videoDuration,
         episode,
-        svr
+        svr,
+        movie.episodes[svr].server_data[episode].name
       );
     }
   };
@@ -987,10 +988,18 @@ const VideoPlayer = ({
             }`}
         >
           {/* Progress bar */}
-          <div className="flex items-center justify-between w-full gap-2 mb-1 lg:mb-3">
+          <div className="flex flex-col items-center justify-between w-full gap-3 mb-1 lg:mb-3">
+            <div className="flex items-center gap-2 justify-between w-full px-1">
+              <span className="text-xs lg:text-sm whitespace-nowrap text-white/90">
+                {formatTime(progress)}
+              </span>
+              <span className="text-xs lg:text-sm whitespace-nowrap text-white/90">
+                {formatTime(duration)}
+              </span>
+            </div>
             <div
               data-progress-bar
-              className="relative h-1 bg-white/20 cursor-pointer w-full transition-all duration-200 group/progress rounded-full py-1 -my-1"
+              className="relative h-1 bg-white/20 cursor-pointer w-full transition-all duration-200 group/progress py-1 -my-1"
               onClick={handleSeek}
               onMouseDown={handleProgressDragStart}
               onTouchStart={handleProgressDragStart}
@@ -1006,13 +1015,13 @@ const VideoPlayer = ({
             >
               {/* Buffered */}
               <div
-                className="absolute top-0 left-0 h-full bg-white/20 rounded-full transition-all duration-200"
+                className="absolute top-0 left-0 h-full bg-white/20 transition-all duration-200"
                 style={{ width: `${buffered}%` }}
               />
 
               {/* Progress */}
               <div
-                className={`absolute top-0 left-0 h-full bg-red-600 rounded-full ${
+                className={`absolute top-0 left-0 h-full bg-red-600 ${
                   isDraggingProgress
                     ? "h-1 transition-none"
                     : "group-hover/progress:h-2 transition-all duration-200"
@@ -1038,7 +1047,7 @@ const VideoPlayer = ({
               </div>
 
               {/* Hover preview */}
-              {hoverTime && (
+              {hoverTime !== null && (
                 <div
                   className="absolute -top-12 flex flex-col items-center -translate-x-1/2 pointer-events-none z-10"
                   style={{ left: hoverPos }}
@@ -1050,9 +1059,6 @@ const VideoPlayer = ({
                 </div>
               )}
             </div>
-            <span className="text-xs lg:text-sm whitespace-nowrap ml-2 text-white/90">
-              {formatTime(duration - progress)}
-            </span>
           </div>
 
           {/* Buttons */}
@@ -1183,7 +1189,7 @@ const VideoPlayer = ({
 
             <div className="flex items-center space-x-1 lg:space-x-4">
               {/* Episodes */}
-              {movie.episodes[svr].server_data.length > 0 && (
+              {/* {movie.episodes[svr].server_data.length > 0 && (
                 <div className="group/episodes hidden lg:block">
                   <button
                     className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
@@ -1261,39 +1267,85 @@ const VideoPlayer = ({
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Next episode */}
               {movie.episodes[svr].server_data.length > 0 &&
                 parseInt(episode) <
                   movie.episodes[svr].server_data.length - 1 && (
-                  <button
-                    className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (onNavigateToNextEpisode) {
-                        onNavigateToNextEpisode();
-                      } else {
-                        navigate(
-                          `/xem-phim/${movie.slug}?svr=${svr}&ep=${
-                            parseInt(episode) + 1
-                          }`
-                        );
-                      }
-                    }}
-                    onTouchEnd={(e) => {
-                      e.stopPropagation();
-                    }}
-                    aria-label="Xem tập tiếp theo"
-                  >
-                    <SkipForward size={isMobile ? 30 : 34} />
-                    <Tooltip
-                      content={`Tập ${parseInt(episode) + 2} (N)`}
-                      size="sm"
-                      className="bottom-[100%]"
-                      color="dark"
-                    />
-                  </button>
+                  <div className="relative group/episodes">
+                    <button
+                      className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onNavigateToNextEpisode) {
+                          onNavigateToNextEpisode();
+                        } else {
+                          navigate(
+                            `/xem-phim/${movie.slug}?svr=${svr}&ep=${
+                              parseInt(episode) + 1
+                            }`
+                          );
+                        }
+                      }}
+                      onTouchEnd={(e) => {
+                        e.stopPropagation();
+                      }}
+                      aria-label="Xem tập tiếp theo"
+                    >
+                      <SkipForward size={isMobile ? 30 : 34} />
+                    </button>
+                    <div
+                      className="hidden lg:block absolute -translate-x-1/2 -translate-y-[100%] top-0 left-1/2 bg-[#262626]/95 backdrop-blur text-white text-sm
+                  opacity-0 invisible group-hover/episodes:opacity-100 group-hover/episodes:visible 
+                  transition-all duration-200 z-[9999] rounded-sm overflow-hidden"
+                    >
+                      <div className="py-3 px-5 text-center">
+                        <span className="text-white font-semibold text-lg">
+                          Tập tiếp theo
+                        </span>
+                        <span className="text-white font-semibold text-lg">
+                          {" - Tập " +
+                            movie.episodes[svr].server_data[
+                              parseInt(episode) + 1
+                            ].name}
+                        </span>
+                      </div>
+                      <div className="flex flex-col h-full bg-black">
+                        <div className="group/nextEpisode relative h-36 aspect-video flex items-center justify-center p-3 cursor-pointer">
+                          <LazyImage
+                            src={movie.poster_url}
+                            alt={
+                              movie.episodes[svr].server_data[
+                                parseInt(episode) + 1
+                              ].name
+                            }
+                            sizes="10vw"
+                          />
+                          <div
+                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-50 group-hover/nextEpisode:opacity-100 group-hover/nextEpisode:scale-105 transition-all ease-linear duration-200"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onNavigateToNextEpisode) {
+                                onNavigateToNextEpisode();
+                              } else {
+                                navigate(
+                                  `/xem-phim/${movie.slug}?svr=${svr}&ep=${
+                                    parseInt(episode) + 1
+                                  }`
+                                );
+                              }
+                            }}
+                          >
+                            <Play
+                              size={40}
+                              className="text-white bg-black/50 backdrop-blur-sm rounded-full p-2"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
               {/* Playback speed */}

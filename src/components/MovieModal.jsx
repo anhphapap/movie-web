@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { toast } from "react-toastify";
 import Tooltip from "./Tooltip";
-import { getYoutubeId } from "../utils/data";
+import { formatSecondsToMinutes, getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
 import LazyImage from "./LazyImage";
 import Top10Icon from "../assets/images/Top10Icon.svg";
@@ -23,6 +23,7 @@ import { Captions, Server } from "lucide-react";
 import SEO from "./SEO";
 import { useFavorites } from "../context/FavouritesProvider";
 import Recommend from "./Recommend";
+import { useWatching } from "../context/WatchingContext";
 const customStyles = {
   content: {
     position: "absolute",
@@ -47,12 +48,30 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   const [intervalId, setIntervalId] = useState(null);
   const [modal, setModal] = useState(null);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const [episodesRange, setEpisodesRange] = useState(0);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [server, setServer] = useState(0);
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
   const isFavourite = favoriteSlugs.includes(slug);
   const navigate = useNavigate();
   const { topSet } = useTop();
+  const { getWatchingMovie, watchingSlugs } = useWatching();
+  const [watchingMovie, setWatchingMovie] = useState(null);
+
+  const handlePlayMovie = (movie) => {
+    // Lưu thông tin resume vào localStorage
+    const resumeData = {
+      slug: movie.slug,
+      currentTime: movie.currentTime || 0,
+      duration: movie.duration || 0,
+      progress: movie.progress || 0,
+      timestamp: Date.now(),
+    };
+
+    localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
+    navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
+  };
+
   useEffect(() => {
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -197,6 +216,11 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
       };
     }
   };
+
+  useEffect(() => {
+    if (watchingSlugs.length === 0) return;
+    setWatchingMovie(getWatchingMovie(slug) || null);
+  }, [watchingSlugs, slug]);
 
   useEffect(() => {
     if (!slug) return;
@@ -392,8 +416,8 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
-          <div className="flex flex-col space-x-2 space-y-3 justify-between absolute left-[5%] right-[5%] bottom-[5%] z-20">
-            <div className="flex flex-col justify-end space-y-3 w-1/2 sm:px-0">
+          <div className="flex flex-col space-x-2 space-y-2 lg:space-y-3 justify-between absolute left-[5%] right-[5%] bottom-[5%] z-20">
+            <div className="flex flex-col justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-2/3 sm:w-1/2 sm:px-0">
               <div className="sm:flex hidden items-center space-x-1 justify-start">
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
@@ -408,7 +432,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                 </span>
               </div>
               <div
-                className={`w-full max-h-[40%] items-start object-cover transition-all ease-linear duration-[1000ms] ${
+                className={`sm:w-2/3 w-1/2 lg:w-full sm:h-auto max-h-[30%] sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] ${
                   fadeOutImage
                     ? "delay-[3000ms] scale-75 -translate-x-[12.5%]"
                     : "delay-0 scale-100 translate-x-0"
@@ -416,6 +440,11 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
               >
                 {modal?.tmdb_image?.logo && (
                   <LazyImage
+                    className={`object-cover sm:!h-full sm:!w-auto self-center ${
+                      modal?.tmdb_image?.aspect_ratio <= 2
+                        ? "!h-full !w-auto"
+                        : "!w-full !h-auto translate-x-0"
+                    }`}
                     src={"https://image.tmdb.org/t/p/" + modal.tmdb_image.logo}
                     alt={modal.item.name}
                     sizes="(max-width: 640px) 30vw, (max-width: 1400px) 40vw, 50vw"
@@ -423,25 +452,55 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                   />
                 )}
               </div>
+              {watchingMovie !== null && (
+                <div className="flex flex-col gap-1 w-full">
+                  <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                    Tập {watchingMovie.episodeName}
+                  </span>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="h-[3px] bg-[#5b5b5b] w-full">
+                      <div
+                        className="h-full bg-[#d80f16] transition-all duration-300"
+                        style={{ width: `${watchingMovie.progress || 0}%` }}
+                      />
+                    </div>
+                    <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                      {formatSecondsToMinutes(watchingMovie.currentTime || 0)}/
+                      {formatSecondsToMinutes(watchingMovie.duration || 0)}ph
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex space-x-2 justify-between w-full !ml-0">
               <div className="flex space-x-2">
                 <div className="relative rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear">
-                  {(modal.item.episodes[0].server_data[0].link_embed != "" && (
-                    <div
-                      onClick={() =>
-                        navigate(
-                          `/xem-phim/${modal.item.slug}?svr=${0}&ep=${0}`
-                        )
-                      }
-                      key={modal.item._id + 0}
-                    >
-                      <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
-                        <FontAwesomeIcon icon="fa-solid fa-play" />
-                        <span>Phát</span>
-                      </button>
-                    </div>
-                  )) || (
+                  {(modal.item.episodes[0].server_data[0].link_embed != "" &&
+                    (watchingMovie === null ? (
+                      <div
+                        onClick={() =>
+                          navigate(
+                            `/xem-phim/${modal.item.slug}?svr=${0}&ep=${0}`
+                          )
+                        }
+                        key={modal.item._id + 0}
+                      >
+                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span>Phát</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => handlePlayMovie(watchingMovie)}
+                        key={modal.item._id + 0}
+                      >
+                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span className="text-nowrap">Tiếp tục xem</span>
+                        </button>
+                      </div>
+                    ))) || (
                     <button
                       className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2"
                       onClick={() => {
@@ -653,9 +712,42 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                       </div>
                     ))}
                   </div>
+                  {modal.item.episodes[server].server_data.length > 100 && (
+                    <div className="flex gap-3 flex-wrap">
+                      {Array.from({
+                        length: Math.ceil(
+                          modal.item.episodes[server].server_data.length / 100
+                        ),
+                      }).map((item, index) => (
+                        <button
+                          className={`text-xs rounded py-1.5 px-3 ${
+                            episodesRange == index * 100
+                              ? "bg-white text-black border-white"
+                              : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
+                          } transition-all ease-linear duration-300`}
+                          key={index}
+                          onClick={() => setEpisodesRange(index * 100)}
+                        >
+                          Tập{" "}
+                          {
+                            modal.item.episodes[server].server_data[index * 100]
+                              .name
+                          }{" "}
+                          -{" "}
+                          {modal.item.episodes[server].server_data?.[
+                            index * 100 + 99
+                          ]?.name ||
+                            modal.item.episodes[server].server_data[
+                              modal.item.episodes[server].server_data.length - 1
+                            ].name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:grid-cols-5 lg:grid-cols-6">
-                    {modal.item.episodes[server].server_data.map(
-                      (item, index) => (
+                    {modal.item.episodes[server].server_data
+                      .slice(episodesRange, episodesRange + 100)
+                      .map((item, index) => (
                         <div
                           onClick={() =>
                             navigate(
@@ -677,8 +769,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
                             </span>
                           </button>
                         </div>
-                      )
-                    )}
+                      ))}
                   </div>
                 </div>
               )}

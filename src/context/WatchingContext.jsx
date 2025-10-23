@@ -35,7 +35,7 @@ export const WatchingProvider = ({ children }) => {
 
   // ❤️ Dùng để check nhanh trên UI
   const [watchingSlugs, setWatchingSlugs] = useState([]);
-  const [loadingFav, setLoadingFav] = useState(true);
+  const [loadingWatching, setLoadingWatching] = useState(true);
 
   const { user } = UserAuth();
 
@@ -50,7 +50,7 @@ export const WatchingProvider = ({ children }) => {
     if (!user) {
       setWatchingSlugs([]);
       setWatchingPage([]);
-      setLoadingFav(false);
+      setLoadingWatching(false);
       return;
     }
 
@@ -59,7 +59,7 @@ export const WatchingProvider = ({ children }) => {
       const slugs = snap.docs.map((d) => d.id);
       setWatchingSlugs(slugs);
       sessionStorage.setItem("watchingSlugs", JSON.stringify(slugs));
-      setLoadingFav(false);
+      setLoadingWatching(false);
     });
 
     return () => unsub();
@@ -152,7 +152,8 @@ export const WatchingProvider = ({ children }) => {
     currentTime,
     duration,
     episode,
-    server
+    server,
+    episodeName
   ) => {
     if (!user?.email) {
       toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
@@ -162,6 +163,7 @@ export const WatchingProvider = ({ children }) => {
     try {
       const ref = doc(db, "users", user.uid, "watching", movieSlug);
       const progressData = {
+        episodeName,
         currentTime,
         duration,
         episode,
@@ -182,6 +184,12 @@ export const WatchingProvider = ({ children }) => {
         const updatedMovie = updatedMovies.find(
           (movie) => movie.slug === movieSlug
         );
+
+        // Nếu không tìm thấy phim, return array gốc
+        if (!updatedMovie) {
+          return updatedMovies;
+        }
+
         const otherMovies = updatedMovies.filter(
           (movie) => movie.slug !== movieSlug
         );
@@ -214,7 +222,7 @@ export const WatchingProvider = ({ children }) => {
 
     // Check nhanh
     watchingSlugs,
-    loadingFav,
+    loadingWatching,
 
     // Functions
     toggleWatching,
