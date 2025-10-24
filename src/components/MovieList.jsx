@@ -137,7 +137,7 @@ const MovieList = ({
   if (!movies) return <></>;
 
   return (
-    <div className="text-white mt-36 px-[3%]">
+    <div className="text-white mt-[20vh] px-[3%]">
       {seoOnPage && (
         <SEO seoData={seoOnPage} baseUrl={window.location.origin} />
       )}
@@ -153,7 +153,7 @@ const MovieList = ({
           )) || <span className="opacity-50 ">{titleHead} </span>}
         </h1>
       )}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-1 gap-y-14 mt-5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 sm:gap-x-2 gap-x-1 sm:gap-y-[7vh] gap-y-[5vh] mt-5">
         {movies?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
@@ -215,19 +215,19 @@ const MovieList = ({
               <>
                 {item.episode_current.toLowerCase().includes("hoàn tất") ||
                 item.episode_current.toLowerCase().includes("full") ? (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-[80%] sm:w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                  <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
                     Mới thêm
                   </span>
                 ) : item.episode_current.toLowerCase().includes("trailer") ? (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-[80%] sm:w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                  <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
                     Sắp ra mắt
                   </span>
                 ) : (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-[80%] sm:w-1/2 xl:w-[70%] 2xl:w-1/2">
-                    <span className=" text-white bg-[#e50914] xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                  <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-auto">
+                    <span className="text-nowrap text-white bg-[#e50914] xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
                       Tập mới
                     </span>
-                    <span className="text-black bg-white xl:py-[2px] py-[1px] px-1 text-xs font-semibold text-center shadow-black/80 shadow w-full">
+                    <span className="text-nowrap text-black bg-white xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
                       Xem ngay
                     </span>
                   </div>

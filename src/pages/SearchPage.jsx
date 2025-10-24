@@ -1,29 +1,19 @@
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MovieList from "../components/MovieList";
-import MainLayout from "../layouts/MainLayout";
-import Header from "../components/Header";
-import { useMovieModal } from "../context/MovieModalContext";
+import { useNavigate } from "react-router-dom";
 const SearchPage = () => {
-  const { openModal } = useMovieModal();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q");
   const [keyword, setKeyword] = useState(query);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setKeyword(query);
   }, [query]);
 
   if (!keyword || keyword.trim() === "") {
-    return (
-      <MainLayout>
-        <div className="text-center mt-10">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Please enter a search term.
-          </h1>
-        </div>
-      </MainLayout>
-    );
+    navigate("/trang-chu");
   }
 
   return <MovieList search={true} keyword={keyword} />;

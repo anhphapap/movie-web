@@ -53,7 +53,8 @@ const AppLayout = ({ children }) => {
       {!cinema && (
         <Header
           filter={
-            pathsWithFilter.includes(pathname) || pathname.startsWith("/filter")
+            pathsWithFilter.includes(pathname) ||
+            pathname.startsWith("/duyet-tim")
           }
           type_slug={pathname}
         />
@@ -193,6 +194,15 @@ function App() {
                                   <Route
                                     path="/duyet-tim/:typeSlug"
                                     element={<FilterPage />}
+                                  />
+                                  <Route
+                                    path="/duyet-tim"
+                                    element={
+                                      <Navigate
+                                        to="/duyet-tim/phim-bo"
+                                        replace
+                                      />
+                                    }
                                   />
                                   <Route
                                     path="/ung-ho"

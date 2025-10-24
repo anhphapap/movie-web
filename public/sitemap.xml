@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
-<url>
-  <loc>https://movie-web-lake-eta.vercel.app/</loc>
-  <lastmod>2025-10-24T04:45:24+00:00</lastmod>
-</url>
-
-
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-page.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-movie-1.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-movie-2.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-movie-3.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-movie-4.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>https://movie-web-lake-eta.vercel.app/sitemap-movie-5.xml</loc>
+    <lastmod>2025-10-24T05:49:05.803Z</lastmod>
+  </sitemap>
+</sitemapindex>
