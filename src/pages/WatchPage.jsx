@@ -83,18 +83,29 @@ const WatchPage = () => {
     const fetchMovie = async () => {
       setLoading(true);
       try {
-        const [movieResponse, peoplesResponse] = await Promise.all([
+        const [movieRes, peoplesRes] = await Promise.allSettled([
           axios.get(`${import.meta.env.VITE_API_DETAILS}${movieSlug}`),
           axios.get(`${import.meta.env.VITE_API_DETAILS}${movieSlug}/peoples`),
         ]);
-        setMovie(movieResponse.data.data || []);
-        setPeoples(peoplesResponse.data.data.peoples || []);
-      } catch (error) {
-        console.error("Error fetching movie:", error);
+
+        if (movieRes.status === "fulfilled") {
+          setMovie(movieRes.value.data.data || []);
+        } else {
+          setMovie([]);
+        }
+
+        if (peoplesRes.status === "fulfilled") {
+          setPeoples(peoplesRes.value.data.data.peoples || []);
+        } else {
+          setPeoples([]);
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchMovie();
   }, [movieSlug]);
 
