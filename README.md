@@ -5,7 +5,7 @@ This project was developed with the purpose of learning and practicing modern fr
 
 ## 🚀 Demo
 
-**Needflex** is deployed and accessible at: [movie-web-lake-eta.vercel.app](https://movie-web-lake-eta.vercel.app)
+**Needflex** is deployed and accessible at: [needflex.site](https://needflex.site)
 
 ## 🛠️ Technologies Used
 

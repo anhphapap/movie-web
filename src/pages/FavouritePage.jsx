@@ -31,7 +31,7 @@ function FavouritePage() {
       name: "Yêu Thích",
       description:
         "Danh sách phim yêu thích được người dùng lưu trên Needflex.",
-      url: "https://movie-web-lake-eta.vercel.app/yeu-thich",
+      url: "https://needflex.site/yeu-thich",
     },
   };
 
@@ -109,6 +109,7 @@ function FavouritePage() {
                 <img
                   loading="lazy"
                   src={logo_n}
+                  alt="Needflex"
                   className="absolute top-2 left-2 w-3"
                 />
               )}
@@ -127,6 +128,7 @@ function FavouritePage() {
                 <img
                   loading="lazy"
                   src={logo_n}
+                  alt="Needflex"
                   className="absolute top-2 left-2 w-3"
                 />
               )}

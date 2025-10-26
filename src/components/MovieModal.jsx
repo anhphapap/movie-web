@@ -437,6 +437,7 @@ export default function MovieModal({
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
                   src={logo_n}
+                  alt="Needflex"
                 ></img>
                 <span className="font-bold text-white text-xs tracking-[3px]">
                   {modal.item.type === "series"

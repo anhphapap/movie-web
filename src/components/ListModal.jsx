@@ -175,6 +175,7 @@ function ListModal({ isOpen, onClose, nameList, params }) {
                     <img
                       loading="lazy"
                       src={logo_n}
+                      alt="Needflex"
                       className="absolute top-2 left-2 w-3"
                     />
                   )}
@@ -198,6 +199,7 @@ function ListModal({ isOpen, onClose, nameList, params }) {
                     <img
                       loading="lazy"
                       src={logo_n}
+                      alt="Needflex"
                       className="absolute top-2 left-2 w-3"
                     />
                   )}

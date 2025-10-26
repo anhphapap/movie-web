@@ -97,7 +97,11 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 className="cursor-pointer"
                 onClick={() => navigate("/trang-chu")}
               >
-                <img src={logo_n} className="object-cover h-full"></img>
+                <img
+                  src={logo_n}
+                  className="object-cover h-full"
+                  alt="Needflex"
+                ></img>
               </div>
             </div>
           </div>

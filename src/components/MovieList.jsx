@@ -184,6 +184,7 @@ const MovieList = ({
                 <img
                   loading="lazy"
                   src={logo_n}
+                  alt="Needflex"
                   className="absolute top-2 left-2 w-3"
                 />
               )}
@@ -205,6 +206,7 @@ const MovieList = ({
                 <img
                   loading="lazy"
                   src={logo_n}
+                  alt="Needflex"
                   className="absolute top-2 left-2 w-3"
                 />
               )}

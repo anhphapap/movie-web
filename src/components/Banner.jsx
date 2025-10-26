@@ -517,6 +517,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             <img
               className="h-[15px] sm:h-[20px] object-cover"
               src={logo_n}
+              alt="Needflex"
             ></img>
             <span className="font-bold text-white text-xs tracking-[3px]">
               {movie.item.type === "series"

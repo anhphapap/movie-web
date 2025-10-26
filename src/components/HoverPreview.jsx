@@ -127,6 +127,7 @@ export default function HoverPreview() {
                 <img
                   loading="lazy"
                   src={logo_n}
+                  alt="Needflex"
                   className="absolute top-3 left-3 w-4"
                 />
               )}

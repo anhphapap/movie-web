@@ -20,7 +20,7 @@ function DonatePage() {
       name: "Ủng Hộ",
       description:
         "Ủng hộ Needflex để duy trì website xem phim miễn phí, không quảng cáo.",
-      url: "https://movie-web-lake-eta.vercel.app/ung-ho",
+      url: "https://needflex.site/ung-ho",
     },
   };
 

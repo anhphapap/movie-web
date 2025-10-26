@@ -138,11 +138,10 @@ export const homeContent = {
       "@context": "https://schema.org",
       "@type": "WebSite",
       name: "Needflex",
-      url: "https://movie-web-lake-eta.vercel.app",
+      url: "https://needflex.site",
       potentialAction: {
         "@type": "SearchAction",
-        target:
-          "https://movie-web-lake-eta.vercel.app/tim-kiem?q={search_term_string}",
+        target: "https://needflex.site/tim-kiem?q={search_term_string}",
         "query-input": "required name=search_term_string",
       },
     },
@@ -242,7 +241,7 @@ export const seriesContent = {
       name: "Phim Bộ Mới Nhất 2025",
       description:
         "Tổng hợp phim bộ mới nhất 2025, Vietsub HD, cập nhật liên tục trên Needflex.",
-      url: "https://movie-web-lake-eta.vercel.app/phim-bo",
+      url: "https://needflex.site/phim-bo",
     },
   },
   data: [
@@ -321,7 +320,7 @@ export const singleContent = {
       name: "Phim Lẻ Mới Nhất 2025",
       description:
         "Tổng hợp phim lẻ mới nhất 2025, Vietsub HD, cập nhật liên tục trên Needflex.",
-      url: "https://movie-web-lake-eta.vercel.app/phim-le",
+      url: "https://needflex.site/phim-le",
     },
   },
   data: [

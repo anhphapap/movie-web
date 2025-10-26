@@ -306,6 +306,7 @@ export default function Carousel({
                     <img
                       loading="lazy"
                       src={logo_n}
+                      alt="Needflex"
                       className="absolute top-[6px] left-[6px] w-3"
                     ></img>
                   )}
@@ -488,6 +489,7 @@ export default function Carousel({
                       <img
                         loading="lazy"
                         src={logo_n}
+                        alt="Needflex"
                         className="absolute top-2 left-2 w-3"
                       />
                     )}
@@ -511,6 +513,7 @@ export default function Carousel({
                       <img
                         loading="lazy"
                         src={logo_n}
+                        alt="Needflex"
                         className="absolute top-2 left-2 w-3"
                       />
                     )}
@@ -745,6 +748,7 @@ export default function Carousel({
                     <img
                       loading="lazy"
                       src={logo_n}
+                      alt="Needflex"
                       className="absolute top-2 left-2 w-3"
                     />
                   )}

@@ -2,7 +2,7 @@ import axios from "axios";
 import fs from "fs";
 import { create } from "xmlbuilder2";
 
-const BASE_URL = "https://movie-web-lake-eta.vercel.app";
+const BASE_URL = "https://needflex.site";
 const API_BASE = "https://ophim1.com"; // bạn có thể đổi domain mirror nếu cần
 
 // === Helper tạo XML nhanh ===

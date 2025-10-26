@@ -8,7 +8,7 @@ export async function fetchTrending(type = "movie", timeWindow = "day") {
 
     // ✅ Tự động chọn base URL
     const baseURL = isLocal
-      ? "https://movie-web-lake-eta.vercel.app" // API production thật
+      ? "https://needflex.site" // API production thật
       : ""; // để Vercel dùng route /api/... nội bộ
 
     const tmdbRes = await fetch(
