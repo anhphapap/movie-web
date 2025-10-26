@@ -25,12 +25,14 @@ import {
   SlidersHorizontal,
   Sun,
   Clock,
+  ArrowLeft,
 } from "lucide-react";
 import { formatTime } from "../utils/data";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "./Tooltip";
 import LazyImage from "./LazyImage";
 import { useWatching } from "../context/WatchingContext";
+import Episodes from "./Episodes";
 
 const VideoPlayer = ({
   episode,
@@ -70,7 +72,6 @@ const VideoPlayer = ({
   const [videoReady, setVideoReady] = useState(false);
   const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [showEpisodes, setShowEpisodes] = useState(0);
   const [centerOverlay, setCenterOverlay] = useState(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [buffered, setBuffered] = useState(0);
@@ -109,10 +110,18 @@ const VideoPlayer = ({
   useEffect(() => {
     const video = videoRef.current;
 
+    // Cleanup HLS instance cũ trước khi tạo mới
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
     // Reset states khi src thay đổi
     setVideoReady(false);
     setPlaying(false);
     setShowControls(false);
+    setIsBuffering(false);
+    setBuffered(0);
     // Không reset hasPlayedOnce nếu đang auto play
     if (!shouldAutoPlay) {
       setHasPlayedOnce(false);
@@ -121,7 +130,10 @@ const VideoPlayer = ({
     if (Hls.isSupported()) {
       const hls = new Hls({
         startLevel: -1, // auto
+        enableWorker: true, // Sử dụng Web Worker để tăng performance
+        lowLatencyMode: true, // Giảm độ trễ
       });
+
       hls.loadSource(movie?.episodes[svr]?.server_data[episode]?.link_m3u8);
       hls.attachMedia(video);
       hlsRef.current = hls;
@@ -145,14 +157,35 @@ const VideoPlayer = ({
       hls.on(Hls.Events.MANIFEST_LOADED, () => {
         setVideoReady(true);
 
-        // Autoplay bình thường
-        if (shouldAutoPlay) {
+        // Autoplay với delay dài hơn để tránh conflict với resume data
+        if (shouldAutoPlay && !resumeData) {
           setTimeout(() => {
-            video.play();
-            setPlaying(true);
-            setShowControls(true);
-            setHasPlayedOnce(true);
-          }, 100);
+            if (video && hlsRef.current === hls) {
+              // Kiểm tra instance vẫn còn hợp lệ và không có resume data
+              video.play().catch(console.error);
+              setPlaying(true);
+              setShowControls(true);
+              setHasPlayedOnce(true);
+            }
+          }, 500); // Tăng delay để tránh conflict với resume data
+        }
+      });
+
+      // Error handling
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS Error:", data);
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              hls.recoverMediaError();
+              break;
+            default:
+              hls.destroy();
+              break;
+          }
         }
       });
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
@@ -161,25 +194,26 @@ const VideoPlayer = ({
       const handleCanPlay = () => {
         setVideoReady(true);
 
-        // Autoplay bình thường
-        if (shouldAutoPlay) {
+        // Autoplay với delay dài hơn để tránh conflict với resume data
+        if (shouldAutoPlay && !resumeData) {
           setTimeout(() => {
-            video.play();
-            setPlaying(true);
-            setShowControls(true);
-            setHasPlayedOnce(true);
-          }, 100);
+            if (video) {
+              video.play().catch(console.error);
+              setPlaying(true);
+              setShowControls(true);
+              setHasPlayedOnce(true);
+            }
+          }, 500);
         }
       };
 
       video.addEventListener("canplay", handleCanPlay);
     }
 
-    setShowEpisodes(parseInt(episode));
-
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
+        hlsRef.current = null;
       }
     };
   }, [movie, svr, episode, shouldAutoPlay]);
@@ -189,20 +223,26 @@ const VideoPlayer = ({
     const video = videoRef.current;
     if (!video || !resumeData || !videoReady) return;
 
-    // Chỉ seek nếu video đã sẵn sàng và có resume data
+    // Chỉ seek nếu video đã sẵn sàng và có resume data với currentTime > 0
     if (resumeData.currentTime > 0) {
+      // Delay để đảm bảo video đã load xong
       setTimeout(() => {
-        video.currentTime = resumeData.currentTime;
-        setProgress(resumeData.currentTime);
-        if (!playing) {
-          video.play();
-          setPlaying(true);
-          setShowControls(true);
-          setHasPlayedOnce(true);
+        if (video && hlsRef.current) {
+          // Kiểm tra cả video và HLS instance
+          video.currentTime = resumeData.currentTime;
+          setProgress(resumeData.currentTime);
+
+          // Chỉ play nếu video đang pause và không có shouldAutoPlay
+          if (video.paused && !shouldAutoPlay) {
+            video.play().catch(console.error);
+            setPlaying(true);
+            setShowControls(true);
+            setHasPlayedOnce(true);
+          }
         }
-      }, 500);
+      }, 800); // Tăng delay để tránh conflict
     }
-  }, [resumeData, videoReady, playing]);
+  }, [resumeData, videoReady, shouldAutoPlay]); // ❌ Bỏ playing khỏi dependency
 
   // Monitor buffering
   useEffect(() => {
@@ -263,18 +303,18 @@ const VideoPlayer = ({
     }
   }, []);
 
-  // Video pause/play events
+  // Video pause/play events - Sync state với video element
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const handlePause = () => {
-      // Bắt đầu đếm khi video pause
+      setPlaying(false); // ✅ Sync state với video element
       resetPauseOverlayTimer();
     };
 
     const handlePlay = () => {
-      // Clear ngay khi video play
+      setPlaying(true); // ✅ Sync state với video element
       clearTimeout(inactivityTimer.current);
       setShowOverlay(false);
     };
@@ -508,14 +548,17 @@ const VideoPlayer = ({
     // Only allow click play/pause on desktop
     if (isMobile) return;
 
-    if (playing) {
-      videoRef.current.pause();
-      showCenterOverlay("pause");
-    } else {
-      videoRef.current.play();
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play().catch(console.error);
       showCenterOverlay("play");
+    } else {
+      video.pause();
+      showCenterOverlay("pause");
     }
-    setPlaying(!playing);
+    // ❌ Không set state ở đây, để video events tự sync
   };
 
   // Touch gestures - Clean implementation
@@ -615,14 +658,16 @@ const VideoPlayer = ({
           // Single tap confirmed
           if (showControls) {
             // Control đang hiện → toggle pause/play
-            if (playing) {
-              videoRef.current.pause();
-              showCenterOverlay("pause");
-            } else {
-              videoRef.current.play();
-              showCenterOverlay("play");
+            const video = videoRef.current;
+            if (video) {
+              if (video.paused) {
+                video.play().catch(console.error);
+                showCenterOverlay("play");
+              } else {
+                video.pause();
+                showCenterOverlay("pause");
+              }
             }
-            setPlaying(!playing);
           } else {
             // Control chưa hiện → hiện control
             setShowControls(true);
@@ -722,14 +767,16 @@ const VideoPlayer = ({
       switch (e.key.toLowerCase()) {
         case " ":
           e.preventDefault();
-          if (playing) {
-            videoRef.current.pause();
-            showCenterOverlay("pause");
-          } else {
-            videoRef.current.play();
-            showCenterOverlay("play");
+          const video = videoRef.current;
+          if (video) {
+            if (video.paused) {
+              video.play().catch(console.error);
+              showCenterOverlay("play");
+            } else {
+              video.pause();
+              showCenterOverlay("pause");
+            }
           }
-          setPlaying(!playing);
           break;
         case "arrowright":
           e.preventDefault();
@@ -771,7 +818,7 @@ const VideoPlayer = ({
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [playing, playbackRate, pipSupported, showShortcuts]);
+  }, [playbackRate, pipSupported, showShortcuts]); // ❌ Bỏ playing khỏi dependency
 
   return (
     <div
@@ -976,10 +1023,29 @@ const VideoPlayer = ({
         </div>
       )}
 
+      {videoReady && hasPlayedOnce && (
+        <div
+          className={`absolute top-0 left-0 w-full bg-gradient-to-b from-black/30 to-transparent ${
+            showControls
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <button
+            onClick={() => {
+              navigate("/trang-chu");
+            }}
+            className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white `}
+          >
+            <ArrowLeft size={isMobile ? 30 : 34} />
+          </button>
+        </div>
+      )}
+
       {/* Controls - chỉ hiện khi video ready VÀ đã play lần đầu */}
       {videoReady && hasPlayedOnce && (
         <div
-          className={`absolute bottom-0 w-full bg-gradient-to-t from-black/80 to-transparent p-2 lg:p-4 text-white 
+          className={`absolute bottom-0 w-full bg-gradient-to-t from-black/50 to-transparent p-2 lg:p-4 text-white 
             transition-all duration-500 ease-in-out
             ${
               showControls
@@ -990,7 +1056,7 @@ const VideoPlayer = ({
           {/* Progress bar */}
           <div className="flex flex-col items-center justify-between w-full gap-3 mb-1 lg:mb-3">
             <div className="flex items-center gap-2 justify-between w-full px-1">
-              <span className="text-xs lg:text-sm whitespace-nowrap text-white/90">
+              <span className="text-xs lg:text-sm whitespace-nowrap text-white/90 ">
                 {formatTime(progress)}
               </span>
               <span className="text-xs lg:text-sm whitespace-nowrap text-white/90">
@@ -999,7 +1065,7 @@ const VideoPlayer = ({
             </div>
             <div
               data-progress-bar
-              className="relative h-1 bg-white/20 cursor-pointer w-full transition-all duration-200 group/progress py-1 -my-1"
+              className="relative h-1 bg-white/20 cursor-pointer w-full transition-all duration-200 group/progress py-[2px] -my-1"
               onClick={handleSeek}
               onMouseDown={handleProgressDragStart}
               onTouchStart={handleProgressDragStart}
@@ -1024,7 +1090,7 @@ const VideoPlayer = ({
                 className={`absolute top-0 left-0 h-full bg-red-600 ${
                   isDraggingProgress
                     ? "h-1 transition-none"
-                    : "group-hover/progress:h-2 transition-all duration-200"
+                    : "group-hover/progress:h-1 transition-all duration-200"
                 }`}
                 style={{
                   width: `${
@@ -1068,14 +1134,16 @@ const VideoPlayer = ({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (playing) {
-                    videoRef.current.pause();
-                    showCenterOverlay("pause");
-                  } else {
-                    videoRef.current.play();
-                    showCenterOverlay("play");
+                  const video = videoRef.current;
+                  if (video) {
+                    if (video.paused) {
+                      video.play().catch(console.error);
+                      showCenterOverlay("play");
+                    } else {
+                      video.pause();
+                      showCenterOverlay("pause");
+                    }
                   }
-                  setPlaying(!playing);
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
@@ -1188,87 +1256,6 @@ const VideoPlayer = ({
             </span>
 
             <div className="flex items-center space-x-1 lg:space-x-4">
-              {/* Episodes */}
-              {/* {movie.episodes[svr].server_data.length > 0 && (
-                <div className="group/episodes hidden lg:block">
-                  <button
-                    className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
-                    aria-label="Danh sách tập"
-                  >
-                    <ListVideo size={34} />
-                  </button>
-                  <div
-                    className="absolute -bottom-20 right-0 bg-[#262626]/95 backdrop-blur h-[400px] w-1/3 text-white rounded-md text-sm
-                  opacity-0 invisible group-hover/episodes:opacity-100 group-hover/episodes:visible 
-                  transition-all duration-200 z-[9999] -translate-y-1/2 border border-white/10"
-                  >
-                    <div className="py-3 px-5 border-b border-white/10">
-                      <span className="text-white font-semibold text-lg">
-                        Danh sách tập
-                      </span>
-                    </div>
-                    <div className="flex flex-col overflow-y-auto h-full bg-[#262626]">
-                      {movie.episodes[svr].server_data.map((ep, index) => (
-                        <div
-                          key={index}
-                          className={`transition ${
-                            showEpisodes === index
-                              ? "border-l-[3px] border-red-600 bg-black/50"
-                              : "hover:bg-[#363636]"
-                          }`}
-                        >
-                          <div
-                            className="flex items-center justify-between py-3 px-5 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowEpisodes(index);
-                            }}
-                          >
-                            <span className="text-zinc-300 text-xs">
-                              {index + 1}
-                            </span>
-                            <span className="ml-4 flex-1 text-white font-medium text-xs">
-                              {"Tập " +
-                                movie.episodes[svr].server_data[index].name}
-                            </span>
-                          </div>
-
-                          {showEpisodes === index && (
-                            <div className={`flex group-hover:flex p-2 gap-2`}>
-                              <div className="relative w-36">
-                                <LazyImage
-                                  src={movie.poster_url}
-                                  alt={
-                                    movie.episodes[svr].server_data[index].name
-                                  }
-                                  sizes="5vw"
-                                />
-                                {showEpisodes !== parseInt(episode) && (
-                                  <div
-                                    className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer hover:scale-105 transition-all ease-linear duration-100"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(
-                                        `/xem-phim/${movie.slug}?svr=${svr}&ep=${index}`
-                                      );
-                                    }}
-                                  >
-                                    <Play
-                                      size={20}
-                                      className="text-white bg-black/70 rounded-full p-1"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )} */}
-
               {/* Next episode */}
               {movie.episodes[svr].server_data.length > 0 &&
                 parseInt(episode) <
@@ -1323,7 +1310,7 @@ const VideoPlayer = ({
                             sizes="10vw"
                           />
                           <div
-                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-50 group-hover/nextEpisode:opacity-100 group-hover/nextEpisode:scale-105 transition-all ease-linear duration-200"
+                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-50 group-hover/nextEpisode:opacity-100 group-hover/nextEpisode:scale-105 transition-all ease-linear duration-100 delay-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               if (onNavigateToNextEpisode) {
@@ -1347,7 +1334,25 @@ const VideoPlayer = ({
                     </div>
                   </div>
                 )}
-
+              {/* Episodes */}
+              {movie.episodes[svr].server_data.length > 0 && (
+                <div className="group/episodes hidden lg:block">
+                  <button
+                    className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
+                    aria-label="Danh sách tập"
+                  >
+                    <ListVideo size={34} />
+                  </button>
+                  <Episodes
+                    name={movie.name}
+                    episodes={movie.episodes}
+                    svr={svr}
+                    poster_url={movie.poster_url}
+                    slug={movie.slug}
+                    episode={episode}
+                  />
+                </div>
+              )}
               {/* Playback speed */}
               <div className="relative group">
                 <div className="relative group/speed">

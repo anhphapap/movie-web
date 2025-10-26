@@ -76,10 +76,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         }`}
         id="header"
       >
-        <div className="flex flex-row-reverse md:flex-row md:flex items-center justify-between w-full">
-          <div className="flex md:hidden">
-            <Search full={true} />
-          </div>
+        <div className="flex flex-row md:flex items-center justify-between w-full">
           <div className="md:hidden flex items-center gap-2">
             <div className="flex items-center md:hidden">
               <button
@@ -149,10 +146,11 @@ const Header = ({ filter = false, type_slug = "" }) => {
               )}
             </nav>
           </div>
-          <div className="items-center hidden md:flex">
-            <div className="hidden md:block">
+          <div className="flex items-center">
+            <Search />
+            {/* <div className="hidden md:block">
               <Search />
-            </div>
+            </div> */}
             <div className="hidden md:block">
               {user?.email ? (
                 <div className="relative flex flex-shrink-0 items-center space-x-2 cursor-pointer group">

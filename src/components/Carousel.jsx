@@ -152,16 +152,21 @@ export default function Carousel({
   }, [page]);
 
   const handlePlayMovie = (movie) => {
-    // Lưu thông tin resume vào localStorage
-    const resumeData = {
-      slug: movie.slug,
-      currentTime: movie.currentTime || 0,
-      duration: movie.duration || 0,
-      progress: movie.progress || 0,
-      timestamp: Date.now(),
-    };
+    // Chỉ lưu resume data nếu có currentTime > 0
+    if (movie.currentTime && movie.currentTime > 0) {
+      const resumeData = {
+        slug: movie.slug,
+        currentTime: movie.currentTime,
+        duration: movie.duration || 0,
+        progress: movie.progress || 0,
+        timestamp: Date.now(),
+      };
+      localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
+    } else {
+      // Clear resume data nếu không có currentTime
+      localStorage.removeItem("resumeVideo");
+    }
 
-    localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
     navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
   };
 
@@ -245,7 +250,6 @@ export default function Carousel({
             swiper.params.navigation.nextEl = nextRef.current;
             swiper.navigation.init();
             swiper.navigation.update();
-            setLastVisible(swiper.params.slidesPerView - 1);
             setSwiperHeight(swiper.el.clientHeight);
             setCanSlidePrev(!swiper.isBeginning);
             setCanSlideNext(!swiper.isEnd);
@@ -264,6 +268,7 @@ export default function Carousel({
             500: { slidesPerView: 3, slidesPerGroup: 3 },
             0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
+          speed={700}
           className="w-full"
           ref={swiperRef}
         >
@@ -449,6 +454,7 @@ export default function Carousel({
             500: { slidesPerView: 4, slidesPerGroup: 4 },
             0: { slidesPerView: 3, slidesPerGroup: 3 },
           }}
+          speed={700}
           className="w-full"
           ref={swiperRef}
         >
@@ -669,6 +675,7 @@ export default function Carousel({
           500: { slidesPerView: 4, slidesPerGroup: 4 },
           0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
+        speed={700}
         className="w-full"
         ref={swiperRef}
       >

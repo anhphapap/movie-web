@@ -28,6 +28,7 @@ const MovieList = ({
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
   const fetchMovies = async () => {
+    console.log("fetchMovies");
     setLoading(true);
     var api = null;
 
@@ -50,7 +51,11 @@ const MovieList = ({
       if (page > totalPages) {
         setHasMore(false);
       } else {
-        setMovies([...movies, ...listResponse.data.data.items]);
+        if (page === 1) {
+          setMovies(listResponse.data.data.items);
+        } else {
+          setMovies((prev) => [...prev, ...listResponse.data.data.items]);
+        }
         if (!seoOnPage) setSeoOnPage(listResponse.data.data.seoOnPage);
 
         if (!titleHead) {
@@ -124,25 +129,27 @@ const MovieList = ({
 
   useEffect(() => {
     fetchMovies();
-  }, [page]);
+  }, [page, keyword]);
 
   useEffect(() => {
+    console.log(keyword);
     setMovies([]);
     setPage(1);
     setTitleHead(null);
     setHasMore(true);
-    fetchMovies();
   }, [keyword, type_slug, country, category, year, sort_field]);
 
   if (!movies) return <></>;
 
   return (
-    <div className="text-white mt-[20vh] px-[3%]">
+    <div className="text-white mt-[20vh] px-[3%] min-h-screen">
       {seoOnPage && (
         <SEO seoData={seoOnPage} baseUrl={window.location.origin} />
       )}
-      {(!loading && movies.length == 0 && (
-        <h1>Không tìm thấy bộ phim nào !</h1>
+      {(!loading && movies.length === 0 && (
+        <h1 className="text-center">
+          Không có kết quả nào khớp với yêu cầu tìm kiếm "{keyword}" của bạn.
+        </h1>
       )) || (
         <h1 className="text-xl md:text-2xl 2xl:text-4xl">
           {(search && (

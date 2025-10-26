@@ -30,7 +30,7 @@ import { WatchingProvider } from "./context/WatchingContext";
 
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
-const WatchPage = lazy(() => import("./pages/WatchPage"));
+// const WatchPage = lazy(() => import("./pages/WatchPage"));
 const FilterPage = lazy(() => import("./pages/FilterPage"));
 const DonatePage = lazy(() => import("./pages/DonatePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -39,7 +39,7 @@ const AccountPage = lazy(() => import("./pages/AccountPage"));
 const FavouritePage = lazy(() => import("./pages/FavouritePage"));
 const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
-
+const FullWatchPage = lazy(() => import("./pages/FullWatchPage"));
 library.add(fas, fab, far);
 
 const AppLayout = ({ children }) => {
@@ -189,7 +189,7 @@ function App() {
                                   />
                                   <Route
                                     path="/xem-phim/:movieSlug"
-                                    element={<WatchPage />}
+                                    element={<FullWatchPage />}
                                   />
                                   <Route
                                     path="/duyet-tim/:typeSlug"
