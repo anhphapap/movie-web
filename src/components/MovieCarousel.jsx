@@ -9,6 +9,7 @@ import { tops } from "../utils/data";
 import { Link } from "react-router-dom";
 import { useMovieModal } from "../context/MovieModalContext";
 import { useListModal } from "../context/ListModalContext";
+import logo_n from "../assets/images/N_logo.png";
 const CustomRightArrow = ({ onClick }) => {
   return (
     <button
@@ -251,7 +252,7 @@ const MovieCarousel = ({
                     {item.sub_docquyen && (
                       <img
                         loading="lazy"
-                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        src={logo_n}
                         className="absolute top-[6px] left-[6px] w-3"
                       ></img>
                     )}
@@ -288,7 +289,7 @@ const MovieCarousel = ({
                     {item.sub_docquyen && (
                       <img
                         loading="lazy"
-                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        src={logo_n}
                         className="absolute top-[6px] left-[6px] w-3"
                       ></img>
                     )}
@@ -423,7 +424,7 @@ const MovieCarousel = ({
                 {item.sub_docquyen && (
                   <img
                     loading="lazy"
-                    src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                    src={logo_n}
                     className="absolute top-2 left-2 w-3"
                   ></img>
                 )}
@@ -472,7 +473,7 @@ const MovieCarousel = ({
                   {item.sub_docquyen && (
                     <img
                       loading="lazy"
-                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      src={logo_n}
                       className="absolute top-2 left-2 w-3"
                     ></img>
                   )}

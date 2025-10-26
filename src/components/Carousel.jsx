@@ -16,6 +16,7 @@ import { useWatching } from "../context/WatchingContext";
 import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { CircleX, Info, X } from "lucide-react";
+import logo_n from "../assets/images/N_logo.png";
 export default function Carousel({
   nameList,
   typeList = "list",
@@ -304,7 +305,7 @@ export default function Carousel({
                   {item.sub_docquyen && (
                     <img
                       loading="lazy"
-                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      src={logo_n}
                       className="absolute top-[6px] left-[6px] w-3"
                     ></img>
                   )}
@@ -486,7 +487,7 @@ export default function Carousel({
                     {item.sub_docquyen && (
                       <img
                         loading="lazy"
-                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        src={logo_n}
                         className="absolute top-2 left-2 w-3"
                       />
                     )}
@@ -509,7 +510,7 @@ export default function Carousel({
                     {item.sub_docquyen && (
                       <img
                         loading="lazy"
-                        src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                        src={logo_n}
                         className="absolute top-2 left-2 w-3"
                       />
                     )}
@@ -743,7 +744,7 @@ export default function Carousel({
                   {item.sub_docquyen && (
                     <img
                       loading="lazy"
-                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      src={logo_n}
                       className="absolute top-2 left-2 w-3"
                     />
                   )}
@@ -845,7 +846,7 @@ export default function Carousel({
                   {item.sub_docquyen && (
                     <img
                       loading="lazy"
-                      src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                      src={logo_n}
                       className="absolute top-2 left-2 w-3"
                     />
                   )}

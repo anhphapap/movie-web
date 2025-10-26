@@ -12,6 +12,7 @@ import Tooltip from "./Tooltip";
 import { toast } from "react-toastify";
 import { useWatching } from "../context/WatchingContext";
 import { formatSecondsToMinutes, formatTime } from "../utils/data";
+import logo_n from "../assets/images/N_logo.png";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ export default function HoverPreview() {
               {item.sub_docquyen && (
                 <img
                   loading="lazy"
-                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  src={logo_n}
                   className="absolute top-3 left-3 w-4"
                 />
               )}

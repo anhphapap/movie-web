@@ -9,6 +9,7 @@ import { useHoverPreview } from "../context/HoverPreviewContext";
 import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
 import SEO from "./SEO";
+import logo_n from "../assets/images/N_logo.png";
 const MovieList = ({
   type_slug = "phim-moi-cap-nhat",
   sort_field = "_id",
@@ -182,7 +183,7 @@ const MovieList = ({
               {item.sub_docquyen && (
                 <img
                   loading="lazy"
-                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  src={logo_n}
                   className="absolute top-2 left-2 w-3"
                 />
               )}
@@ -203,7 +204,7 @@ const MovieList = ({
               {item.sub_docquyen && (
                 <img
                   loading="lazy"
-                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  src={logo_n}
                   className="absolute top-2 left-2 w-3"
                 />
               )}

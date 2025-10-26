@@ -9,6 +9,7 @@ import { useMovieModal } from "../context/MovieModalContext";
 import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
 import { toast } from "react-toastify";
+import logo_n from "../assets/images/N_logo.png";
 
 const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
@@ -515,7 +516,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           <div className="flex items-center space-x-1 sm:justify-start justify-center">
             <img
               className="h-[15px] sm:h-[20px] object-cover"
-              src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+              src={logo_n}
             ></img>
             <span className="font-bold text-white text-xs tracking-[3px]">
               {movie.item.type === "series"

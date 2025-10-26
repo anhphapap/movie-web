@@ -24,6 +24,7 @@ import SEO from "./SEO";
 import { useFavorites } from "../context/FavouritesProvider";
 import Recommend from "./Recommend";
 import { useWatching } from "../context/WatchingContext";
+import logo_n from "../assets/images/N_logo.png";
 const customStyles = {
   content: {
     position: "absolute",
@@ -421,7 +422,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
               <div className="sm:flex hidden items-center space-x-1 justify-start">
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
-                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
+                  src={logo_n}
                 ></img>
                 <span className="font-bold text-white text-xs tracking-[3px]">
                   {modal.item.type === "series"

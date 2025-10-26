@@ -4,123 +4,119 @@ const SEO = ({
   seoData,
   baseUrl = window.location.origin,
   siteName = "Needflex",
+  defaultImage = `${window.location.origin}/assets/images/logo_full_940.png`,
 }) => {
   useEffect(() => {
     if (!seoData) return;
 
-    // Update document title
-    if (seoData.titleHead) {
-      // Thêm tên website vào title nếu chưa có
-      const title = seoData.titleHead.includes(siteName)
-        ? seoData.titleHead
-        : `${seoData.titleHead} | ${siteName}`;
-      document.title = title;
-    }
-
-    // Update or create meta tags
-    const updateMetaTag = (name, content, property = false) => {
-      if (!content) return;
-
-      const attribute = property ? "property" : "name";
-      let element = document.querySelector(`meta[${attribute}="${name}"]`);
-
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, name);
-        document.head.appendChild(element);
+    // Helper: update or create <meta> tag
+    const setMeta = (key, value, isProperty = false) => {
+      if (!value) return;
+      const attr = isProperty ? "property" : "name";
+      let el = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
       }
-
-      element.setAttribute("content", content);
+      el.setAttribute("content", value);
     };
 
-    // Basic meta tags
-    updateMetaTag("description", seoData.descriptionHead);
+    // Helper: remove old structured data if exists
+    const removeOldScript = (id) => {
+      const old = document.getElementById(id);
+      if (old) old.remove();
+    };
 
-    // Open Graph tags
-    updateMetaTag("og:site_name", siteName, true);
-    updateMetaTag("og:type", seoData.og_type, true);
-    updateMetaTag("og:title", seoData.titleHead, true);
-    updateMetaTag("og:description", seoData.descriptionHead, true);
-    updateMetaTag("og:url", `${baseUrl}/${seoData.og_url}`, true);
+    // ✅ Title (auto append site name)
+    const titleRaw = seoData.titleHead || "Xem phim online chất lượng cao";
+    const title = titleRaw.includes(siteName)
+      ? titleRaw
+      : `${titleRaw} | ${siteName}`;
+    document.title = title;
 
-    if (seoData.og_image && seoData.og_image[0]) {
-      const imageUrl = seoData.og_image[0].startsWith("http")
-        ? seoData.og_image[0]
-        : `${
-            import.meta.env.VITE_IMAGE_URL || "https://img.ophim.live/uploads/"
-          }${seoData.og_image[0]}`;
-      updateMetaTag("og:image", imageUrl, true);
-      updateMetaTag("og:image:secure_url", imageUrl, true);
-      updateMetaTag("og:image:type", "image/jpeg", true);
-      updateMetaTag("og:image:width", "1200", true);
-      updateMetaTag("og:image:height", "630", true);
+    // ✅ Description fallback
+    const desc =
+      seoData.descriptionHead ||
+      "Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí.";
+
+    // ✅ URL canonical
+    const cleanUrl = seoData.og_url
+      ? `${baseUrl.replace(/\/$/, "")}/${seoData.og_url.replace(/^\//, "")}`
+      : baseUrl;
+
+    // ✅ Image fallback
+    const image = seoData.og_image?.[0]?.startsWith("http")
+      ? seoData.og_image[0]
+      : `${import.meta.env.VITE_IMAGE_URL || baseUrl}/${
+          seoData.og_image?.[0] || defaultImage
+        }`;
+
+    // 🧩 --- BASIC META ---
+    setMeta("description", desc);
+    setMeta(
+      "keywords",
+      "xem phim, phim vietsub, Needflex, phim online, phim HD, phim 2025"
+    );
+    setMeta("author", siteName);
+    setMeta("robots", "index, follow");
+    setMeta("theme-color", "#000000");
+
+    // 🧩 --- OPEN GRAPH ---
+    setMeta("og:locale", "vi_VN", true);
+    setMeta("og:site_name", siteName, true);
+    setMeta("og:type", seoData.og_type || "website", true);
+    setMeta("og:title", title, true);
+    setMeta("og:description", desc, true);
+    setMeta("og:url", cleanUrl, true);
+    setMeta("og:image", image, true);
+    setMeta("og:image:width", "1200", true);
+    setMeta("og:image:height", "630", true);
+    setMeta("og:image:alt", siteName, true);
+
+    // 🧩 --- TWITTER ---
+    setMeta("twitter:card", "summary_large_image");
+    setMeta("twitter:title", title);
+    setMeta("twitter:description", desc);
+    setMeta("twitter:image", image);
+
+    // 🧩 --- CANONICAL ---
+    let link = document.querySelector('link[rel="canonical"]');
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "canonical";
+      document.head.appendChild(link);
     }
+    link.href = cleanUrl;
 
-    if (seoData.updated_time) {
-      const updatedTime = new Date(seoData.updated_time).toISOString();
-      updateMetaTag("og:updated_time", updatedTime, true);
-    }
+    // 🧩 --- STRUCTURED DATA ---
+    removeOldScript("json-ld-schema");
+    const schema = {
+      "@context": "https://schema.org",
+      "@type":
+        seoData.og_type === "video.movie"
+          ? "Movie"
+          : seoData.og_type === "video.tv_show"
+          ? "TVSeries"
+          : "WebSite",
+      name: titleRaw,
+      description: desc,
+      image: image,
+      url: cleanUrl,
+      ...(seoData.seoSchema || {}),
+    };
 
-    // Twitter Card tags
-    updateMetaTag("twitter:card", "summary_large_image");
-    updateMetaTag("twitter:title", seoData.titleHead);
-    updateMetaTag("twitter:description", seoData.descriptionHead);
-    if (seoData.og_image && seoData.og_image[0]) {
-      const imageUrl = seoData.og_image[0].startsWith("http")
-        ? seoData.og_image[0]
-        : `${
-            import.meta.env.VITE_IMAGE_URL || "https://img.ophim.live/uploads/"
-          }${seoData.og_image[0]}`;
-      updateMetaTag("twitter:image", imageUrl);
-    }
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "json-ld-schema";
+    script.textContent = JSON.stringify(schema, null, 2);
+    document.head.appendChild(script);
 
-    // Canonical link
-    let canonicalLink = document.querySelector('link[rel="canonical"]');
-    if (!canonicalLink) {
-      canonicalLink = document.createElement("link");
-      canonicalLink.setAttribute("rel", "canonical");
-      document.head.appendChild(canonicalLink);
-    }
-    canonicalLink.setAttribute("href", `${baseUrl}/${seoData.og_url}`);
-
-    // JSON-LD Structured Data
-    if (seoData.seoSchema) {
-      let scriptTag = document.querySelector(
-        'script[type="application/ld+json"]#movie-schema'
-      );
-
-      if (!scriptTag) {
-        scriptTag = document.createElement("script");
-        scriptTag.setAttribute("type", "application/ld+json");
-        scriptTag.setAttribute("id", "movie-schema");
-        document.head.appendChild(scriptTag);
-      }
-
-      // Enhance schema with more details
-      const enhancedSchema = {
-        ...seoData.seoSchema,
-        image:
-          seoData.seoSchema.image ||
-          (seoData.og_image && seoData.og_image[0]
-            ? seoData.og_image[0].startsWith("http")
-              ? seoData.og_image[0]
-              : `${
-                  import.meta.env.VITE_IMAGE_URL ||
-                  "https://img.ophim.live/uploads/"
-                }${seoData.og_image[0]}`
-            : undefined),
-        url: seoData.seoSchema.url || `${baseUrl}/${seoData.og_url}`,
-        description: seoData.descriptionHead,
-      };
-
-      scriptTag.textContent = JSON.stringify(enhancedSchema);
-    }
-
-    // Cleanup function to reset title on unmount
+    // ✅ CLEANUP
     return () => {
-      document.title = siteName;
+      removeOldScript("json-ld-schema");
     };
-  }, [seoData, baseUrl, siteName]);
+  }, [seoData, baseUrl, siteName, defaultImage]);
 
   return null;
 };

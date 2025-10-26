@@ -5,6 +5,7 @@ import FilterNavbar from "./FilterNavbar";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import logo_full from "../assets/images/logo_full_240.png";
+import logo_n from "../assets/images/N_logo.png";
 
 const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -96,10 +97,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 className="cursor-pointer"
                 onClick={() => navigate("/trang-chu")}
               >
-                <img
-                  src="https://images.ctfassets.net/y2ske730sjqp/4aEQ1zAUZF5pLSDtfviWjb/ba04f8d5bd01428f6e3803cc6effaf30/Netflix_N.png"
-                  className="object-cover h-full"
-                ></img>
+                <img src={logo_n} className="object-cover h-full"></img>
               </div>
             </div>
           </div>
