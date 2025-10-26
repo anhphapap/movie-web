@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   listCategory,
   listCountry,
@@ -13,15 +13,17 @@ function FilterNavbar({ type_slug, open }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
-
+  const [searchParams] = useSearchParams();
+  const [sort_field, setSortField] = useState(
+    searchParams.get("sort_field") || ""
+  );
+  const [type, setType] = useState(type_slug || "phim-moi-cap-nhat");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [year, setYear] = useState(searchParams.get("year") || "");
+  const [country, setCountry] = useState(searchParams.get("country") || "");
   const handleFilter = () => {
-    const category = document.getElementById("category").value;
-    const country = document.getElementById("country").value;
-    const year = document.getElementById("year").value;
-    const type = document.getElementById("type").value;
-    const sortField = document.getElementById("sortField").value;
     navigate(
-      `/duyet-tim/${type}?sort_field=${sortField}&category=${category}&country=${country}&year=${year}`
+      `/duyet-tim/${type}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
     );
   };
 
@@ -70,8 +72,9 @@ function FilterNavbar({ type_slug, open }) {
       >
         <div className="space-y-1 pb-2 px-[3%] lg:px-0 grid sm:grid-cols-2 md:grid-cols-3 gap-2 lg:flex">
           <select
-            id="sortField"
+            onChange={(e) => setSortField(e.target.value)}
             className="px-1 pr-4 py-[1px] mt-1 border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
+            defaultValue={sort_field}
           >
             {listSortField.map((cate, index) => {
               return (
@@ -86,9 +89,9 @@ function FilterNavbar({ type_slug, open }) {
             })}
           </select>
           <select
-            id="type"
+            onChange={(e) => setType(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={type_slug}
+            defaultValue={type}
           >
             {listType.map((cate, index) => {
               return (
@@ -103,8 +106,9 @@ function FilterNavbar({ type_slug, open }) {
             })}
           </select>
           <select
-            id="category"
+            onChange={(e) => setCategory(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
+            defaultValue={category}
           >
             <option value="">Thể loại</option>
             {listCategory.map((cate, index) => {
@@ -120,8 +124,9 @@ function FilterNavbar({ type_slug, open }) {
             })}
           </select>
           <select
-            id="country"
+            onChange={(e) => setCountry(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
+            defaultValue={country}
           >
             <option value="">Quốc gia</option>
             {listCountry.map((ct, index) => {
@@ -137,8 +142,9 @@ function FilterNavbar({ type_slug, open }) {
             })}
           </select>
           <select
-            id="year"
+            onChange={(e) => setYear(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
+            defaultValue={year}
           >
             <option value="">Năm</option>
             {[...Array(2025 - 2010 + 1)].map((_, index) => {

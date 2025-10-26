@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -73,6 +73,12 @@ const Search = () => {
       closeSearch();
     }
   };
+
+  useEffect(() => {
+    if (!location.pathname.includes("/tim-kiem")) {
+      setIsSearchOpen(false);
+    }
+  }, [location.pathname]);
 
   return (
     <div

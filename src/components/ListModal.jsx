@@ -12,6 +12,7 @@ import Top10Badge from "../assets/images/Top10Badge.svg";
 import LazyImage from "./LazyImage";
 import { listSortField } from "../utils/data";
 import logo_n from "../assets/images/N_logo.png";
+import { useSEOManager } from "../context/SEOManagerContext";
 const customStyles = {
   content: {
     position: "absolute",
@@ -37,7 +38,17 @@ function ListModal({ isOpen, onClose, nameList, params }) {
   const [sortField, setSortField] = useState("_id");
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
+  const { pushSEO } = useSEOManager();
   const modalContainerRef = useRef(null);
+  const [seoOnPage, setSeoOnPage] = useState(null);
+
+  // SEO Management - push SEO khi modal mở
+  useEffect(() => {
+    if (isOpen && seoOnPage) {
+      pushSEO(seoOnPage);
+    }
+  }, [isOpen, seoOnPage]);
+
   useEffect(() => {
     const fetchAPI = async () => {
       if (params && isOpen && page <= totalPage) {
@@ -55,6 +66,7 @@ function ListModal({ isOpen, onClose, nameList, params }) {
                 currentList.data.data.params.pagination.totalItemsPerPage
             )
           );
+        if (!seoOnPage) setSeoOnPage(currentList.data.data.seoOnPage);
         setLoading(false);
       }
     };

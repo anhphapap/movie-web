@@ -20,10 +20,10 @@ import { useTop } from "../context/TopContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Captions, Server } from "lucide-react";
-import SEO from "./SEO";
 import { useFavorites } from "../context/FavouritesProvider";
 import Recommend from "./Recommend";
 import { useWatching } from "../context/WatchingContext";
+import { useSEOManager } from "../context/SEOManagerContext";
 import logo_n from "../assets/images/N_logo.png";
 const customStyles = {
   content: {
@@ -40,7 +40,13 @@ const customStyles = {
   },
 };
 
-export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
+export default function MovieModal({
+  onClose,
+  slug,
+  tmdb_id,
+  tmdb_type,
+  isOpen,
+}) {
   const [loading, setLoading] = useState(false);
   const [player, setPlayer] = useState(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -57,7 +63,9 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   const navigate = useNavigate();
   const { topSet } = useTop();
   const { getWatchingMovie, watchingSlugs } = useWatching();
+  const { pushSEO } = useSEOManager();
   const [watchingMovie, setWatchingMovie] = useState(null);
+  const [seoOnPage, setSeoOnPage] = useState(null);
 
   const handlePlayMovie = (movie) => {
     // Lưu thông tin resume vào localStorage
@@ -78,6 +86,13 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
       if (intervalId) clearInterval(intervalId);
     };
   }, [intervalId]);
+
+  // SEO Management - push SEO khi modal mở
+  useEffect(() => {
+    if (isOpen && seoOnPage) {
+      pushSEO(seoOnPage);
+    }
+  }, [isOpen, seoOnPage]);
 
   // Page Visibility API - dừng video khi chuyển tab hoặc mất focus
   useEffect(() => {
@@ -249,6 +264,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
           `${import.meta.env.VITE_API_DETAILS}${slug}`
         );
         setModal(res.data.data);
+        setSeoOnPage(res.data.data.seoOnPage);
         return;
       }
       const [data, image] = await Promise.all([
@@ -260,6 +276,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
         ),
       ]);
       setModal({ ...data.data.data, tmdb_image: image });
+      setSeoOnPage(data.data.data.seoOnPage);
     };
     fetchMovie();
     if (!isMuted) {
@@ -303,7 +320,7 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
   if (loading || !modal?.item)
     return (
       <Modal
-        isOpen={!!slug}
+        isOpen={isOpen}
         onRequestClose={onClose}
         style={customStyles}
         ariaHideApp={false}
@@ -328,15 +345,12 @@ export default function MovieModal({ onClose, slug, tmdb_id, tmdb_type }) {
 
   return (
     <Modal
-      isOpen={!!slug}
+      isOpen={isOpen}
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
       className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] min-h-screen lg:min-h-0"
     >
-      {modal?.seoOnPage && (
-        <SEO seoData={modal.seoOnPage} baseUrl={window.location.origin} />
-      )}
       <div className="flex flex-col w-full lg:rounded-lg">
         <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
           <div

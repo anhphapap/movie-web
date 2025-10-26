@@ -27,10 +27,12 @@ import SplashScreen from "./pages/SplashScreen";
 import { FavoritesProvider } from "./context/FavouritesProvider";
 import { CinemaProvider, useCinema } from "./context/CinemaContext";
 import { WatchingProvider } from "./context/WatchingContext";
+import { SEOManagerProvider } from "./context/SEOManagerContext";
+import SEOGlobal from "./components/SEOGlobal";
 
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
-// const WatchPage = lazy(() => import("./pages/WatchPage"));
+const WatchPage = lazy(() => import("./pages/WatchPage"));
 const FilterPage = lazy(() => import("./pages/FilterPage"));
 const DonatePage = lazy(() => import("./pages/DonatePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -114,142 +116,158 @@ function App() {
                 <WatchingProvider>
                   <div className="bg-[#141414] overflow-hidden text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl select-none outline-none min-h-screen flex flex-col justify-between">
                     <Router>
-                      <MovieModalProvider
-                        allowedPaths={[
-                          "/trang-chu",
-                          "/phim-bo",
-                          "/phim-le",
-                          "/tim-kiem",
-                          "/duyet-tim",
-                          "/yeu-thich",
-                        ]}
-                      >
-                        <HoverPreviewProvider>
-                          <ListModalProvider
-                            allowedPaths={[
-                              "/trang-chu",
-                              "/phim-bo",
-                              "/phim-le",
-                            ]}
-                          >
-                            <Suspense
-                              fallback={
-                                <div className="h-screen flex items-center justify-center text-white text-lg">
-                                  <FontAwesomeIcon
-                                    icon="fa-solid fa-spinner"
-                                    size="2xl"
-                                    className="animate-spin text-white"
-                                  />
-                                </div>
-                              }
+                      <SEOManagerProvider>
+                        <SEOGlobal />
+                        <MovieModalProvider
+                          allowedPaths={[
+                            "/trang-chu",
+                            "/phim-bo",
+                            "/phim-le",
+                            "/tim-kiem",
+                            "/duyet-tim",
+                            "/yeu-thich",
+                          ]}
+                        >
+                          <HoverPreviewProvider>
+                            <ListModalProvider
+                              allowedPaths={[
+                                "/trang-chu",
+                                "/phim-bo",
+                                "/phim-le",
+                              ]}
                             >
-                              <ToastContainer
-                                position="bottom-right"
-                                autoClose={5000}
-                                hideProgressBar={false}
-                                closeOnClick
-                                draggable
-                                pauseOnHover
-                                theme="dark"
-                                className="z-[99999]"
-                                toastClassName={(context) =>
-                                  contextClass[context?.type || "default"] +
-                                  " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+                              <Suspense
+                                fallback={
+                                  <div className="h-screen flex items-center justify-center text-white text-lg">
+                                    <FontAwesomeIcon
+                                      icon="fa-solid fa-spinner"
+                                      size="2xl"
+                                      className="animate-spin text-white"
+                                    />
+                                  </div>
                                 }
-                              />
+                              >
+                                <ToastContainer
+                                  position="bottom-right"
+                                  autoClose={5000}
+                                  hideProgressBar={false}
+                                  closeOnClick
+                                  draggable
+                                  pauseOnHover
+                                  theme="dark"
+                                  className="z-[99999]"
+                                  toastClassName={(context) =>
+                                    contextClass[context?.type || "default"] +
+                                    " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+                                  }
+                                />
 
-                              <AppLayout>
-                                <ScrollToTop />
-                                <Routes>
-                                  <Route
-                                    path="/trang-chu"
-                                    element={<MainLayout />}
-                                  />
-                                  <Route
-                                    path="/"
-                                    element={
-                                      <Navigate to="/trang-chu" replace />
-                                    }
-                                  />
-                                  <Route
-                                    path="/phim-bo"
-                                    element={
-                                      <MainLayout type_slug="phim-bo" filter />
-                                    }
-                                  />
-                                  <Route
-                                    path="/phim-le"
-                                    element={
-                                      <MainLayout type_slug="phim-le" filter />
-                                    }
-                                  />
-                                  <Route
-                                    path="/tim-kiem"
-                                    element={<SearchPage />}
-                                  />
-                                  <Route
-                                    path="/xem-phim/:movieSlug"
-                                    element={<FullWatchPage />}
-                                  />
-                                  <Route
-                                    path="/duyet-tim/:typeSlug"
-                                    element={<FilterPage />}
-                                  />
-                                  <Route
-                                    path="/duyet-tim"
-                                    element={
-                                      <Navigate
-                                        to="/duyet-tim/phim-bo"
-                                        replace
-                                      />
-                                    }
-                                  />
-                                  <Route
-                                    path="/ung-ho"
-                                    element={<DonatePage />}
-                                  />
-                                  <Route
-                                    path="/dang-nhap"
-                                    element={
-                                      <ProtectedRoute diff>
-                                        <LoginPage />
-                                      </ProtectedRoute>
-                                    }
-                                  />
-                                  <Route
-                                    path="/dang-ky"
-                                    element={
-                                      <ProtectedRoute diff>
-                                        <SignUpPage />
-                                      </ProtectedRoute>
-                                    }
-                                  />
-                                  <Route
-                                    path="/tai-khoan"
-                                    element={
-                                      <ProtectedRoute>
-                                        <AccountPage />
-                                      </ProtectedRoute>
-                                    }
-                                  />
-                                  <Route
-                                    path="/yeu-thich"
-                                    element={
-                                      <ProtectedRoute>
-                                        <FavouritePage />
-                                      </ProtectedRoute>
-                                    }
-                                  />
-                                  <Route path="*" element={<NotFoundPage />} />
-                                </Routes>
-                              </AppLayout>
+                                <AppLayout>
+                                  <ScrollToTop />
+                                  <Routes>
+                                    <Route
+                                      path="/trang-chu"
+                                      element={<MainLayout />}
+                                    />
+                                    <Route
+                                      path="/"
+                                      element={
+                                        <Navigate to="/trang-chu" replace />
+                                      }
+                                    />
+                                    <Route
+                                      path="/phim-bo"
+                                      element={
+                                        <MainLayout
+                                          type_slug="phim-bo"
+                                          filter
+                                        />
+                                      }
+                                    />
+                                    <Route
+                                      path="/phim-le"
+                                      element={
+                                        <MainLayout
+                                          type_slug="phim-le"
+                                          filter
+                                        />
+                                      }
+                                    />
+                                    <Route
+                                      path="/tim-kiem"
+                                      element={<SearchPage />}
+                                    />
+                                    <Route
+                                      path="/xem-phim-full/:movieSlug"
+                                      element={<WatchPage />}
+                                    />
+                                    <Route
+                                      path="/xem-phim/:movieSlug"
+                                      element={<FullWatchPage />}
+                                    />
+                                    <Route
+                                      path="/duyet-tim/:typeSlug"
+                                      element={<FilterPage />}
+                                    />
+                                    <Route
+                                      path="/duyet-tim"
+                                      element={
+                                        <Navigate
+                                          to="/duyet-tim/phim-bo"
+                                          replace
+                                        />
+                                      }
+                                    />
+                                    <Route
+                                      path="/ung-ho"
+                                      element={<DonatePage />}
+                                    />
+                                    <Route
+                                      path="/dang-nhap"
+                                      element={
+                                        <ProtectedRoute diff>
+                                          <LoginPage />
+                                        </ProtectedRoute>
+                                      }
+                                    />
+                                    <Route
+                                      path="/dang-ky"
+                                      element={
+                                        <ProtectedRoute diff>
+                                          <SignUpPage />
+                                        </ProtectedRoute>
+                                      }
+                                    />
+                                    <Route
+                                      path="/tai-khoan"
+                                      element={
+                                        <ProtectedRoute>
+                                          <AccountPage />
+                                        </ProtectedRoute>
+                                      }
+                                    />
+                                    <Route
+                                      path="/yeu-thich"
+                                      element={
+                                        <ProtectedRoute>
+                                          <FavouritePage />
+                                        </ProtectedRoute>
+                                      }
+                                    />
+                                    <Route
+                                      path="*"
+                                      element={<NotFoundPage />}
+                                    />
+                                  </Routes>
+                                </AppLayout>
 
-                              <FooterWrapper />
-                            </Suspense>
-                            <HoverPreview />
-                          </ListModalProvider>
-                        </HoverPreviewProvider>
-                      </MovieModalProvider>
+                                <FooterWrapper />
+                              </Suspense>
+                              <HoverPreview />
+                            </ListModalProvider>
+                          </HoverPreviewProvider>
+                        </MovieModalProvider>
+                      </SEOManagerProvider>
                     </Router>
                   </div>
                 </WatchingProvider>

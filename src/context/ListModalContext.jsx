@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import ListModal from "../components/ListModal";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSEOManager } from "./SEOManagerContext";
 const ListModalContext = createContext();
 
 export const ListModalProvider = ({ children, allowedPaths = [] }) => {
@@ -9,6 +10,7 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
   const [nameList, setNameList] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { pushSEO, popSEO } = useSEOManager();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -41,6 +43,8 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
     setIsOpen(false);
     document.body.style.overflow = "auto";
     document.body.style.paddingRight = "";
+    // Pop SEO khi đóng modal
+    popSEO();
   };
 
   useEffect(() => {

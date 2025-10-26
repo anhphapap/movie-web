@@ -8,14 +8,32 @@ import { useTop } from "../context/TopContext";
 import Top10Badge from "../assets/images/Top10Badge.svg";
 import { useFavorites } from "../context/FavouritesProvider";
 import logo_n from "../assets/images/N_logo.png";
+import SEO from "../components/SEO";
 function FavouritePage() {
   const { favoritesPage, loadFavoritesPage, hasMore, loadingPage } =
     useFavorites();
-  const { openModal } = useMovieModal();
+  const movieModal = useMovieModal();
+  const openModal = movieModal?.openModal || (() => {});
   const { topSet } = useTop();
   const { user } = UserAuth();
   const { onEnter, onLeave } = useHoverPreview();
   const { ref, inView } = useInView({ threshold: 0.2 }); // 👀 trigger khi gần cuối
+  const seoData = {
+    titleHead: "Danh sách phim yêu thích",
+    descriptionHead:
+      "Tổng hợp các bộ phim bạn đã lưu yêu thích tại Needflex. Truy cập nhanh để xem lại hoặc tiếp tục xem những bộ phim bạn quan tâm.",
+    og_url: "yeu-thich",
+    og_type: "website",
+    og_image: ["/assets/images/N_logo.png"],
+    seoSchema: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Yêu Thích",
+      description:
+        "Danh sách phim yêu thích được người dùng lưu trên Needflex.",
+      url: "https://movie-web-lake-eta.vercel.app/yeu-thich",
+    },
+  };
 
   // 🔹 Load danh sách lần đầu
   useEffect(() => {
@@ -62,6 +80,7 @@ function FavouritePage() {
 
   return (
     <div className="text-white px-[3%] mt-24 min-h-screen pb-20">
+      <SEO seoData={seoData} />
       <h1 className="text-xl md:text-2xl 2xl:text-4xl font-bold">
         {favoritesPage?.length === 0
           ? "Danh sách của bạn hiện đang trống!"

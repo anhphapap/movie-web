@@ -1,11 +1,28 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import SEO from "../components/SEO";
 
 const listAmount = [10000, 20000, 50000, 100000, 200000, 500000];
 
 function DonatePage() {
   const [createdQR, setCreatedQR] = useState(false);
   const [imgQR, setImgQR] = useState("");
+  const seoData = {
+    titleHead: "Ủng Hộ - Góp phần duy trì trang xem phim miễn phí",
+    descriptionHead:
+      "Ủng hộ Needflex để giúp chúng mình duy trì máy chủ, cập nhật phim nhanh hơn và không quảng cáo. Mọi đóng góp đều đáng quý!",
+    og_url: "ung-ho",
+    og_type: "website",
+    og_image: ["/assets/images/N_logo.png"],
+    seoSchema: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: "Ủng Hộ",
+      description:
+        "Ủng hộ Needflex để duy trì website xem phim miễn phí, không quảng cáo.",
+      url: "https://movie-web-lake-eta.vercel.app/ung-ho",
+    },
+  };
 
   const handleCreateQR = async () => {
     const amount = document.getElementById("amount").value;
@@ -23,6 +40,7 @@ function DonatePage() {
 
   return (
     <div className="text-white flex flex-col items-center justify-center space-y-5 text-center px-[3%] mt-24">
+      <SEO seoData={seoData} />
       <h1 className="text-2xl sm:text-4xl font-bold">Donate</h1>
       <p>
         Để ủng hộ website & sử dụng tính năng VIP mode cho phim, hãy donate cho

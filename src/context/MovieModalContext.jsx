@@ -1,12 +1,14 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MovieModal from "../components/MovieModal";
+import { useSEOManager } from "./SEOManagerContext";
 
 const MovieModalContext = createContext();
 
 export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { pushSEO, popSEO } = useSEOManager();
   const [movieSlug, setMovieSlug] = useState(null);
   const [tmdbId, setTmdbId] = useState(null);
   const [tmdbType, setTmdbType] = useState(null);
@@ -35,6 +37,8 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
     params.delete("tmdb_id");
     params.delete("tmdb_type");
     navigate(`${location.pathname}?${params.toString()}`, { replace: false });
+    // Pop SEO khi đóng modal
+    popSEO();
   };
 
   const normalize = (path) => path.replace(/\/+$/, "");
@@ -52,8 +56,9 @@ export const MovieModalProvider = ({ children, allowedPaths = [] }) => {
   return (
     <MovieModalContext.Provider value={{ openModal, closeModal, isModalOpen }}>
       {children}
-      {canOpen && movieSlug && tmdbId && tmdbType && (
+      {canOpen && movieSlug && tmdbId && tmdbType && isModalOpen && (
         <MovieModal
+          isOpen={isModalOpen}
           slug={movieSlug}
           tmdb_id={tmdbId}
           tmdb_type={tmdbType}

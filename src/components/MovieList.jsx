@@ -54,10 +54,10 @@ const MovieList = ({
       } else {
         if (page === 1) {
           setMovies(listResponse.data.data.items);
+          setSeoOnPage(listResponse.data.data.seoOnPage);
         } else {
           setMovies((prev) => [...prev, ...listResponse.data.data.items]);
         }
-        if (!seoOnPage) setSeoOnPage(listResponse.data.data.seoOnPage);
 
         if (!titleHead) {
           const yearNow = new Date().getFullYear();
@@ -130,7 +130,7 @@ const MovieList = ({
 
   useEffect(() => {
     fetchMovies();
-  }, [page, keyword]);
+  }, [page, keyword, type_slug, country, category, year, sort_field]);
 
   useEffect(() => {
     console.log(keyword);
@@ -147,7 +147,7 @@ const MovieList = ({
       {seoOnPage && (
         <SEO seoData={seoOnPage} baseUrl={window.location.origin} />
       )}
-      {(!loading && movies.length === 0 && (
+      {(!loading && movies.length === 0 && search && (
         <h1 className="text-center">
           Không có kết quả nào khớp với yêu cầu tìm kiếm "{keyword}" của bạn.
         </h1>

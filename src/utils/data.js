@@ -1,3 +1,5 @@
+import { data } from "react-router-dom";
+
 export const tops = [
   '<svg height="100%" viewBox="-40 0 110 154" ><path stroke="#595959" stroke-linejoin="square" stroke-width="4" d="M35.377 152H72V2.538L2 19.362v30.341l33.377-8.459V152z"></path></svg>',
   '<svg height="100%" viewBox="0 0 110 154"><path stroke="#595959" stroke-linejoin="square" stroke-width="4" d="M3.72 152H113v-30.174H50.484l4.355-3.55 29.453-24.012c5.088-4.124 9.748-8.459 13.983-13.004 4.16-4.464 7.481-9.339 9.972-14.629 2.449-5.203 3.678-11.113 3.678-17.749 0-9.428-2.294-17.627-6.875-24.645-4.597-7.042-10.941-12.494-19.07-16.376C77.803 3.957 68.496 2 58.036 2 47.591 2 38.37 4.023 30.347 8.06c-8.015 4.032-14.457 9.578-19.352 16.654-4.492 6.493-7.389 13.803-8.693 21.952h34.055c1.236-3.52 3.398-6.52 6.459-8.97 3.54-2.834 8.277-4.224 14.147-4.224 5.93 0 10.552 1.537 13.76 4.681 3.181 3.12 4.791 7.024 4.791 11.594 0 4.151-1.16 7.934-3.468 11.298-2.192 3.194-5.987 7.124-11.405 11.84L3.72 122.465V152z"></path></svg>',
@@ -124,207 +126,258 @@ export const listAvatar = [
   "https://sgimage.netmarble.com/images/netmarble/common/20240228/1709115629970/Twitter_HanSong-Yi.png",
 ];
 
-export const homeContent = [
-  {
-    nameList: "Danh sách tiếp tục xem của ",
-    typeList: "watching",
+export const homeContent = {
+  seoData: {
+    titleHead: "Needflex - Xem phim online chất lượng cao",
+    descriptionHead:
+      "Xem phim online miễn phí, chất lượng cao, cập nhật phim mới nhất 2025. Xem phim HD Vietsub không quảng cáo tại Needflex.",
+    og_url: "",
+    og_type: "website",
+    og_image: ["/assets/images/N_logo.png"],
+    seoSchema: {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Needflex",
+      url: "https://movie-web-lake-eta.vercel.app",
+      potentialAction: {
+        "@type": "SearchAction",
+        target:
+          "https://movie-web-lake-eta.vercel.app/tim-kiem?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
   },
-  {
-    nameList: "Top 10 phim bộ",
-    typeList: "top",
-    type_slug: "phim-bo",
-    sort_field: "view",
-    year: 2025,
-    size: 10,
-  },
-  {
-    nameList: "Series Hàn Quốc",
-    typeList: "list",
-    type_slug: "phim-bo",
-    sort_field: "modified.time",
-    category: "",
-    country: "han-quoc",
-  },
-  {
-    nameList: "Series Trung Quốc",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "",
-    country: "trung-quoc",
-  },
-  {
-    nameList: "Top 10 phim lẻ",
-    typeList: "top",
-    type_slug: "phim-le",
-    sort_field: "view",
-    year: 2025,
-    size: 10,
-  },
-  {
-    nameList: "Mới trên Needflex",
-    typeList: "list",
-    type_slug: "phim-moi-cap-nhat",
-    category: "",
-    country: "",
-  },
-  {
-    nameList: "Anime mới nhất",
-    typeList: "list",
-    type_slug: "hoat-hinh",
-    category: "",
-    country: "",
-  },
-  {
-    nameList: "Phim hành động Âu Mỹ",
-    typeList: "list",
-    type_slug: "phim-moi-cap-nhat",
-    category: "hanh-dong",
-    country: "au-my",
-  },
-  {
-    nameList: "Phim khoa học viễn tưởng",
-    typeList: "list",
-    type_slug: "phim-moi-cap-nhat",
-    category: "vien-tuong",
-    country: "au-my",
-  },
-  {
-    nameList: "Vietsub độc quyền tại Needflex",
-    typeList: "list",
-    type_slug: "subteam",
-    category: "",
-    country: "",
-  },
-  {
-    nameList: "Sắp ra mắt trên Needflex",
-    typeList: "list",
-    type_slug: "phim-sap-chieu",
-    category: "",
-    country: "",
-  },
-];
+  data: [
+    {
+      nameList: "Danh sách tiếp tục xem của ",
+      typeList: "watching",
+    },
+    {
+      nameList: "Top 10 phim bộ",
+      typeList: "top",
+      type_slug: "phim-bo",
+      sort_field: "view",
+      year: 2025,
+      size: 10,
+    },
+    {
+      nameList: "Series Hàn Quốc",
+      typeList: "list",
+      type_slug: "phim-bo",
+      sort_field: "modified.time",
+      category: "",
+      country: "han-quoc",
+    },
+    {
+      nameList: "Series Trung Quốc",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "",
+      country: "trung-quoc",
+    },
+    {
+      nameList: "Top 10 phim lẻ",
+      typeList: "top",
+      type_slug: "phim-le",
+      sort_field: "view",
+      year: 2025,
+      size: 10,
+    },
+    {
+      nameList: "Mới trên Needflex",
+      typeList: "list",
+      type_slug: "phim-moi-cap-nhat",
+      category: "",
+      country: "",
+    },
+    {
+      nameList: "Anime mới nhất",
+      typeList: "list",
+      type_slug: "hoat-hinh",
+      category: "",
+      country: "",
+    },
+    {
+      nameList: "Phim hành động Âu Mỹ",
+      typeList: "list",
+      type_slug: "phim-moi-cap-nhat",
+      category: "hanh-dong",
+      country: "au-my",
+    },
+    {
+      nameList: "Phim khoa học viễn tưởng",
+      typeList: "list",
+      type_slug: "phim-moi-cap-nhat",
+      category: "vien-tuong",
+      country: "au-my",
+    },
+    {
+      nameList: "Vietsub độc quyền tại Needflex",
+      typeList: "list",
+      type_slug: "subteam",
+      category: "",
+      country: "",
+    },
+    {
+      nameList: "Sắp ra mắt trên Needflex",
+      typeList: "list",
+      type_slug: "phim-sap-chieu",
+      category: "",
+      country: "",
+    },
+  ],
+};
 
-export const seriesContent = [
-  {
-    nameList: "Top 10 phim bộ",
-    typeList: "top",
-    type_slug: "phim-bo",
-    sort_field: "view",
-    year: 2025,
-    size: 10,
+export const seriesContent = {
+  seoData: {
+    titleHead: "Phim Bộ Mới Nhất 2025 - Xem Online Vietsub HD ",
+    descriptionHead:
+      "Tổng hợp phim bộ mới nhất 2025, Vietsub Full HD, cập nhật liên tục trên Needflex. Xem phim bộ Trung Quốc, Hàn Quốc, Âu Mỹ miễn phí.",
+    og_url: "phim-bo",
+    og_type: "website",
+    og_image: ["/assets/images/N_logo.png"],
+    seoSchema: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Phim Bộ Mới Nhất 2025",
+      description:
+        "Tổng hợp phim bộ mới nhất 2025, Vietsub HD, cập nhật liên tục trên Needflex.",
+      url: "https://movie-web-lake-eta.vercel.app/phim-bo",
+    },
   },
-  {
-    nameList: "Series Hàn Quốc",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "",
-    country: "han-quoc",
-  },
-  {
-    nameList: "Phim tình cảm Trung Quốc",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "tinh-cam",
-    sort_field: "year",
-    country: "trung-quoc",
-  },
-  {
-    nameList: "Series Âu Mỹ",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "",
-    country: "au-my",
-  },
-  {
-    nameList: "Loạt phim Anime Nhật Bản",
-    typeList: "list",
-    type_slug: "hoat-hinh",
-    category: "",
-    country: "nhat-ban",
-  },
-  {
-    nameList: "Cổ trang Trung Quốc",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "co-trang",
-    country: "trung-quoc",
-  },
-  {
-    nameList: "Chính kịch Mỹ",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "chinh-kich",
-    country: "au-my",
-  },
-  {
-    nameList: "Series mới cập nhật",
-    typeList: "list",
-    type_slug: "phim-bo",
-    category: "",
-    country: "",
-  },
-];
+  data: [
+    {
+      nameList: "Top 10 phim bộ",
+      typeList: "top",
+      type_slug: "phim-bo",
+      sort_field: "view",
+      year: 2025,
+      size: 10,
+    },
+    {
+      nameList: "Series Hàn Quốc",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "",
+      country: "han-quoc",
+    },
+    {
+      nameList: "Phim tình cảm Trung Quốc",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "tinh-cam",
+      sort_field: "year",
+      country: "trung-quoc",
+    },
+    {
+      nameList: "Series Âu Mỹ",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "",
+      country: "au-my",
+    },
+    {
+      nameList: "Loạt phim Anime Nhật Bản",
+      typeList: "list",
+      type_slug: "hoat-hinh",
+      category: "",
+      country: "nhat-ban",
+    },
+    {
+      nameList: "Cổ trang Trung Quốc",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "co-trang",
+      country: "trung-quoc",
+    },
+    {
+      nameList: "Chính kịch Mỹ",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "chinh-kich",
+      country: "au-my",
+    },
+    {
+      nameList: "Series mới cập nhật",
+      typeList: "list",
+      type_slug: "phim-bo",
+      category: "",
+      country: "",
+    },
+  ],
+};
 
-export const singleContent = [
-  {
-    nameList: "Top 10 phim bộ",
-    typeList: "top",
-    type_slug: "phim-le",
-    sort_field: "view",
-    year: 2025,
-    size: 10,
+export const singleContent = {
+  seoData: {
+    titleHead: "Phim Lẻ Mới Nhất 2025 - Xem Online Vietsub HD ",
+    descriptionHead:
+      "Tổng hợp phim lẻ mới nhất 2025, Vietsub Full HD, cập nhật liên tục trên Needflex. Xem phim lẻ Trung Quốc, Hàn Quốc, Âu Mỹ miễn phí.",
+    og_url: "phim-le",
+    og_type: "website",
+    og_image: ["/assets/images/N_logo.png"],
+    seoSchema: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Phim Lẻ Mới Nhất 2025",
+      description:
+        "Tổng hợp phim lẻ mới nhất 2025, Vietsub HD, cập nhật liên tục trên Needflex.",
+      url: "https://movie-web-lake-eta.vercel.app/phim-le",
+    },
   },
-  {
-    nameList: "Phim Hàn Quốc",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "",
-    country: "han-quoc",
-  },
-  {
-    nameList: "Phim Trung Quốc",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "",
-    sort_field: "year",
-    country: "trung-quoc",
-  },
-  {
-    nameList: "Phim Âu Mỹ",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "",
-    country: "au-my",
-  },
-  {
-    nameList: "Phim khoa học viễn tưởng",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "vien-tuong",
-    country: "",
-  },
-  {
-    nameList: "Phim Kinh dị",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "kinh-di",
-    country: "",
-  },
-  {
-    nameList: "Phim Hài",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "hai-huoc",
-    country: "",
-  },
-  {
-    nameList: "Mới trên Needflex",
-    typeList: "list",
-    type_slug: "phim-le",
-    category: "",
-    country: "",
-  },
-];
+  data: [
+    {
+      nameList: "Top 10 phim lẻ",
+      typeList: "top",
+      type_slug: "phim-le",
+      sort_field: "view",
+      year: 2025,
+      size: 10,
+    },
+    {
+      nameList: "Phim Trung Quốc",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "",
+      sort_field: "year",
+      country: "trung-quoc",
+    },
+    {
+      nameList: "Phim Âu Mỹ",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "",
+      country: "au-my",
+    },
+    {
+      nameList: "Phim khoa học viễn tưởng",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "vien-tuong",
+      country: "",
+    },
+    {
+      nameList: "Phim Kinh dị",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "kinh-di",
+      country: "",
+    },
+    {
+      nameList: "Phim Hài",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "hai-huoc",
+      country: "",
+    },
+    {
+      nameList: "Mới trên Needflex",
+      typeList: "list",
+      type_slug: "phim-le",
+      category: "",
+      country: "",
+    },
+  ],
+};
 
 export const formatTime = (time) => {
   if (!time || isNaN(time)) return "00:00";

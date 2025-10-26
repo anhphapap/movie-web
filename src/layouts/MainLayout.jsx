@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { homeContent, seriesContent, singleContent } from "../utils/data";
 import Carousel from "../components/Carousel";
+import SEO from "../components/SEO";
 
 const MainLayout = ({ type_slug, filter = false }) => {
   const [listInfo, setListInfo] = useState(null);
@@ -36,8 +37,8 @@ const MainLayout = ({ type_slug, filter = false }) => {
   return (
     <>
       <Banner type_slug={type_slug} filter={filter} />
-
-      {listInfo.map((item, index) => (
+      <SEO seoData={listInfo.seoData} />
+      {listInfo.data.map((item, index) => (
         <div key={`${locate.pathname}-${index}-${item.type_slug}`}>
           {item.typeList === "top" ? (
             <Carousel

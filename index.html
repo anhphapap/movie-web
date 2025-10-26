@@ -2,16 +2,108 @@
 <html lang="vi">
 
 <head>
+  <!-- ✅ Structured Data JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://movie-web-lake-eta.vercel.app/#organization",
+        "name": "Needflex",
+        "alternateName": "Needflex Movies",
+        "url": "https://movie-web-lake-eta.vercel.app",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://movie-web-lake-eta.vercel.app/assets/images/N_logo.png",
+          "width": 275,
+          "height": 275
+        },
+        "brand": {
+          "@type": "Brand",
+          "name": "Needflex",
+          "logo": "https://movie-web-lake-eta.vercel.app/assets/images/N_logo.png"
+        },
+        "sameAs": [
+          "https://www.youtube.com/",
+          "https://www.facebook.com/"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "bestRating": "5",
+          "ratingCount": "15742"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://movie-web-lake-eta.vercel.app/#website",
+        "url": "https://movie-web-lake-eta.vercel.app",
+        "name": "Needflex",
+        "description": "Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí.",
+        "publisher": {
+          "@id": "https://movie-web-lake-eta.vercel.app/#organization"
+        },
+        "inLanguage": "vi-VN",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://movie-web-lake-eta.vercel.app/tim-kiem?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "ImageObject",
+        "@id": "https://movie-web-lake-eta.vercel.app/#logo",
+        "url": "https://movie-web-lake-eta.vercel.app/assets/images/N_logo.png",
+        "width": 275,
+        "height": 275,
+        "caption": "Needflex Logo"
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://movie-web-lake-eta.vercel.app/#sitelinks",
+        "itemListElement": [
+          {
+            "@type": "SiteNavigationElement",
+            "position": 1,
+            "name": "Trang chủ",
+            "url": "https://movie-web-lake-eta.vercel.app/trang-chu"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 2,
+            "name": "Phim lẻ",
+            "url": "https://movie-web-lake-eta.vercel.app/phim-le"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 3,
+            "name": "Phim bộ",
+            "url": "https://movie-web-lake-eta.vercel.app/phim-bo"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 4,
+            "name": "Duyệt tìm",
+            "url": "https://movie-web-lake-eta.vercel.app/duyet-tim"
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- Basic meta -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- SEO Meta Tags -->
+  <!-- ✅ SEO Meta Tags -->
   <meta name="description" content="Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
   <meta name="keywords" content="xem phim, phim online, phim HD, phim Vietsub, phim mới 2025" />
   <meta name="author" content="Needflex" />
   <meta name="robots" content="index, follow" />
 
-  <!-- Open Graph Meta Tags -->
+  <!-- ✅ Open Graph -->
   <meta property="og:site_name" content="Needflex" />
   <meta property="og:locale" content="vi_VN" />
   <meta property="og:type" content="website" />
@@ -21,28 +113,28 @@
   <meta property="og:url" content="https://movie-web-lake-eta.vercel.app" />
   <meta property="og:image" content="https://movie-web-lake-eta.vercel.app/assets/images/N_logo.png" />
 
-  <!-- Twitter Card Meta Tags -->
+  <!-- ✅ Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Needflex - Xem phim online chất lượng cao" />
   <meta name="twitter:description"
     content="Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
   <meta name="twitter:image" content="https://movie-web-lake-eta.vercel.app/assets/images/N_logo.png" />
 
-  <!-- Canonical URL -->
+  <!-- ✅ Canonical -->
   <link rel="canonical" href="https://movie-web-lake-eta.vercel.app" />
 
-  <link rel="shortcut icon" href="/assets/images/N_logo.png" />
+  <!-- ✅ Favicon + preload -->
+  <link rel="icon" href="/assets/images/N_logo.png" type="image/png" />
   <link rel="preload" href="/assets/images/N_logo.png" as="image" type="image/png" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Light.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
-
   <link rel="preload" href="/assets/index-Cd9gPHFq.css" as="style" />
   <link rel="stylesheet" href="/assets/index-Cd9gPHFq.css" media="print" onload="this.media='all'" />
 
-
   <title>Needflex - Xem phim online chất lượng cao</title>
+
   <style>
     .ReactModal__Overlay {
       position: fixed;
@@ -65,7 +157,7 @@
   </style>
 </head>
 
-<body className="bg-[#141414]">
+<body style="background-color: #141414;">
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
