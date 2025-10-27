@@ -5,7 +5,7 @@ const SEO = ({
   seoData = null,
   baseUrl = window.location.origin,
   siteName = "Needflex",
-  defaultImage = `${window.location.origin}/assets/images/N_logo.png`,
+  defaultImage = `${window.location.origin}/android-chrome-512x512.png`,
 }) => {
   if (!seoData) return null;
   const { pathname, search } = useLocation();
@@ -66,7 +66,7 @@ const SEO = ({
 
     const image = mergedData.og_image[0]?.startsWith("http")
       ? mergedData.og_image[0]
-      : `${baseUrl}${mergedData.og_image[0]}`;
+      : `${"https://img.ophim.live/uploads/"}${mergedData.og_image[0]}`;
     const url = `${baseUrl}${pathname}${search}`;
 
     // 🧩 Helper cập nhật meta
@@ -130,20 +130,56 @@ const SEO = ({
 
     // ✅ JSON-LD SCHEMA (trang hiện tại)
     removeOldScript("json-ld-schema");
+    const ophimData = mergedData.seoSchema || {};
+
     const schema = {
       "@context": "https://schema.org",
       "@type":
-        mergedData.og_type === "video.movie"
+        ophimData["@type"] ||
+        (mergedData.og_type === "video.movie"
           ? "Movie"
           : mergedData.og_type === "video.tv_show"
           ? "TVSeries"
-          : "WebSite",
-      name: mergedData.titleHead,
-      description: mergedData.descriptionHead,
-      url,
-      image,
-      ...mergedData.seoSchema,
+          : "WebSite"),
+      name: ophimData.name || mergedData.titleHead,
+      description: ophimData.description || mergedData.descriptionHead,
+      url: `${baseUrl}${pathname}${search}`, // ✅ Ghi đè URL thành needflex.site
+      image: ophimData.image || image, // vẫn dùng ảnh từ Ophim nếu có
+      dateCreated: ophimData.dateCreated,
+      dateModified: ophimData.dateModified,
+      datePublished: ophimData.datePublished,
+      director: ophimData.director?.toLowerCase?.().includes("ophim")
+        ? "Needflex"
+        : ophimData.director,
+      inLanguage: "vi-VN",
+      publisher: {
+        "@type": "Organization",
+        name: "Needflex",
+        url: baseUrl,
+        logo: `${baseUrl}/android-chrome-512x512.png`,
+      },
+      author: {
+        "@type": "Organization",
+        name: "Needflex",
+        url: baseUrl,
+        logo: `${baseUrl}/android-chrome-512x512.png`,
+      },
     };
+
+    // const schema = {
+    //   "@context": "https://schema.org",
+    //   "@type":
+    //     mergedData.og_type === "video.movie"
+    //       ? "Movie"
+    //       : mergedData.og_type === "video.tv_show"
+    //       ? "TVSeries"
+    //       : "WebSite",
+    //   name: mergedData.titleHead,
+    //   description: mergedData.descriptionHead,
+    //   url,
+    //   image,
+    //   ...mergedData.seoSchema,
+    // };
     const script = document.createElement("script");
     script.type = "application/ld+json";
     script.id = "json-ld-schema";

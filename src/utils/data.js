@@ -133,7 +133,6 @@ export const homeContent = {
       "Xem phim online miễn phí, chất lượng cao, cập nhật phim mới nhất 2025. Xem phim HD Vietsub không quảng cáo tại Needflex.",
     og_url: "",
     og_type: "website",
-    og_image: ["/assets/images/N_logo.png"],
     seoSchema: {
       "@context": "https://schema.org",
       "@type": "WebSite",
@@ -234,7 +233,6 @@ export const seriesContent = {
       "Tổng hợp phim bộ mới nhất 2025, Vietsub Full HD, cập nhật liên tục trên Needflex. Xem phim bộ Trung Quốc, Hàn Quốc, Âu Mỹ miễn phí.",
     og_url: "phim-bo",
     og_type: "website",
-    og_image: ["/assets/images/N_logo.png"],
     seoSchema: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -313,7 +311,6 @@ export const singleContent = {
       "Tổng hợp phim lẻ mới nhất 2025, Vietsub Full HD, cập nhật liên tục trên Needflex. Xem phim lẻ Trung Quốc, Hàn Quốc, Âu Mỹ miễn phí.",
     og_url: "phim-le",
     og_type: "website",
-    og_image: ["/assets/images/N_logo.png"],
     seoSchema: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",

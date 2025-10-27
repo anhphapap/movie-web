@@ -4,102 +4,59 @@
 <head>
   <!-- ✅ Structured Data JSON-LD -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": "https://needflex.site/#organization",
-        "name": "Needflex",
-        "alternateName": "Needflex Movies",
-        "url": "https://needflex.site",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://needflex.site/assets/images/N_logo.png",
-          "width": 275,
-          "height": 275
-        },
-        "brand": {
-          "@type": "Brand",
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://needflex.site/#organization",
           "name": "Needflex",
-          "logo": "https://needflex.site/assets/images/N_logo.png"
+          "url": "https://needflex.site",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://needflex.site/android-chrome-512x512.png",
+            "width": 512,
+            "height": 512
+          },
+          "sameAs": [
+            "https://www.facebook.com/",
+            "https://www.youtube.com/"
+          ]
         },
-        "sameAs": [
-          "https://www.youtube.com/",
-          "https://www.facebook.com/"
-        ],
-        "aggregateRating": {
-          "@type": "AggregateRating",
-          "ratingValue": "4.9",
-          "bestRating": "5",
-          "ratingCount": "15742"
-        }
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://needflex.site/#website",
-        "url": "https://needflex.site",
-        "name": "Needflex",
-        "description": "Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí.",
-        "publisher": {
-          "@id": "https://needflex.site/#organization"
-        },
-        "inLanguage": "vi-VN",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://needflex.site/tim-kiem?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@type": "ImageObject",
-        "@id": "https://needflex.site/#logo",
-        "url": "https://needflex.site/assets/images/N_logo.png",
-        "width": 275,
-        "height": 275,
-        "caption": "Needflex Logo"
-      },
-      {
-        "@type": "ItemList",
-        "@id": "https://needflex.site/#sitelinks",
-        "itemListElement": [
-          {
-            "@type": "SiteNavigationElement",
-            "position": 1,
-            "name": "Trang chủ",
-            "url": "https://needflex.site/trang-chu"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 2,
-            "name": "Phim lẻ",
-            "url": "https://needflex.site/phim-le"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 3,
-            "name": "Phim bộ",
-            "url": "https://needflex.site/phim-bo"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 4,
-            "name": "Duyệt tìm",
-            "url": "https://needflex.site/duyet-tim"
+        {
+          "@type": "WebSite",
+          "@id": "https://needflex.site/#website",
+          "url": "https://needflex.site",
+          "name": "Needflex",
+          "description": "Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí.",
+          "publisher": { "@id": "https://needflex.site/#organization" },
+          "inLanguage": "vi-VN",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://needflex.site/tim-kiem?q={search_term_string}",
+            "query-input": "required name=search_term_string"
           }
-        ]
-      }
-    ]
-  }
+        },
+        {
+          "@type": "ItemList",
+          "@id": "https://needflex.site/#sitelinks",
+          "itemListElement": [
+            { "@type": "SiteNavigationElement", "position": 1, "name": "Trang chủ", "url": "https://needflex.site/trang-chu" },
+            { "@type": "SiteNavigationElement", "position": 2, "name": "Phim lẻ", "url": "https://needflex.site/phim-le" },
+            { "@type": "SiteNavigationElement", "position": 3, "name": "Phim bộ", "url": "https://needflex.site/phim-bo" },
+            { "@type": "SiteNavigationElement", "position": 4, "name": "Duyệt tìm", "url": "https://needflex.site/duyet-tim" }
+          ]
+        }
+      ]
+    }    
   </script>
 
-  <!-- Basic meta -->
+  <!-- ✅ Basic Meta -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- ✅ SEO Meta Tags -->
-  <meta name="description" content="Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
-  <meta name="keywords" content="xem phim, phim online, phim HD, phim Vietsub, phim mới 2025" />
+  <meta name="description"
+    content="Needflex - Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
+  <meta name="keywords" content="xem phim, phim online, phim HD, phim Vietsub, phim mới 2025, Needflex" />
   <meta name="author" content="Needflex" />
   <meta name="robots" content="index, follow" />
 
@@ -111,21 +68,36 @@
   <meta property="og:description"
     content="Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
   <meta property="og:url" content="https://needflex.site" />
-  <meta property="og:image" content="https://needflex.site/assets/images/N_logo.png" />
+  <meta property="og:image" content="https://needflex.site/android-chrome-512x512.png" />
 
   <!-- ✅ Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Needflex - Xem phim online chất lượng cao" />
   <meta name="twitter:description"
     content="Xem phim online chất lượng cao, phim mới nhất 2025, phim HD Vietsub miễn phí" />
-  <meta name="twitter:image" content="https://needflex.site/assets/images/N_logo.png" />
+  <meta name="twitter:image" content="https://needflex.site/android-chrome-512x512.png" />
 
   <!-- ✅ Canonical -->
   <link rel="canonical" href="https://needflex.site" />
 
-  <!-- ✅ Favicon + preload -->
-  <link rel="icon" href="/assets/images/N_logo.png" type="image/png" />
-  <link rel="preload" href="/assets/images/N_logo.png" as="image" type="image/png" crossorigin>
+  <!-- ✅ Favicons (chuẩn favicon.io) -->
+  <!-- ✅ Favicon cho trình duyệt (nền đen hoặc trong suốt) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+
+  <!-- ✅ Favicon cho Google Search (bản nền trắng, đặt ở gốc domain) -->
+  <link rel="alternate icon" type="image/png" href="/favicon.png" />
+
+  <!-- ✅ iOS & PWA -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+
+  <!-- ✅ Màu theme cho mobile Chrome -->
+  <meta name="theme-color" content="#000000" />
+
+
+  <!-- ✅ Preload Fonts & Styles -->
   <link rel="preload" href="/assets/fonts/NetflixSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/NetflixSans-Light.woff2" as="font" type="font/woff2" crossorigin>
