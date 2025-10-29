@@ -17,7 +17,13 @@
           "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
         }
       ],
-      "destination": "https://service.prerender.io/https://needflex.site/$1"
+      "destination": "https://service.prerender.io/https://needflex.site/$1",
+      "headers": [
+        {
+          "key": "X-Prerender-Token",
+          "value": "@PRERENDER_TOKEN"
+        }
+      ]
     },
     {
       "source": "/((?!api).*)",
@@ -26,15 +32,6 @@
   ],
 
   "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Prerender-Token",
-          "value": "vsQfraBszpUwy7YdgQqr"
-        }
-      ]
-    },
     {
       "source": "/api/(.*)",
       "headers": [
