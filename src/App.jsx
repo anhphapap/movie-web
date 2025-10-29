@@ -29,6 +29,8 @@ import { CinemaProvider, useCinema } from "./context/CinemaContext";
 import { WatchingProvider } from "./context/WatchingContext";
 import { SEOManagerProvider } from "./context/SEOManagerContext";
 import SEOGlobal from "./components/SEOGlobal";
+import { BannerCacheProvider } from "./context/BannerCacheContext";
+import BannerContainer from "./components/BannerContainer";
 
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
 const SearchPage = lazy(() => import("./pages/SearchPage"));
@@ -53,13 +55,16 @@ const AppLayout = ({ children }) => {
   return (
     <div>
       {!cinema && (
-        <Header
-          filter={
-            pathsWithFilter.includes(pathname) ||
-            pathname.startsWith("/duyet-tim")
-          }
-          type_slug={pathname}
-        />
+        <>
+          <Header
+            filter={
+              pathsWithFilter.includes(pathname) ||
+              pathname.startsWith("/duyet-tim")
+            }
+            type_slug={pathname}
+          />
+          <BannerContainer />
+        </>
       )}
       {children}
     </div>
@@ -161,106 +166,106 @@ function App() {
                                     " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
                                   }
                                 />
-
-                                <AppLayout>
-                                  <ScrollToTop />
-                                  <Routes>
-                                    <Route
-                                      path="/trang-chu"
-                                      element={<MainLayout />}
-                                    />
-                                    <Route
-                                      path="/"
-                                      element={
-                                        <Navigate to="/trang-chu" replace />
-                                      }
-                                    />
-                                    <Route
-                                      path="/phim-bo"
-                                      element={
-                                        <MainLayout
-                                          type_slug="phim-bo"
-                                          filter
-                                        />
-                                      }
-                                    />
-                                    <Route
-                                      path="/phim-le"
-                                      element={
-                                        <MainLayout
-                                          type_slug="phim-le"
-                                          filter
-                                        />
-                                      }
-                                    />
-                                    <Route
-                                      path="/tim-kiem"
-                                      element={<SearchPage />}
-                                    />
-                                    <Route
-                                      path="/xem-phim-full/:movieSlug"
-                                      element={<WatchPage />}
-                                    />
-                                    <Route
-                                      path="/xem-phim/:movieSlug"
-                                      element={<FullWatchPage />}
-                                    />
-                                    <Route
-                                      path="/duyet-tim/:typeSlug"
-                                      element={<FilterPage />}
-                                    />
-                                    <Route
-                                      path="/duyet-tim"
-                                      element={
-                                        <Navigate
-                                          to="/duyet-tim/phim-bo"
-                                          replace
-                                        />
-                                      }
-                                    />
-                                    <Route
-                                      path="/ung-ho"
-                                      element={<DonatePage />}
-                                    />
-                                    <Route
-                                      path="/dang-nhap"
-                                      element={
-                                        <ProtectedRoute diff>
-                                          <LoginPage />
-                                        </ProtectedRoute>
-                                      }
-                                    />
-                                    <Route
-                                      path="/dang-ky"
-                                      element={
-                                        <ProtectedRoute diff>
-                                          <SignUpPage />
-                                        </ProtectedRoute>
-                                      }
-                                    />
-                                    <Route
-                                      path="/tai-khoan"
-                                      element={
-                                        <ProtectedRoute>
-                                          <AccountPage />
-                                        </ProtectedRoute>
-                                      }
-                                    />
-                                    <Route
-                                      path="/yeu-thich"
-                                      element={
-                                        <ProtectedRoute>
-                                          <FavouritePage />
-                                        </ProtectedRoute>
-                                      }
-                                    />
-                                    <Route
-                                      path="*"
-                                      element={<NotFoundPage />}
-                                    />
-                                  </Routes>
-                                </AppLayout>
-
+                                <BannerCacheProvider>
+                                  <AppLayout>
+                                    <ScrollToTop />
+                                    <Routes>
+                                      <Route
+                                        path="/trang-chu"
+                                        element={<MainLayout />}
+                                      />
+                                      <Route
+                                        path="/"
+                                        element={
+                                          <Navigate to="/trang-chu" replace />
+                                        }
+                                      />
+                                      <Route
+                                        path="/phim-bo"
+                                        element={
+                                          <MainLayout
+                                            type_slug="phim-bo"
+                                            filter
+                                          />
+                                        }
+                                      />
+                                      <Route
+                                        path="/phim-le"
+                                        element={
+                                          <MainLayout
+                                            type_slug="phim-le"
+                                            filter
+                                          />
+                                        }
+                                      />
+                                      <Route
+                                        path="/tim-kiem"
+                                        element={<SearchPage />}
+                                      />
+                                      <Route
+                                        path="/xem-phim-full/:movieSlug"
+                                        element={<WatchPage />}
+                                      />
+                                      <Route
+                                        path="/xem-phim/:movieSlug"
+                                        element={<FullWatchPage />}
+                                      />
+                                      <Route
+                                        path="/duyet-tim/:typeSlug"
+                                        element={<FilterPage />}
+                                      />
+                                      <Route
+                                        path="/duyet-tim"
+                                        element={
+                                          <Navigate
+                                            to="/duyet-tim/phim-bo"
+                                            replace
+                                          />
+                                        }
+                                      />
+                                      <Route
+                                        path="/ung-ho"
+                                        element={<DonatePage />}
+                                      />
+                                      <Route
+                                        path="/dang-nhap"
+                                        element={
+                                          <ProtectedRoute diff>
+                                            <LoginPage />
+                                          </ProtectedRoute>
+                                        }
+                                      />
+                                      <Route
+                                        path="/dang-ky"
+                                        element={
+                                          <ProtectedRoute diff>
+                                            <SignUpPage />
+                                          </ProtectedRoute>
+                                        }
+                                      />
+                                      <Route
+                                        path="/tai-khoan"
+                                        element={
+                                          <ProtectedRoute>
+                                            <AccountPage />
+                                          </ProtectedRoute>
+                                        }
+                                      />
+                                      <Route
+                                        path="/yeu-thich"
+                                        element={
+                                          <ProtectedRoute>
+                                            <FavouritePage />
+                                          </ProtectedRoute>
+                                        }
+                                      />
+                                      <Route
+                                        path="*"
+                                        element={<NotFoundPage />}
+                                      />
+                                    </Routes>
+                                  </AppLayout>
+                                </BannerCacheProvider>
                                 <FooterWrapper />
                               </Suspense>
                               <HoverPreview />

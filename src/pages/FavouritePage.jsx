@@ -81,13 +81,13 @@ function FavouritePage() {
   return (
     <div className="text-white px-[3%] mt-24 min-h-screen pb-20">
       <SEO seoData={seoData} />
-      <h1 className="text-xl md:text-2xl 2xl:text-4xl font-bold">
+      <h1 className="text-xl md:text-2xl">
         {favoritesPage?.length === 0
           ? "Danh sách của bạn hiện đang trống!"
           : "Danh sách của tôi"}
       </h1>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-1 gap-y-14 mt-5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
         {favoritesPage?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
@@ -97,11 +97,11 @@ function FavouritePage() {
             onClick={() => openModal(item.slug, item.tmdb?.id, item.tmdb?.type)}
           >
             {/* Thumbnail chính */}
-            <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
+            <div className="hidden md:block relative w-full aspect-video rounded overflow-hidden">
               <LazyImage
                 src={item.poster_url}
                 alt={item.name}
-                sizes="16vw"
+                sizes="(max-width: 1024px) 24vw,(max-width: 1536px) 19vw,16vw"
                 quality={65}
                 className="object-cover w-full h-full rounded"
               />
@@ -116,7 +116,7 @@ function FavouritePage() {
             </div>
 
             {/* Mobile thumbnail */}
-            <div className="block lg:hidden relative overflow-hidden rounded">
+            <div className="block md:hidden relative overflow-hidden rounded">
               <LazyImage
                 src={item.thumb_url}
                 alt={item.name}
@@ -140,7 +140,7 @@ function FavouritePage() {
                 <img
                   src={Top10Badge}
                   alt="Top 10"
-                  className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                  className="w-10 sm:w-12 md:w-10 aspect-auto"
                 />
               </div>
             )}
@@ -153,7 +153,7 @@ function FavouritePage() {
             {[...Array(6)].map((_, index) => (
               <div
                 key={index + 198}
-                className="w-full aspect-[2/3] lg:aspect-video cursor-pointer relative animate-pulse"
+                className="w-full aspect-[2/3] md:aspect-video cursor-pointer relative animate-pulse"
               >
                 <div className="w-full h-full bg-gray-600 rounded-md"></div>
               </div>

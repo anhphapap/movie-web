@@ -15,7 +15,7 @@ import { useListModal } from "../context/ListModalContext";
 import { useWatching } from "../context/WatchingContext";
 import { UserAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { CircleX, Info, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleX, Info, X } from "lucide-react";
 import logo_n from "../assets/images/N_logo.png";
 export default function Carousel({
   nameList,
@@ -26,6 +26,7 @@ export default function Carousel({
   category = "",
   year = new Date().getFullYear(),
   size = 16,
+  prefetchMovies = [],
 }) {
   const {
     watchingPage,
@@ -34,7 +35,7 @@ export default function Carousel({
     loadingPage,
     toggleWatching,
   } = useWatching();
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState(prefetchMovies);
   const [firstVisible, setFirstVisible] = useState(0);
   const [lastVisible, setLastVisible] = useState(0);
   const swiperRef = useRef(null);
@@ -58,7 +59,8 @@ export default function Carousel({
   const navigate = useNavigate();
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.2,
+    threshold: 0,
+    rootMargin: "300px 0px",
   });
 
   useEffect(() => {
@@ -129,10 +131,11 @@ export default function Carousel({
   };
 
   useEffect(() => {
+    if (prefetchMovies.length > 0 || movies.length > 0) return;
     if (!inView || fetchedRef.current || typeList === "watching") return;
     fetchedRef.current = true;
     fetchMovies();
-  }, [type_slug, inView]);
+  }, [type_slug, inView, prefetchMovies]);
 
   useEffect(() => {
     if (typeList === "watching" && inView) {
@@ -198,28 +201,28 @@ export default function Carousel({
   if (loading || loadingPage) {
     return (
       <div className="px-[3%] relative animate-pulse my-10">
-        <h2 className="font-bold mb-3 rounded h-5 bg-neutral-900 w-fit text-transparent">
+        <h2 className="font-bold mb-3 rounded-[.2vw] h-5 bg-neutral-900 w-fit text-transparent">
           {" "}
           {nameList}
         </h2>
-        <div className="lg:h-[150px] sm:h-[200px] h-[150px] bg-neutral-900 animate-pulse rounded-xl" />
+        <div className="md:h-[150px] sm:h-[200px] h-[150px] bg-neutral-900 animate-pulse rounded-xl" />
       </div>
     );
   }
   if (typeList === "top") {
     return (
       <div
-        className="my-10 lg:my-14 relative w-[94%] mx-[3%]"
+        className="my-[6vw] md:my-[3vw] relative w-[94%] mx-[3%] group/carousel"
         ref={(node) => {
           containerRef.current = node;
           ref(node);
         }}
       >
         <div className="flex justify-between items-center w-full mb-3">
-          <h2 className="text-white font-bold">{nameList}</h2>
+          <h2 className="text-white font-medium">{nameList}</h2>
           <div
             ref={paginationRef}
-            className="ml-auto hidden lg:flex justify-center gap-[1px]"
+            className="ml-auto hidden md:flex justify-center gap-[1px]"
           />
         </div>
 
@@ -234,7 +237,6 @@ export default function Carousel({
             prevEl: prevRef.current,
             nextEl: nextRef.current,
           }}
-          spaceBetween={6}
           onResize={(swiper) => {
             setSwiperHeight(swiper.el.clientHeight);
             setFirstVisible(swiper.activeIndex);
@@ -264,8 +266,9 @@ export default function Carousel({
             setCanSlideNext(!swiper.isEnd);
           }}
           breakpoints={{
-            1024: { slidesPerView: 5, slidesPerGroup: 5 },
-            800: { slidesPerView: 4, slidesPerGroup: 4 },
+            1400: { slidesPerView: 6, slidesPerGroup: 6 },
+            1100: { slidesPerView: 5, slidesPerGroup: 5 },
+            768: { slidesPerView: 4, slidesPerGroup: 4 },
             500: { slidesPerView: 3, slidesPerGroup: 3 },
             0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
@@ -277,10 +280,10 @@ export default function Carousel({
             <SwiperSlide
               key={`${type_slug}-${item._id}-${index}`}
               data-index={index}
-              className="!overflow-visible"
+              className="!overflow-visible px-[.4vw] md:px-[.2vw]"
             >
               <div
-                className="group relative cursor-pointer h-full flex items-end lg:items-center"
+                className="group relative cursor-pointer h-full flex items-end md:items-center"
                 onMouseEnter={(e) => handleEnter(item, e, index)}
                 onMouseLeave={onLeave}
                 onClick={() =>
@@ -291,14 +294,14 @@ export default function Carousel({
                   dangerouslySetInnerHTML={{
                     __html: tops[index],
                   }}
-                  className="w-[30%] lg:w-[50%] aspect-[2/3] flex items-end lg:items-center"
+                  className="w-[30%] md:w-[50%] aspect-[2/3] flex items-end md:items-center"
                 />
-                <div className="relative w-[70%] lg:w-[50%] rounded lg:rounded-[3px] overflow-hidden">
-                  <div className="object-cover w-full aspect-[2/3] object-center rounded lg:rounded-[3px]">
+                <div className="relative w-[70%] md:w-[50%] rounded-[.2vw] overflow-hidden">
+                  <div className="object-cover w-full aspect-[2/3] object-center rounded-[.2vw]">
                     <LazyImage
                       src={`${item.thumb_url}`}
                       alt={item.name}
-                      sizes="(max-width: 500px) 15vw, (max-width: 800px) 21vw, (max-width: 1024px) 16vw, 10vw"
+                      sizes="(max-width: 500px) 15vw, (max-width: 768px) 21vw,(max-width: 1100px) 12vw, (max-width: 1400px) 10vw, 8vw"
                       quality={65}
                     />
                   </div>
@@ -347,22 +350,28 @@ export default function Carousel({
         <button
           ref={prevRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e transition-all ease-linear duration-100 cursor-pointer ${
+          className={`group/left absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-in-out duration-100 cursor-pointer ${
             canSlidePrev ? "visible" : "invisible"
           }`}
           disabled={!canSlidePrev}
         >
-          ‹
+          <ChevronLeft
+            className=" sm:size-8 size-6 group-hover/left:scale-[1.35] transition-all ease-in-out duration-200"
+            strokeWidth={2}
+          />
         </button>
         <button
           ref={nextRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s transition-all ease-linear duration-100 cursor-pointer ${
+          className={`group/right absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-in-out duration-100 cursor-pointer ${
             canSlideNext ? "visible" : "invisible"
           }`}
           disabled={!canSlideNext}
         >
-          ›
+          <ChevronRight
+            className=" sm:size-8 size-6 group-hover/right:scale-[1.35] transition-all ease-in-out duration-200"
+            strokeWidth={2}
+          />
         </button>
       </div>
     );
@@ -370,7 +379,7 @@ export default function Carousel({
   if (typeList === "list") {
     return (
       <div
-        className="my-10 lg:my-14 relative w-[94%] mx-[3%]"
+        className="my-[6vw] md:my-[3vw] relative w-[94%] mx-[3%] group/carousel"
         ref={(node) => {
           containerRef.current = node;
           ref(node);
@@ -378,7 +387,7 @@ export default function Carousel({
       >
         <div className="flex justify-between items-center w-full mb-3">
           <div
-            className="group cursor-pointer font-bold flex justify-between items-center lg:inline-block gap-2 w-full lg:w-auto"
+            className="group cursor-pointer font-medium flex justify-between items-center md:inline-block gap-2 w-full md:w-auto"
             onClick={() =>
               openList({
                 params: `${type_slug}?category=${category}&country=${country}&year=${year}`,
@@ -389,14 +398,14 @@ export default function Carousel({
             <span className="text-white transition-all ease-in-out duration-500">
               {nameList}
             </span>
-            <span className="lg:opacity-0 text-xs group-hover:opacity-100 group-hover:pl-2 transition-all ease-in-out duration-500 text-white/80 group-hover:text-white">
+            <span className="md:opacity-0 text-xs group-hover:opacity-100 group-hover:pl-2 transition-all ease-in-out duration-500 text-white/80 group-hover:text-white">
               Xem tất cả{" "}
               <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
             </span>
           </div>
           <div
             ref={paginationRef}
-            className="ml-auto hidden lg:flex justify-center gap-[1px]"
+            className="ml-auto hidden md:flex justify-center gap-[1px]"
           />
         </div>
 
@@ -411,7 +420,6 @@ export default function Carousel({
             prevEl: prevRef.current,
             nextEl: nextRef.current,
           }}
-          spaceBetween={5}
           onResize={(swiper) => {
             setSwiperHeight(swiper.el.clientHeight);
             updateNavState(swiper);
@@ -451,8 +459,8 @@ export default function Carousel({
           }}
           onUpdate={(swiper) => updateNavState(swiper)}
           breakpoints={{
-            1024: { slidesPerView: 6, slidesPerGroup: 6 },
-            800: { slidesPerView: 5, slidesPerGroup: 5 },
+            1400: { slidesPerView: 6, slidesPerGroup: 6 },
+            1100: { slidesPerView: 5, slidesPerGroup: 5 },
             500: { slidesPerView: 4, slidesPerGroup: 4 },
             0: { slidesPerView: 3, slidesPerGroup: 3 },
           }}
@@ -465,7 +473,7 @@ export default function Carousel({
               <SwiperSlide
                 key={`${type_slug}-${item._id}-${index}`}
                 data-index={index}
-                className="!overflow-visible"
+                className="!overflow-visible px-[.4vw] md:px-[.2vw]"
               >
                 <div
                   className="group relative cursor-pointer h-full"
@@ -475,12 +483,12 @@ export default function Carousel({
                     openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
                   }
                 >
-                  <div className="hidden lg:block relative w-full aspect-video rounded-[3px] overflow-hidden">
-                    <div className="object-cover w-full h-full rounded-[3px]">
+                  <div className="hidden md:block relative w-full aspect-video rounded-[.2vw] overflow-hidden">
+                    <div className="object-cover w-full h-full rounded-[.2vw]">
                       <LazyImage
                         src={item.poster_url}
                         alt={item.name}
-                        sizes="16vw"
+                        sizes="(max-width: 1100px) 22vw, (max-width: 1400px) 19vw, 16vw"
                         quality={65}
                       />
                     </div>
@@ -496,16 +504,16 @@ export default function Carousel({
                   </div>
 
                   <div
-                    className="block lg:hidden relative overflow-hidden rounded-[3px]"
+                    className="block md:hidden relative overflow-hidden rounded-[.2vw]"
                     onClick={() =>
                       openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
                     }
                   >
-                    <div className="w-full object-cover aspect-[2/3] rounded-[3px]">
+                    <div className="w-full object-cover aspect-[2/3] rounded-[.2vw]">
                       <LazyImage
                         src={item.thumb_url}
                         alt={item.name}
-                        sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                        sizes="(max-width: 500px) 16vw, (max-width: 768px) 23vw, 18vw"
                         quality={65}
                       />
                     </div>
@@ -523,7 +531,7 @@ export default function Carousel({
                       <img
                         src={Top10Badge}
                         alt="Top 10"
-                        className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                        className="w-10 sm:w-12 md:w-10 aspect-auto"
                       />
                     </div>
                   )}
@@ -564,9 +572,9 @@ export default function Carousel({
                 <SwiperSlide
                   key={`${type_slug}-${index}-skeleton`}
                   data-index={movies.length + index}
-                  className="!overflow-visible"
+                  className="!overflow-visible px-[.4vw] md:px-[.2vw]"
                 >
-                  <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] lg:aspect-video rounded-lg" />
+                  <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] md:aspect-video rounded-[.2vw]" />
                 </SwiperSlide>
               ))}
           </>
@@ -574,22 +582,28 @@ export default function Carousel({
         <button
           ref={prevRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-linear duration-100 cursor-pointer ${
+          className={`group/left absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-in-out duration-100 cursor-pointer ${
             canSlidePrev ? "visible" : "invisible"
           }`}
           disabled={!canSlidePrev}
         >
-          ‹
+          <ChevronLeft
+            className=" sm:size-8 size-6 group-hover/left:scale-[1.35] transition-all ease-in-out duration-200"
+            strokeWidth={2}
+          />
         </button>
         <button
           ref={nextRef}
           style={{ height: swiperHeight + 1 || "100%" }}
-          className={`absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-linear duration-100 cursor-pointer ${
+          className={`group/right absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-in-out duration-100 cursor-pointer ${
             canSlideNext ? "visible" : "invisible"
           }`}
           disabled={!canSlideNext}
         >
-          ›
+          <ChevronRight
+            className=" sm:size-8 size-6 group-hover/right:scale-[1.35] transition-all ease-in-out duration-200"
+            strokeWidth={2}
+          />
         </button>
       </div>
     );
@@ -597,7 +611,7 @@ export default function Carousel({
   if (!user || (!loadingPage && watchingPage.length === 0)) return null;
   return (
     <div
-      className="my-10 lg:my-14 relative w-[94%] mx-[3%]"
+      className="my-[6vw] md:my-[3vw] relative w-[94%] mx-[3%] group/carousel"
       ref={(node) => {
         containerRef.current = node;
         ref(node);
@@ -605,7 +619,7 @@ export default function Carousel({
     >
       <div className="flex justify-between items-center w-full mb-3">
         <div
-          className="group font-bold flex justify-between items-center lg:inline-block gap-2 w-full lg:w-auto"
+          className="group font-medium flex justify-between items-center md:inline-block gap-2 w-full md:w-auto"
           // onClick={() =>
           //   openList({
           //     params: `${type_slug}?category=${category}&country=${country}&year=${year}`,
@@ -616,14 +630,14 @@ export default function Carousel({
           <span className="text-white transition-all ease-in-out duration-500">
             {nameList} {user.displayName}
           </span>
-          {/* <span className="lg:opacity-0 text-xs group-hover:opacity-100 group-hover:pl-2 transition-all ease-in-out duration-500 text-white/80 group-hover:text-white">
+          {/* <span className="md:opacity-0 text-xs group-hover:opacity-100 group-hover:pl-2 transition-all ease-in-out duration-500 text-white/80 group-hover:text-white">
             Xem tất cả{" "}
             <FontAwesomeIcon icon="fa-solid fa-angles-right" size="xs" />
           </span> */}
         </div>
         <div
           ref={paginationRef}
-          className="ml-auto hidden lg:flex justify-center gap-[1px]"
+          className="ml-auto hidden md:flex justify-center gap-[1px]"
         />
       </div>
 
@@ -638,7 +652,6 @@ export default function Carousel({
           prevEl: prevRef.current,
           nextEl: nextRef.current,
         }}
-        spaceBetween={5}
         onResize={(swiper) => {
           setSwiperHeight(swiper.el.clientHeight);
           updateNavState(swiper);
@@ -674,8 +687,8 @@ export default function Carousel({
         }}
         onUpdate={(swiper) => updateNavState(swiper)}
         breakpoints={{
-          1024: { slidesPerView: 6, slidesPerGroup: 6 },
-          800: { slidesPerView: 5, slidesPerGroup: 5 },
+          1400: { slidesPerView: 6, slidesPerGroup: 6 },
+          1100: { slidesPerView: 5, slidesPerGroup: 5 },
           500: { slidesPerView: 4, slidesPerGroup: 4 },
           0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
@@ -688,7 +701,7 @@ export default function Carousel({
             <SwiperSlide
               key={`watching-carousel-${item.slug}-${index}`}
               data-index={index}
-              className="!overflow-visible"
+              className="!overflow-visible px-[.4vw] md:px-[.2vw]"
             >
               <div
                 className="group relative cursor-pointer h-full"
@@ -699,18 +712,18 @@ export default function Carousel({
                   onLeave();
                 }}
               >
-                <div className="absolute -bottom-3 left-[20%] right-[20%] h-[3px] bg-[#5b5b5b] overflow-hidden hidden lg:block">
+                <div className="absolute -bottom-3 left-[20%] right-[20%] h-[3px] bg-[#5b5b5b] overflow-hidden hidden md:block">
                   <div
                     className="h-full bg-[#d80f16] transition-all duration-300"
                     style={{ width: `${item.progress || 0}%` }}
                   />
                 </div>
-                <div className="hidden lg:block relative w-full aspect-video rounded-[3px] overflow-hidden">
-                  <div className="object-cover w-full h-full rounded-[3px] relative">
+                <div className="hidden md:block relative w-full aspect-video rounded-[.2vw] overflow-hidden">
+                  <div className="object-cover w-full h-full rounded-[.2vw] relative">
                     <LazyImage
                       src={item.poster_url}
                       alt={item.name}
-                      sizes="16vw"
+                      sizes="(max-width: 1100px) 22vw, (max-width: 1400px) 19vw, 16vw"
                       quality={65}
                     />
                     {new Date().getTime() -
@@ -754,9 +767,9 @@ export default function Carousel({
                   )}
                 </div>
 
-                <div className="block lg:hidden relative overflow-hidden rounded-[3px]">
+                <div className="block md:hidden relative overflow-hidden rounded-[.2vw]">
                   <div
-                    className="w-full object-cover aspect-[2/3] rounded-[3px] relative"
+                    className="w-full object-cover aspect-[2/3] rounded-[.2vw] relative"
                     onClick={() => {
                       handlePlayMovie(item);
                     }}
@@ -764,7 +777,7 @@ export default function Carousel({
                     <LazyImage
                       src={item.thumb_url}
                       alt={item.name}
-                      sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
+                      sizes="(max-width: 500px) 16vw, (max-width: 768px) 23vw, 18vw"
                       quality={65}
                     />
                     <div className="absolute bottom-0 left-0 w-full h-full flex items-center justify-center from-black/30 to-transparent bg-gradient-to-br">
@@ -806,7 +819,7 @@ export default function Carousel({
                       </>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2 py-2 bg-[#1a1a18] rounded-b-[3px]">
+                  <div className="flex flex-col gap-2 py-2 bg-[#1a1a18] rounded-b-[2vw]">
                     <div className="h-[3px] bg-[#5b5b5b] overflow-hidden w-[90%] mx-auto rounded-full">
                       <div
                         className="h-full bg-[#d80f16] transition-all duration-300"
@@ -845,7 +858,7 @@ export default function Carousel({
                     onClick={(e) => handleRemoveWatching(e, item)}
                     className="absolute top-1 right-1 bg-black/30 backdrop-blur-[1px] rounded-[3px] p-1.5 opacity-100 transition-opacity duration-300 "
                   >
-                    <X size={16} className="text-white" strokeWidth={3} />
+                    <X size={16} className="text-white" strokeWidth={2} />
                   </button> */}
                   {item.sub_docquyen && (
                     <img
@@ -860,7 +873,7 @@ export default function Carousel({
                     <img
                       src={Top10Badge}
                       alt="Top 10"
-                      className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                      className="w-10 sm:w-12 md:w-10 aspect-auto"
                     />
                   </div>
                 )}
@@ -873,9 +886,9 @@ export default function Carousel({
               <SwiperSlide
                 key={`watching-carousel-skeleton-${index}`}
                 data-index={watchingPage.length + index}
-                className="!overflow-visible"
+                className="!overflow-visible px-[.4vw] md:px-[.2vw]"
               >
-                <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] lg:aspect-video rounded-lg" />
+                <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] md:aspect-video rounded-[.2vw]" />
               </SwiperSlide>
             ))}
         </>
@@ -883,22 +896,28 @@ export default function Carousel({
       <button
         ref={prevRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pl-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-linear duration-100 cursor-pointer ${
+        className={`group/left absolute -left-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-in-out duration-100 cursor-pointer ${
           canSlidePrev ? "visible" : "invisible"
         }`}
         disabled={!canSlidePrev}
       >
-        ‹
+        <ChevronLeft
+          className=" sm:size-8 size-6 group-hover/left:scale-[1.35] transition-all ease-in-out duration-200"
+          strokeWidth={2}
+        />
       </button>
       <button
         ref={nextRef}
         style={{ height: swiperHeight + 1 || "100%" }}
-        className={`absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 pr-[2.75px] hover:bg-black/80 text-transparent hover:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-linear duration-100 cursor-pointer ${
+        className={`group/right absolute -right-[3.19%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-in-out duration-100 cursor-pointer ${
           canSlideNext ? "visible" : "invisible"
         }`}
         disabled={!canSlideNext}
       >
-        ›
+        <ChevronRight
+          className=" sm:size-8 size-6 group-hover/right:scale-[1.35] transition-all ease-in-out duration-200"
+          strokeWidth={2}
+        />
       </button>
     </div>
   );

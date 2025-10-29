@@ -152,7 +152,7 @@ const MovieList = ({
           Không có kết quả nào khớp với yêu cầu tìm kiếm "{keyword}" của bạn.
         </h1>
       )) || (
-        <h1 className="text-xl md:text-2xl 2xl:text-4xl">
+        <h1 className="text-xl md:text-2xl">
           {(search && (
             <>
               <span className="opacity-50">Kết quả tìm kiếm của: </span>
@@ -161,7 +161,7 @@ const MovieList = ({
           )) || <span className="opacity-50 ">{titleHead} </span>}
         </h1>
       )}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 sm:gap-x-2 gap-x-1 sm:gap-y-[7vh] gap-y-[5vh] mt-5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
         {movies?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
@@ -170,12 +170,12 @@ const MovieList = ({
             onMouseLeave={onLeave}
             onClick={() => openModal(item.slug, item.tmdb.id, item.tmdb.type)}
           >
-            <div className="hidden lg:block relative w-full aspect-video rounded overflow-hidden">
+            <div className="hidden md:block relative w-full aspect-video rounded overflow-hidden">
               <div className="object-cover w-full h-full rounded">
                 <LazyImage
                   src={item.poster_url}
                   alt={item.name}
-                  sizes="16vw"
+                  sizes="(max-width: 1024px) 24vw,(max-width: 1536px) 19vw,16vw"
                   quality={65}
                 />
               </div>
@@ -191,7 +191,7 @@ const MovieList = ({
             </div>
 
             <div
-              className="block lg:hidden relative overflow-hidden rounded"
+              className="block md:hidden relative overflow-hidden rounded"
               onClick={() => openModal(item.slug, item.tmdb.id, item.tmdb.type)}
             >
               <div className="w-full object-cover aspect-[2/3] rounded">
@@ -216,7 +216,7 @@ const MovieList = ({
                 <img
                   src={Top10Badge}
                   alt="Top 10"
-                  className="w-10 sm:w-12 lg:w-10 aspect-auto"
+                  className="w-10 sm:w-12 md:w-10 aspect-auto"
                 />
               </div>
             )}
@@ -251,7 +251,7 @@ const MovieList = ({
             {[...Array(7)].map((_, index) => (
               <div
                 key={index + 198}
-                className="w-full aspect-[2/3] lg:aspect-video cursor-pointer relative animate-pulse"
+                className="w-full aspect-[2/3] md:aspect-video cursor-pointer relative animate-pulse"
               >
                 <div className="w-full h-full bg-gray-600 rounded-md"></div>
               </div>

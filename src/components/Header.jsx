@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import logo_full from "../assets/images/logo_full_240.png";
 import logo_n from "../assets/images/N_logo.png";
-
+import { useBannerCache } from "../context/BannerCacheContext";
 const Header = ({ filter = false, type_slug = "" }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, logOut, loading } = UserAuth();
@@ -14,6 +14,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [onTab, setOnTab] = useState(-1);
   const [pathname, setPathname] = useState(window.location.pathname);
+  const { playing } = useBannerCache();
 
   const navigation = [
     { name: "Trang chủ", href: "/trang-chu" },
@@ -71,7 +72,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         className={`flex items-center justify-start py-2 px-[3%] transition-all duration-500 ease-linear text-white sm:py-3 md:py-4 ${
           filter
             ? "bg-gradient-to-b from-[#080808] to-[#141414]"
-            : isScrolled || showMenu
+            : isScrolled || showMenu || playing
             ? "bg-[#141414]"
             : "bg-gradient-to-b from-black/70 to-transparent"
         }`}

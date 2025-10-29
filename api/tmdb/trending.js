@@ -2,7 +2,7 @@
 // ✅ Proxy cache cho TMDB Trending (movie/tv)
 
 const cache = new Map(); // bộ nhớ tạm (Vercel edge instance riêng biệt)
-const CACHE_TTL = 1000 * 60 * 30; // 30 phút
+const CACHE_TTL = 1000 * 60 * 60 * 6; // 6 giờ
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");

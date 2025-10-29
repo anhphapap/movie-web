@@ -38,6 +38,7 @@ export async function getTmdbCached(type = "movie", timeWindow = "day") {
   if (Array.isArray(fresh) && fresh.length > 0) {
     sessionStorage.setItem(key, JSON.stringify(fresh));
     sessionStorage.setItem(`${key}_time`, Date.now());
+    sessionStorage.setItem("selected_movie", Math.floor(Math.random() * 10));
   } else {
     console.warn(`⚠️ No valid data to cache for ${type}`);
   }

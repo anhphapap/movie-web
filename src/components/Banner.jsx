@@ -10,19 +10,21 @@ import { getYoutubeId } from "../utils/data";
 import YouTube from "react-youtube";
 import { toast } from "react-toastify";
 import logo_n from "../assets/images/N_logo.png";
+import { useBannerCache } from "../context/BannerCacheContext";
 
 const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
   const [player, setPlayer] = useState(null);
   const [isMuted, setIsMuted] = useState(true);
   const [showTrailer, setShowTrailer] = useState(false);
-  const [fadeOutImage, setFadeOutImage] = useState(false);
+  const [hasValidTrailer, setHasValidTrailer] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const bannerRef = useRef(null);
   const { openModal, isModalOpen } = useMovieModal();
+  const { getBanner, saveBanner, playing, setPlaying } = useBannerCache();
   const navigate = useNavigate();
   useEffect(() => {
     return () => {
@@ -104,14 +106,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     };
 
     const handleWindowBlur = () => {
-      console.log("Cửa sổ mất focus");
       setIsPageVisible(false);
 
       if (player && player.getPlayerState) {
         try {
           // Cửa sổ mất focus - dừng video nếu đang phát
           if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
-            console.log("Dừng video do mất focus cửa sổ");
             player.pauseVideo();
             setIsVideoPaused(true);
           }
@@ -149,7 +149,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             }
           } else {
             // Video ra khỏi viewport - dừng video
-            console.log("Video ra khỏi viewport");
             if (
               player.getPlayerState &&
               player.getPlayerState() === window.YT.PlayerState.PLAYING
@@ -185,7 +184,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
           player.pauseVideo();
           setIsVideoPaused(true);
-          console.log("Video đã dừng do modal");
         }
       } else if (isVideoPaused) {
         // Modal đóng và video đang bị pause - tiếp tục phát nếu trong viewport
@@ -197,7 +195,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           isInViewport &&
           player.getPlayerState() === window.YT.PlayerState.PAUSED
         ) {
-          console.log("Tiếp tục phát video sau khi đóng modal");
           player.playVideo();
           setIsVideoPaused(false);
         }
@@ -236,7 +233,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     setPlayer(null);
     setIsMuted(true);
     setShowTrailer(false);
-    setFadeOutImage(false);
+    setPlaying(false);
     setLoading(false);
     setIsVideoPaused(false);
     setIsPageVisible(true);
@@ -252,11 +249,11 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     const delayToTrailer = setTimeout(() => {
       // cho ảnh hiển thị ít nhất 1.2s rồi mới bắt đầu trailer
       if (!youtubeId) return;
-      setFadeOutImage(true); // ảnh bắt đầu fade
+      // Chỉ mount trailer, để việc fade sang video xảy ra khi player thực sự phát (current > 1)
       setTimeout(() => {
         setShowTrailer(true); // trailer mount sau fade
       }, 1000);
-    }, 1200);
+    }, 3000);
 
     return () => clearTimeout(delayToTrailer);
   }, [movie]);
@@ -285,6 +282,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
     let isMounted = true;
 
     const fetchMovie = async () => {
+      const cached = getBanner(type_slug);
+      if (cached) {
+        setMovie(cached);
+        setLoading(false);
+        return;
+      }
       try {
         setLoading(true);
 
@@ -296,7 +299,8 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           return;
         }
 
-        const selectedMovie = movies[Math.floor(Math.random() * movies.length)];
+        const selectedMovie =
+          movies[Number(sessionStorage.getItem("selected_movie"))];
 
         const [data, image] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_DETAILS}${selectedMovie.slug}`),
@@ -307,7 +311,12 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           ),
         ]);
 
-        if (isMounted) setMovie({ ...data.data.data, tmdb_image: image });
+        const movieData = { ...data.data.data, tmdb_image: image };
+
+        if (isMounted) {
+          setMovie(movieData);
+          saveBanner(type_slug, movieData);
+        }
       } catch (err) {
         console.error("Error fetching movie banner:", err);
       } finally {
@@ -328,11 +337,8 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         playerVars: { ...playerOptions.playerVars, mute: 1 },
       });
     }
-    const t = setTimeout(() => setShowTrailer(true), 300);
-
     return () => {
       isMounted = false;
-      clearTimeout(t);
 
       // Cleanup player an toàn
       if (player) {
@@ -354,13 +360,18 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       setIntervalId(null);
       setIsMuted(true);
       setShowTrailer(false);
-      setFadeOutImage(false);
+      setHasValidTrailer(false);
+      setPlaying(false);
       setLoading(false);
       setMovie(null);
       setIsVideoPaused(false);
       setIsPageVisible(true);
     };
   }, [type_slug]);
+
+  useEffect(() => {
+    console.log(playing);
+  }, [playing]);
 
   useEffect(() => {
     if (!movie?.poster_url) return;
@@ -389,105 +400,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         filter && "mt-12"
       }`}
     >
-      {youtubeId && (
-        <div
-          className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-700 ease-in-out ${
-            fadeOutImage && showTrailer
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          }`}
-        >
-          <YouTube
-            videoId={youtubeId}
-            opts={playerOptions}
-            className="aspect-video object-cover pointer-events-none absolute w-full h-full top-0 left-0 z-0 rounded-t-lg"
-            onReady={(e) => {
-              try {
-                const ytPlayer = e.target;
-                const iframe = ytPlayer.getIframe();
-
-                // Kiểm tra an toàn trước khi truy cập iframe
-                if (!iframe || !iframe.src) {
-                  console.warn("YouTube iframe not ready");
-                  return;
-                }
-
-                iframe.style.pointerEvents = "none";
-                setPlayer(ytPlayer);
-
-                // Phát video ngay khi ready
-                ytPlayer.playVideo();
-                if (isMuted) ytPlayer.mute();
-
-                // Set trạng thái video đang phát
-                setIsVideoPaused(false);
-
-                const id = setInterval(() => {
-                  try {
-                    // Kiểm tra player vẫn tồn tại
-                    if (
-                      !ytPlayer ||
-                      !ytPlayer.getDuration ||
-                      !ytPlayer.getCurrentTime
-                    ) {
-                      clearInterval(id);
-                      return;
-                    }
-
-                    const duration = ytPlayer.getDuration();
-                    const current = ytPlayer.getCurrentTime();
-
-                    if (current > 1) setFadeOutImage(true);
-
-                    if (duration - current <= 6) {
-                      clearInterval(id);
-                      setIntervalId(null);
-                      ytPlayer.stopVideo();
-
-                      setFadeOutImage(false);
-                      setShowTrailer(false);
-                    }
-                  } catch (error) {
-                    console.warn("Error in video interval:", error);
-                    clearInterval(id);
-                    setIntervalId(null);
-                  }
-                }, 500);
-
-                setIntervalId(id);
-                ytPlayer._checkTime = id;
-              } catch (error) {
-                console.error("Error in onReady:", error);
-              }
-            }}
-            onStateChange={(e) => {
-              try {
-                if (e.data === window.YT.PlayerState.ENDED) {
-                  if (intervalId) {
-                    clearInterval(intervalId);
-                    setIntervalId(null);
-                  }
-
-                  setFadeOutImage(false);
-                  setTimeout(() => setShowTrailer(false), 800);
-                }
-
-                if (e.data === window.YT.PlayerState.PAUSED) {
-                  if (intervalId) {
-                    clearInterval(intervalId);
-                    setIntervalId(null);
-                  }
-                }
-              } catch (error) {
-                console.warn("Error in onStateChange:", error);
-              }
-            }}
-          />
-        </div>
-      )}
       <div
         className={`block absolute top-0 left-0 z-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
-          fadeOutImage && showTrailer ? "opacity-0" : "opacity-100"
+          playing ? "opacity-0" : "opacity-100"
         }`}
       >
         <LazyImage
@@ -501,6 +416,101 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           sizes="100vw"
         />
       </div>
+      {youtubeId && (
+        <div
+          className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
+            showTrailer && hasValidTrailer
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <YouTube
+            videoId={youtubeId}
+            opts={playerOptions}
+            className="aspect-video object-cover pointer-events-none absolute w-full h-full top-0 left-0 z-0 rounded-t-lg"
+            onReady={(e) => {
+              try {
+                const ytPlayer = e.target;
+                const iframe = ytPlayer.getIframe();
+
+                if (!iframe || !iframe.src) {
+                  console.warn("YouTube iframe not ready");
+                  setHasValidTrailer(false);
+                  return;
+                }
+
+                iframe.style.pointerEvents = "none";
+                setPlayer(ytPlayer);
+
+                ytPlayer.playVideo();
+                if (isMuted) ytPlayer.mute();
+                setIsVideoPaused(false);
+
+                const id = setInterval(() => {
+                  try {
+                    const duration = ytPlayer.getDuration();
+                    const current = ytPlayer.getCurrentTime();
+
+                    // Xác nhận trailer hợp lệ khi duration hợp lệ (>0)
+                    if (duration && duration > 0) {
+                      setHasValidTrailer(true);
+                    }
+
+                    if (current > 1) setPlaying(true);
+
+                    if (duration - current <= 6) {
+                      clearInterval(id);
+                      setIntervalId(null);
+                      ytPlayer.stopVideo();
+                      setPlaying(false);
+                      setShowTrailer(false);
+                      setHasValidTrailer(false);
+                    }
+                  } catch {
+                    clearInterval(id);
+                    setIntervalId(null);
+                  }
+                }, 500);
+
+                setIntervalId(id);
+                ytPlayer._checkTime = id;
+              } catch (error) {
+                console.error("Error in onReady:", error);
+                setHasValidTrailer(false);
+                setShowTrailer(false);
+              }
+            }}
+            onStateChange={(e) => {
+              try {
+                if (e.data === window.YT.PlayerState.ENDED) {
+                  if (intervalId) {
+                    clearInterval(intervalId);
+                    setIntervalId(null);
+                  }
+
+                  setPlaying(false);
+                  setTimeout(() => setShowTrailer(false), 800);
+                  setHasValidTrailer(false);
+                }
+
+                if (e.data === window.YT.PlayerState.PAUSED) {
+                  if (intervalId) {
+                    clearInterval(intervalId);
+                    setIntervalId(null);
+                  }
+                }
+              } catch (error) {
+                console.warn("Error in onStateChange:", error);
+              }
+            }}
+            onError={() => {
+              setShowTrailer(false);
+              setPlaying(false);
+              setHasValidTrailer(false);
+            }}
+          />
+        </div>
+      )}
 
       {/* <div className="absolute top-0 left-0 w-full sm:hidden">
         <LazyImage
@@ -529,7 +539,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           </div>
           <div
             className={`w-full max-h-[43.75%] sm:h-auto sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] ${
-              fadeOutImage
+              playing
                 ? "delay-[3000ms] scale-75 sm:-translate-x-[12.5%]"
                 : "delay-0 scale-100 translate-x-0"
             }`}
@@ -557,7 +567,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           </div>
           <div
             className={`hidden md:block transition-all ease-linear  duration-[2000ms] overflow-hidden ${
-              fadeOutImage
+              playing
                 ? "max-h-0 opacity-0 delay-[1000ms]"
                 : "max-h-full opacity-100 delay-0"
             }`}
@@ -613,7 +623,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             </div>
           </div>
           <div className="absolute right-[3%] sm:right-0 bottom-[55%] -translate-x-1/2 sm:-translate-x-0 sm:bottom-0 flex items-center justify-center z-10 sm:space-x-3">
-            {showTrailer && youtubeId && fadeOutImage && (
+            {showTrailer && youtubeId && playing && (
               <button
                 onClick={handleToggleMute}
                 className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square h-full rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"

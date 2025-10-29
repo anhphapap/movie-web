@@ -8,19 +8,20 @@ import {
   listType,
 } from "../utils/data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { useBannerCache } from "../context/BannerCacheContext";
 function FilterNavbar({ type_slug, open }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [sort_field, setSortField] = useState(
-    searchParams.get("sort_field") || ""
+    searchParams.get("sort_field") || "_id"
   );
   const [type, setType] = useState(type_slug || "phim-moi-cap-nhat");
   const [category, setCategory] = useState(searchParams.get("category") || "");
   const [year, setYear] = useState(searchParams.get("year") || "");
   const [country, setCountry] = useState(searchParams.get("country") || "");
+  const { playing } = useBannerCache();
   const handleFilter = () => {
     navigate(
       `/duyet-tim/${type}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
@@ -45,7 +46,9 @@ function FilterNavbar({ type_slug, open }) {
   return (
     <div
       className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white ${
-        isScrolled || showMenu || open ? "bg-[#141414]" : "bg-transparent"
+        isScrolled || showMenu || open || playing
+          ? "bg-[#141414]"
+          : "bg-transparent"
       }`}
     >
       <div className="flex lg:inline-block justify-between w-full lg:w-auto pl-[3%]">

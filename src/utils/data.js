@@ -151,7 +151,7 @@ export const homeContent = {
       typeList: "watching",
     },
     {
-      nameList: "Top 10 phim bộ",
+      nameList: "Top 10 phim bộ hôm nay",
       typeList: "top",
       type_slug: "phim-bo",
       sort_field: "view",
@@ -174,7 +174,7 @@ export const homeContent = {
       country: "trung-quoc",
     },
     {
-      nameList: "Top 10 phim lẻ",
+      nameList: "Top 10 phim lẻ hôm nay",
       typeList: "top",
       type_slug: "phim-le",
       sort_field: "view",
@@ -244,7 +244,7 @@ export const seriesContent = {
   },
   data: [
     {
-      nameList: "Top 10 phim bộ",
+      nameList: "Top 10 phim bộ hôm nay",
       typeList: "top",
       type_slug: "phim-bo",
       sort_field: "view",
@@ -322,7 +322,7 @@ export const singleContent = {
   },
   data: [
     {
-      nameList: "Top 10 phim lẻ",
+      nameList: "Top 10 phim lẻ hôm nay",
       typeList: "top",
       type_slug: "phim-le",
       sort_field: "view",
@@ -408,5 +408,6 @@ export const getYoutubeId = (url) => {
   const match = url.match(
     /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([^&?\/]+)/
   );
-  return match ? match[1] : null;
+  const isValid = match && match[1].length === 11;
+  return isValid ? match[1] : null;
 };
