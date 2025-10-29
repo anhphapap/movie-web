@@ -9,7 +9,7 @@
 
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "header",
@@ -17,13 +17,7 @@
           "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
         }
       ],
-      "destination": "https://service.prerender.io/https://needflex.site/$1",
-      "headers": [
-        {
-          "key": "X-Prerender-Token",
-          "value": "@PRERENDER_TOKEN"
-        }
-      ]
+      "destination": "https://service.prerender.io/https://needflex.site/:path*?prerender_token=@PRERENDER_TOKEN"
     },
     {
       "source": "/((?!api).*)",
