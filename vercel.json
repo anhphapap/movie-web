@@ -6,11 +6,8 @@
       "permanent": true
     }
   ],
+
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
     {
       "source": "/(.*)",
       "has": [
@@ -27,7 +24,17 @@
       "destination": "/index.html"
     }
   ],
+
   "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Prerender-Token",
+          "value": "vsQfraBszpUwy7YdgQqr"
+        }
+      ]
+    },
     {
       "source": "/api/(.*)",
       "headers": [
@@ -42,19 +49,13 @@
     {
       "source": "/assets/(.*)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
+        { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
       ]
     },
     {
       "source": "/(.*)\\.(jpg|jpeg|png|webp|avif|ico|js|css|woff2)",
       "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
+        { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
       ]
     },
     {
@@ -63,12 +64,6 @@
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
         { "key": "Cache-Control", "value": "public, max-age=0" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Prerender-Token", "value": "vsQfraBszpUwy7YdgQqr" }
       ]
     }
   ]
