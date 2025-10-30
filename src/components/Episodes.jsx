@@ -26,11 +26,6 @@ const Episodes = ({
   const navigate = useNavigate();
   const episodesContainerRef = useRef(null);
 
-  useEffect(() => {
-    console.log(showServer, "showServer");
-    console.log(showEpisode, "showEpisode");
-  }, [showServer, showEpisode]);
-
   // Scroll đến tập hiện tại khi mở menu
   useEffect(() => {
     if (tab === 3 && episodesContainerRef.current) {

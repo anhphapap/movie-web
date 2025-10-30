@@ -105,7 +105,6 @@ export const WatchingProvider = ({ children }) => {
   // 🔹 Toggle đang xem (update local ngay)
   const toggleWatching = async (movie) => {
     if (!user) {
-      toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
       return;
     }
 
@@ -156,7 +155,6 @@ export const WatchingProvider = ({ children }) => {
     episodeName
   ) => {
     if (!user?.email) {
-      toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
       return false;
     }
 

@@ -33,6 +33,7 @@ import Tooltip from "./Tooltip";
 import LazyImage from "./LazyImage";
 import { useWatching } from "../context/WatchingContext";
 import Episodes from "./Episodes";
+import { UserAuth } from "../context/AuthContext";
 
 const VideoPlayer = ({
   episode,
@@ -58,6 +59,7 @@ const VideoPlayer = ({
   const navigate = useNavigate();
   const { toggleWatching, updateWatchingProgress, isInWatching } =
     useWatching();
+  const { user } = UserAuth();
 
   // State
   const [playing, setPlaying] = useState(false);
@@ -389,7 +391,7 @@ const VideoPlayer = ({
       };
 
       // Chỉ thêm nếu chưa có trong danh sách, tránh toggle gây xóa
-      if (!isInWatching(movie.slug)) {
+      if (!isInWatching(movie.slug) && user?.email) {
         toggleWatching(movieData);
       }
     }
@@ -836,7 +838,7 @@ const VideoPlayer = ({
           fullscreen ? "object-contain" : "object-cover"
         }`}
         style={{ filter: `brightness(${brightness}%)` }}
-        onTimeUpdate={handleTimeUpdate}
+        onTimeUpdate={user?.email ? handleTimeUpdate : undefined}
         onClick={isMobile ? undefined : handleVideoClick}
         preload="auto"
         playsInline
