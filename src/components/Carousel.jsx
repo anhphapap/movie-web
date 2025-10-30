@@ -296,8 +296,8 @@ export default function Carousel({
                   }}
                   className="w-[30%] md:w-[50%] aspect-[2/3] flex items-end md:items-center"
                 />
-                <div className="relative w-[70%] md:w-[50%] rounded-[.2vw] overflow-hidden">
-                  <div className="object-cover w-full aspect-[2/3] object-center rounded-[.2vw]">
+                <div className="relative w-[70%] md:w-[50%] md:rounded-[.2vw] rounded-[.4vw] overflow-hidden">
+                  <div className="object-cover w-full aspect-[2/3] object-center">
                     <LazyImage
                       src={`${item.thumb_url}`}
                       alt={item.name}
@@ -483,7 +483,7 @@ export default function Carousel({
                     openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
                   }
                 >
-                  <div className="hidden md:block relative w-full aspect-video rounded-[.2vw] overflow-hidden">
+                  <div className="hidden md:block relative w-full aspect-video rounded-[.2vw]  overflow-hidden">
                     <div className="object-cover w-full h-full rounded-[.2vw]">
                       <LazyImage
                         src={item.poster_url}
@@ -504,12 +504,12 @@ export default function Carousel({
                   </div>
 
                   <div
-                    className="block md:hidden relative overflow-hidden rounded-[.2vw]"
+                    className="block md:hidden relative overflow-hidden rounded-[.4vw]"
                     onClick={() =>
                       openModal(item.slug, item.tmdb?.id, item.tmdb?.type)
                     }
                   >
-                    <div className="w-full object-cover aspect-[2/3] rounded-[.2vw]">
+                    <div className="w-full object-cover aspect-[2/3]">
                       <LazyImage
                         src={item.thumb_url}
                         alt={item.name}
@@ -767,9 +767,9 @@ export default function Carousel({
                   )}
                 </div>
 
-                <div className="block md:hidden relative overflow-hidden rounded-[.2vw]">
+                <div className="block md:hidden relative overflow-hidden rounded-[.4vw]">
                   <div
-                    className="w-full object-cover aspect-[2/3] rounded-[.2vw] relative"
+                    className="w-full object-cover aspect-[2/3] relative"
                     onClick={() => {
                       handlePlayMovie(item);
                     }}
@@ -819,7 +819,7 @@ export default function Carousel({
                       </>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2 py-2 bg-[#1a1a18] rounded-b-[2vw]">
+                  <div className="flex flex-col gap-2 py-2 bg-[#1a1a18] rounded-b-[.4vw]">
                     <div className="h-[3px] bg-[#5b5b5b] overflow-hidden w-[90%] mx-auto rounded-full">
                       <div
                         className="h-full bg-[#d80f16] transition-all duration-300"

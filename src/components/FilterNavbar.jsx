@@ -26,6 +26,7 @@ function FilterNavbar({ type_slug, open }) {
     navigate(
       `/duyet-tim/${type}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
     );
+    setShowMenu(false);
   };
 
   useEffect(() => {
@@ -45,7 +46,7 @@ function FilterNavbar({ type_slug, open }) {
   }, []);
   return (
     <div
-      className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white ${
+      className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white z-10 ${
         isScrolled || showMenu || open || playing
           ? "bg-[#141414]"
           : "bg-transparent"

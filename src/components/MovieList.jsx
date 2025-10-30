@@ -161,7 +161,7 @@ const MovieList = ({
           )) || <span className="opacity-50 ">{titleHead} </span>}
         </h1>
       )}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
         {movies?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
@@ -170,8 +170,8 @@ const MovieList = ({
             onMouseLeave={onLeave}
             onClick={() => openModal(item.slug, item.tmdb.id, item.tmdb.type)}
           >
-            <div className="hidden md:block relative w-full aspect-video rounded overflow-hidden">
-              <div className="object-cover w-full h-full rounded">
+            <div className="hidden md:block relative w-full aspect-video rounded-[.2vw] overflow-hidden">
+              <div className="object-cover w-full h-full rounded-[.2vw]">
                 <LazyImage
                   src={item.poster_url}
                   alt={item.name}
@@ -191,10 +191,10 @@ const MovieList = ({
             </div>
 
             <div
-              className="block md:hidden relative overflow-hidden rounded"
+              className="block md:hidden relative overflow-hidden rounded-[.4vw]"
               onClick={() => openModal(item.slug, item.tmdb.id, item.tmdb.type)}
             >
-              <div className="w-full object-cover aspect-[2/3] rounded">
+              <div className="w-full object-cover aspect-[2/3]">
                 <LazyImage
                   src={item.thumb_url}
                   alt={item.name}
@@ -253,7 +253,7 @@ const MovieList = ({
                 key={index + 198}
                 className="w-full aspect-[2/3] md:aspect-video cursor-pointer relative animate-pulse"
               >
-                <div className="w-full h-full bg-gray-600 rounded-md"></div>
+                <div className="w-full h-full bg-gray-600 rounded-[.4vw] md:rounded-[.2vw]"></div>
               </div>
             ))}
           </>

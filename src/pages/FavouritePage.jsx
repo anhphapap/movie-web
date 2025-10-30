@@ -87,7 +87,7 @@ function FavouritePage() {
           : "Danh sách của tôi"}
       </h1>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 2xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
         {favoritesPage?.map((item, index) => (
           <div
             className="group relative cursor-pointer h-full"
@@ -97,13 +97,13 @@ function FavouritePage() {
             onClick={() => openModal(item.slug, item.tmdb?.id, item.tmdb?.type)}
           >
             {/* Thumbnail chính */}
-            <div className="hidden md:block relative w-full aspect-video rounded overflow-hidden">
+            <div className="hidden md:block relative w-full aspect-video rounded-[.2vw] overflow-hidden">
               <LazyImage
                 src={item.poster_url}
                 alt={item.name}
                 sizes="(max-width: 1024px) 24vw,(max-width: 1536px) 19vw,16vw"
                 quality={65}
-                className="object-cover w-full h-full rounded"
+                className="object-cover w-full h-full"
               />
               {item.sub_docquyen && (
                 <img
@@ -116,13 +116,13 @@ function FavouritePage() {
             </div>
 
             {/* Mobile thumbnail */}
-            <div className="block md:hidden relative overflow-hidden rounded">
+            <div className="block md:hidden relative overflow-hidden rounded-[.4vw]">
               <LazyImage
                 src={item.thumb_url}
                 alt={item.name}
                 sizes="(max-width: 500px) 16vw, (max-width: 800px) 23vw, (max-width: 1024px) 18vw"
                 quality={65}
-                className="w-full object-cover aspect-[2/3] rounded"
+                className="w-full object-cover aspect-[2/3]"
               />
               {item.sub_docquyen && (
                 <img
@@ -144,6 +144,30 @@ function FavouritePage() {
                 />
               </div>
             )}
+            {new Date().getTime() - new Date(item.modified?.time).getTime() <
+              1000 * 60 * 60 * 24 * 3 && (
+              <>
+                {item.episode_current.toLowerCase().includes("hoàn tất") ||
+                item.episode_current.toLowerCase().includes("full") ? (
+                  <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-white w-auto bg-[#e50914] py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                    Mới thêm
+                  </span>
+                ) : item.episode_current.toLowerCase().includes("trailer") ? (
+                  <span className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 text-black w-auto bg-white py-[2px] px-2 rounded-t text-xs font-semibold text-center shadow-black/80 shadow">
+                    Sắp ra mắt
+                  </span>
+                ) : (
+                  <div className="text-nowrap absolute bottom-0 left-1/2 -translate-x-1/2 flex xl:flex-row flex-col rounded-t overflow-hidden w-auto">
+                    <span className="text-nowrap text-white bg-[#e50914] xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                      Tập mới
+                    </span>
+                    <span className="text-nowrap text-black bg-white xl:py-[2px] py-[1px] px-2 text-xs font-semibold text-center shadow-black/80 shadow">
+                      Xem ngay
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         ))}
 
@@ -155,7 +179,7 @@ function FavouritePage() {
                 key={index + 198}
                 className="w-full aspect-[2/3] md:aspect-video cursor-pointer relative animate-pulse"
               >
-                <div className="w-full h-full bg-gray-600 rounded-md"></div>
+                <div className="w-full h-full bg-gray-600 rounded-[.4vw] md:rounded-[.2vw]"></div>
               </div>
             ))}
           </>

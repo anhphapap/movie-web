@@ -31,6 +31,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
     try {
       await logOut();
       navigate("/trang-chu");
+      setShowMenu(false);
     } catch (error) {
       alert(error);
     }
@@ -69,7 +70,13 @@ const Header = ({ filter = false, type_slug = "" }) => {
       className={`fixed flex flex-col top-0 left-0 right-0 z-50 transition-all duration-500 ease-linear text-sm lg:text-base`}
     >
       <div
-        className={`flex items-center justify-start py-2 px-[3%] transition-all duration-500 ease-linear text-white sm:py-3 md:py-4 ${
+        className={`block md:hidden h-screen w-full absolute top-0 left-0 bg-black/50 z-0 ${
+          showMenu ? "block" : "hidden"
+        }`}
+        onClick={() => setShowMenu(false)}
+      ></div>
+      <div
+        className={`flex items-center justify-start z-10 py-2 px-[3%] transition-all duration-500 ease-linear text-white sm:py-3 md:py-4 ${
           filter
             ? "bg-gradient-to-b from-[#080808] to-[#141414]"
             : isScrolled || showMenu || playing
@@ -79,11 +86,11 @@ const Header = ({ filter = false, type_slug = "" }) => {
         id="header"
       >
         <div className="flex flex-row md:flex items-center justify-between w-full">
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-1">
             <div className="flex items-center md:hidden">
               <button
                 type="button"
-                className="relative inline-flex items-center justify-center text-white p-2 rounded hover:bg-white/10"
+                className="relative inline-flex items-center aspect-square w-8 h-8 justify-center text-white p-2 rounded hover:bg-white/10"
                 onClick={() => setShowMenu(!showMenu)}
               >
                 {showMenu ? (
@@ -93,7 +100,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 )}
               </button>
             </div>
-            <div className="md:hidden sm:h-8 h-6 aspect-square flex justify-center">
+            <div className="md:hidden h-8 aspect-square flex justify-center">
               <div
                 className="cursor-pointer"
                 onClick={() => navigate("/trang-chu")}
@@ -211,7 +218,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         </div>
       </div>
       <div
-        className={`bg-[#141414] md:hidden border-y-[1px] border-white ${
+        className={`bg-[#141414] md:hidden border-y-[1px] border-white z-10 ${
           showMenu ? "block" : "hidden"
         }`}
         id="mobile-menu"
@@ -252,7 +259,10 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 </div>
               </div>
               <div
-                onClick={() => navigate("/tai-khoan")}
+                onClick={() => {
+                  navigate("/tai-khoan");
+                  setShowMenu(false);
+                }}
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/tai-khoan" === pathname && onTab === 4
                     ? "bg-white/15 text-white"
@@ -263,7 +273,10 @@ const Header = ({ filter = false, type_slug = "" }) => {
                 <span>Tài khoản</span>
               </div>
               <div
-                onClick={() => navigate("/yeu-thich")}
+                onClick={() => {
+                  navigate("/yeu-thich");
+                  setShowMenu(false);
+                }}
                 className={`text-white/70 hover:bg-white/10 hover:text-white rounded-md px-3 py-2 font-medium flex items-center space-x-2 cursor-pointer ${
                   "/yeu-thich" === pathname && onTab === 5
                     ? "bg-white/15 text-white"

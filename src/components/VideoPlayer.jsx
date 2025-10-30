@@ -84,6 +84,7 @@ const VideoPlayer = ({
   const [isMobile, setIsMobile] = useState(false);
   const [brightness, setBrightness] = useState(100); // 0-100%
   const [showSwipeControl, setShowSwipeControl] = useState(null);
+  const [showEpisodes, setShowEpisodes] = useState(false);
   const [swipeValue, setSwipeValue] = useState(0);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [previewTime, setPreviewTime] = useState(null);
@@ -1048,7 +1049,7 @@ const VideoPlayer = ({
           className={`absolute bottom-0 w-full bg-gradient-to-t from-black/50 to-transparent p-2 lg:p-4 text-white 
             transition-all duration-500 ease-in-out
             ${
-              showControls
+              showControls || showEpisodes
                 ? "opacity-100 pointer-events-auto"
                 : "opacity-0 pointer-events-none"
             }`}
@@ -1336,14 +1337,23 @@ const VideoPlayer = ({
                 )}
               {/* Episodes */}
               {movie.episodes[svr].server_data.length > 0 && (
-                <div className="group/episodes hidden lg:block">
+                <div className="group/episodes">
                   <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isMobile) {
+                        setShowEpisodes(!showEpisodes);
+                        videoRef.current.pause();
+                      }
+                    }}
                     className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
                     aria-label="Danh sách tập"
                   >
                     <ListVideo size={34} />
                   </button>
                   <Episodes
+                    onClose={() => setShowEpisodes(false)}
+                    show={showEpisodes}
                     name={movie.name}
                     episodes={movie.episodes}
                     svr={svr}

@@ -1,8 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import LazyImage from "./LazyImage";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Check, Play } from "lucide-react";
-const Episodes = ({ episode, name, episodes, svr, poster_url, slug }) => {
+import { ArrowLeft, ArrowRight, Check, Play, X } from "lucide-react";
+const Episodes = ({
+  show,
+  onClose,
+  episode,
+  name,
+  episodes,
+  svr,
+  poster_url,
+  slug,
+}) => {
   const [showServer, setShowServer] = useState(parseInt(svr));
   const [showEpisode, setShowEpisode] = useState(parseInt(episode));
   const [showEpisodes, setShowEpisodes] = useState(
@@ -53,24 +62,31 @@ const Episodes = ({ episode, name, episodes, svr, poster_url, slug }) => {
   };
   return (
     <div
-      className="absolute -bottom-[126px] right-0 bg-[#262626] backdrop-blur h-[500px] w-[600px] text-white rounded-sm text-sm
-                  opacity-0 invisible group-hover/episodes:opacity-100 group-hover/episodes:visible 
-                  transition-all duration-200 z-[9999] -translate-y-1/2 "
+      className={`lg:absolute fixed lg:-bottom-[126px] bottom-0 right-0 bg-[#262626] backdrop-blur lg:h-[500px] h-screen lg:w-[600px] w-full text-white rounded-sm text-sm
+                  lg:opacity-0 lg:group-hover/episodes:opacity-100 lg:group-hover/episodes:visible 
+                   ${show ? "visible opacity-100" : "invisible opacity-0"}
+                  lg:transition-all lg:duration-200 z-[9999] lg:-translate-y-1/2`}
       onMouseLeave={() => {
         setHoveredEpisode(parseInt(episode));
         setTab(3);
       }}
     >
-      <div className="py-3 px-5 flex items-center gap-2">
-        {tab > 1 && (
-          <button onClick={handleBack}>
-            <ArrowLeft size={20} strokeWidth={3} />
-          </button>
-        )}
-        <span className="text-white font-semibold text-2xl text-truncate ">
-          {name}
-          {tab !== 1 && " - " + episodes[showServer].server_name.split(" #")[0]}
-        </span>
+      <div className="py-3 px-5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {tab > 1 && (
+            <button onClick={handleBack}>
+              <ArrowLeft size={20} strokeWidth={3} />
+            </button>
+          )}
+          <span className="text-white font-semibold lg:text-2xl text-lg text-truncate ">
+            {name}
+            {tab !== 1 &&
+              " - " + episodes[showServer].server_name.split(" #")[0]}
+          </span>
+        </div>
+        <button onClick={onClose} className="lg:hidden block">
+          <X size={20} strokeWidth={3} />
+        </button>
       </div>
       <div
         ref={episodesContainerRef}
@@ -111,7 +127,7 @@ const Episodes = ({ episode, name, episodes, svr, poster_url, slug }) => {
                     <div
                       className={`flex group-hover:flex p-2 gap-2 group/Episodes`}
                     >
-                      <div className="relative w-60 ml-3">
+                      <div className={`relative w-60 ml-3`}>
                         <LazyImage
                           src={poster_url}
                           alt={
@@ -123,7 +139,7 @@ const Episodes = ({ episode, name, episodes, svr, poster_url, slug }) => {
                         />
                         {hoveredEpisode !== parseInt(episode) && (
                           <div
-                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100 group-hover/Episodes:scale-125 transition-all ease-linear duration-100 delay-100"
+                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100 group-hover/Episodes:scale-125 transition-all ease-linear duration-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(

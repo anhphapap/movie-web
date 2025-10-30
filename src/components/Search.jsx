@@ -96,14 +96,14 @@ const Search = () => {
 
       {isSearchOpen && (
         <div
-          className={`border-[1px] border-white px-3 bg-black flex items-center justify-start space-x-2 fixed top-[10px] md:top-auto left-1 md:left-auto right-1 z-40 py-[6px] md:flex-grow md:absolute md:w-64 md:!right-3 md:!py-1`}
+          className={`border-[1px] border-white px-3 bg-black flex items-center justify-start fixed top-[10px] md:top-auto left-1 md:left-auto right-1 z-40 py-[6px] md:flex-grow md:absolute md:w-64 md:!right-3 md:!py-1`}
         >
-          <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
+          <FontAwesomeIcon icon="fa-solid fa-magnifying-glass " color="white" />
           <input
             ref={inputRef}
             value={searchTerm}
             type="text"
-            className="bg-black text-white placeholder:text-gray-400 outline-none flex-grow"
+            className="bg-black text-white placeholder:text-gray-400 outline-none flex-grow ml-2"
             placeholder="Tên phim..."
             onChange={handleChange}
           ></input>
