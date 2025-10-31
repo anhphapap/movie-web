@@ -8,7 +8,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "has": [
         {
           "type": "header",
@@ -16,7 +16,7 @@
           "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
         }
       ],
-      "destination": "https://service.prerender.io/https://needflex.site/$1"
+      "destination": "https://service.prerender.io/https://needflex.site/:path*"
     },
     {
       "source": "/((?!api).*)",
@@ -40,28 +40,49 @@
           "key": "Cache-Control",
           "value": "no-store, no-cache, must-revalidate"
         },
-        { "key": "Pragma", "value": "no-cache" },
-        { "key": "Expires", "value": "0" }
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
       ]
     },
     {
       "source": "/assets/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=31536000,immutable"
+        }
       ]
     },
     {
       "source": "/(.*)\\.(jpg|jpeg|png|webp|avif|ico|js|css|woff2)",
       "headers": [
-        { "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=31536000,immutable"
+        }
       ]
     },
     {
       "source": "/(.*)\\.xml",
       "headers": [
-        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=0" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
       ]
     }
   ]
