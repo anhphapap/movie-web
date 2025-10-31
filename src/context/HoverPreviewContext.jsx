@@ -32,7 +32,7 @@ export const HoverPreviewProvider = ({ children }) => {
     }, enterDelay);
   }, []);
 
-  const onLeave = useCallback((leaveDelay = 100) => {
+  const onLeave = useCallback((leaveDelay = 50) => {
     clear();
     timer.current = setTimeout(() => {
       setHovered(null);

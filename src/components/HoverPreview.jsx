@@ -72,10 +72,13 @@ export default function HoverPreview() {
     hovered;
 
   const content = (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="popLayout">
       <motion.div
-        key={item.slug + "hoverpreview" || item._id + "hoverpreview"}
-        className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden lg:block pointer-events-auto"
+        key={
+          item.slug + "hoverpreview" + index ||
+          item._id + "hoverpreview" + index
+        }
+        className="absolute z-[10000] shadow-xl shadow-black/80 rounded hidden md:block pointer-events-auto"
         style={{
           top: rect.top - rect.height / (typeList === "top" ? 2.75 : 1.25),
           left:
@@ -99,18 +102,26 @@ export default function HoverPreview() {
 
           if (!insideThumb) onLeave();
         }}
-        initial={{ opacity: 0, scale: 0.95, y: 15 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
+        initial={{
+          opacity: 0,
+          scale: 0.7,
+          y: rect.height / (typeList === "top" ? 2.75 : 1.25),
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          y: 0,
+        }}
         exit={{
           opacity: 0,
-          scale: 0.9,
-          y: 15,
-          transition: { duration: 0.15, ease: "easeInOut" },
+          scale: 0.7,
+          y: rect.height / (typeList === "top" ? 2.75 : 1.25),
+          transition: { duration: 0.3, ease: "easeInOut" },
         }}
         transition={{
-          opacity: { duration: 0.25, ease: "easeOut" },
-          scale: { duration: 0.25, ease: "easeOut" },
-          y: { duration: 0.25, ease: "easeOut" },
+          opacity: { duration: 0.3, ease: "easeOut" },
+          scale: { duration: 0.3, ease: "easeOut" },
+          y: { duration: 0.3, ease: "easeOut" },
         }}
         onClick={() => handleOpenModal(item.slug, item.tmdb.id, item.tmdb.type)}
       >

@@ -29,13 +29,13 @@ const customStyles = {
   },
 };
 
-function ListModal({ isOpen, onClose, nameList, params }) {
+function ListModal({ isOpen, onClose, nameList, params, sortField = "_id" }) {
   const { openModal } = useMovieModal();
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [sortField, setSortField] = useState("_id");
+  const [currentSortField, setCurrentSortField] = useState(sortField);
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
   const { pushSEO } = useSEOManager();
@@ -56,7 +56,7 @@ function ListModal({ isOpen, onClose, nameList, params }) {
         const currentList = await axios.get(
           `${
             import.meta.env.VITE_API_LIST
-          }${params}&page=${page}&sort_field=${sortField}`
+          }${params}&page=${page}&sort_field=${currentSortField}`
         );
         setMovies((prev) => [...prev, ...currentList.data.data.items]);
         if (page == 1)
@@ -71,13 +71,13 @@ function ListModal({ isOpen, onClose, nameList, params }) {
       }
     };
     fetchAPI();
-  }, [params, nameList, page, isOpen, sortField]);
+  }, [params, nameList, page, isOpen, currentSortField, sortField]);
 
   useEffect(() => {
     setMovies([]);
     setPage(1);
     setTotalPage(1);
-  }, [isOpen, sortField]);
+  }, [isOpen, currentSortField]);
 
   const getColumns = () => {
     if (window.innerWidth >= 1280) return 5;
@@ -131,10 +131,10 @@ function ListModal({ isOpen, onClose, nameList, params }) {
         <div className="flex self-end w-fit bg-black mb-5 items-center p-1 border-white border-[1px]">
           <LayoutGrid className="w-4 h-4 mx-2" />
           <select
-            id="sortField"
+            id="currentSortField"
             className="pr-4 py-[1px] text-xs font-semibold bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear self-end outline-none"
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value)}
+            value={currentSortField}
+            onChange={(e) => setCurrentSortField(e.target.value)}
           >
             {listSortField.map((cate, index) => {
               return (
@@ -283,6 +283,7 @@ ListModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   nameList: PropTypes.string.isRequired,
   params: PropTypes.string.isRequired,
+  sortField: PropTypes.string.isRequired,
 };
 
 export default ListModal;

@@ -78,6 +78,9 @@ const FooterWrapper = () => {
 
 function App() {
   const [ready, setReady] = useState(false);
+  const [firstLaunch, setFirstLaunch] = useState(
+    !sessionStorage.getItem("hasVisited")
+  );
 
   useEffect(() => {
     const preloadApp = async () => {
@@ -91,6 +94,7 @@ function App() {
         console.warn("Preload error:", err);
       } finally {
         setReady(true);
+        sessionStorage.setItem("hasVisited", "true");
       }
     };
     preloadApp();
@@ -107,10 +111,9 @@ function App() {
 
   return (
     <>
-      <SplashScreen onFinish={() => setReady(true)} />
-
+      {firstLaunch && <SplashScreen onFinish={() => setReady(true)} />}
       <div
-        className={`transition-opacity duration-700 ${
+        className={`transition-opacity duration-100 ${
           ready ? "opacity-100" : "opacity-0"
         }`}
       >

@@ -14,7 +14,7 @@ export default function Recommend({
   totalPage = 3,
   slug = "",
 }) {
-  const [movies, setMovies] = useState([]);
+  const [movies, setMovies] = useState(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -77,12 +77,13 @@ export default function Recommend({
   useEffect(() => {
     if (inView && hasMore) fetchMovies();
   }, [page]);
-  return (
-    <div className="text-white pt-4 border-t-[1px] border-white/20" ref={ref}>
-      <h2 className="text-base lg:text-xl font-bold">Nội dung tương tự</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
-        {movies?.length > 0 &&
-          movies
+
+  return !loading ? (
+    movies && movies.length > 0 && (
+      <div className="text-white pt-4 border-t-[1px] border-white/20" ref={ref}>
+        <h2 className="text-base lg:text-xl font-bold">Nội dung tương tự</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+          {movies
             .filter((m) => slug && m.slug !== slug)
             .map((movie) => (
               <div
@@ -185,24 +186,36 @@ export default function Recommend({
                 </h2>
               </div>
             ))}
-        {loading &&
-          Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="animate-pulse">
-              <div className="w-full h-full bg-gray-700 rounded aspect-square"></div>
-            </div>
-          ))}
-      </div>
-      {hasMore && (
-        <div className="relative border-b-[1.6px] border-white/20 w-full">
-          <button
-            onClick={() => setPage(page + 1)}
-            className="absolute group/tooltip bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414]/50 border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
-          >
-            <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
-            <Tooltip content={"Xem thêm"} />
-          </button>
+          {loading &&
+            Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="animate-pulse">
+                <div className="w-full h-full bg-gray-700 rounded aspect-square"></div>
+              </div>
+            ))}
         </div>
-      )}
+        {hasMore && (
+          <div className="relative border-b-[1.6px] border-white/20 w-full">
+            <button
+              onClick={() => setPage(page + 1)}
+              className="absolute group/tooltip bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414]/50 border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
+            >
+              <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
+              <Tooltip content={"Xem thêm"} />
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  ) : (
+    <div className="text-white pt-4 border-t-[1px] border-white/20" ref={ref}>
+      <h2 className="text-base lg:text-xl font-bold">Nội dung tương tự</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="animate-pulse">
+            <div className="w-full h-full bg-gray-700 rounded aspect-square"></div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

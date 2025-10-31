@@ -8,6 +8,7 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [params, setParams] = useState("");
   const [nameList, setNameList] = useState("");
+  const [sortField, setSortField] = useState("_id");
   const navigate = useNavigate();
   const location = useLocation();
   const { pushSEO, popSEO } = useSEOManager();
@@ -16,15 +17,18 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
     const params = new URLSearchParams(location.search);
     const param = params.get("list");
     const listName = params.get("listName");
+    const sort = params.get("sortField");
+    setSortField(sort || "_id");
     setNameList(listName);
     setParams(param);
     setIsOpen(!!param && !!listName);
   }, [location.search]);
 
-  const openList = ({ nameList, params }) => {
+  const openList = ({ nameList, params, sortField = "_id" }) => {
     const p = new URLSearchParams(location.search);
     p.set("list", params);
     p.set("listName", nameList);
+    p.set("sortField", sortField);
     navigate(`${location.pathname}?${p.toString()}`, { replace: false });
     const scrollBarWidth =
       window.innerWidth - document.documentElement.clientWidth;
@@ -32,6 +36,7 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
     document.body.style.paddingRight = `${scrollBarWidth}px`;
 
     setNameList(nameList);
+    setSortField(sortField);
     setIsOpen(true);
   };
 
@@ -39,6 +44,7 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
     const params = new URLSearchParams(location.search);
     params.delete("list");
     params.delete("listName");
+    params.delete("sortField");
     navigate(`${location.pathname}?${params.toString()}`, { replace: false });
     setIsOpen(false);
     document.body.style.overflow = "auto";
@@ -86,6 +92,7 @@ export const ListModalProvider = ({ children, allowedPaths = [] }) => {
           onClose={closeList}
           nameList={nameList}
           params={params}
+          sortField={sortField}
         />
       )}
     </ListModalContext.Provider>

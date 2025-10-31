@@ -272,13 +272,13 @@ export default function Carousel({
             500: { slidesPerView: 3, slidesPerGroup: 3 },
             0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
-          speed={700}
+          speed={500}
           className="w-full"
           ref={swiperRef}
         >
           {movies.map((item, index) => (
             <SwiperSlide
-              key={`${type_slug}-${item._id}-${index}`}
+              key={`${type_slug}-${item._id}-${index}-${nameList}`}
               data-index={index}
               className="!overflow-visible px-[.4vw] md:px-[.2vw]"
             >
@@ -392,6 +392,7 @@ export default function Carousel({
               openList({
                 params: `${type_slug}?category=${category}&country=${country}&year=${year}`,
                 nameList,
+                sortField: sort_field,
               })
             }
           >
@@ -464,14 +465,14 @@ export default function Carousel({
             500: { slidesPerView: 4, slidesPerGroup: 4 },
             0: { slidesPerView: 3, slidesPerGroup: 3 },
           }}
-          speed={700}
+          speed={500}
           className="w-full"
           ref={swiperRef}
         >
           <>
             {movies.map((item, index) => (
               <SwiperSlide
-                key={`${type_slug}-${item._id}-${index}`}
+                key={`${type_slug}-${item._id}-${index}-${nameList}`}
                 data-index={index}
                 className="!overflow-visible px-[.4vw] md:px-[.2vw]"
               >
@@ -692,7 +693,7 @@ export default function Carousel({
           500: { slidesPerView: 4, slidesPerGroup: 4 },
           0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
-        speed={700}
+        speed={500}
         className="w-full"
         ref={swiperRef}
       >

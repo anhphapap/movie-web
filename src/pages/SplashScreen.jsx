@@ -4,44 +4,39 @@ import { useEffect, useState } from "react";
 
 export default function SplashScreen({ onFinish }) {
   const [progress, setProgress] = useState(0);
-  const [done, setDone] = useState(false); // load xong
-  const [shine, setShine] = useState(false); // bắt đầu ánh sáng
-  const [fade, setFade] = useState(false); // bắt đầu fade-out
-  const [visible, setVisible] = useState(true); // kiểm soát unmount
+  const [shine, setShine] = useState(false);
+  const [fade, setFade] = useState(false);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // Thanh load chạy chậm dần
-    const timer = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 99) {
-          clearInterval(timer);
-          setTimeout(() => setDone(true), 300);
-          return 100;
-        }
-        return p + (100 - p) * 0.08;
-      });
-    }, 70);
-    return () => clearInterval(timer);
-  }, []);
+    const duration = 2800;
+    const start = performance.now();
+    let frameId;
 
-  useEffect(() => {
-    if (done) {
-      setShine(true);
-      // Sau khi ánh sáng chạy xong (~1.4s) → bắt đầu fade
-      const t1 = setTimeout(() => setFade(true), 1000);
-      // Sau khi fade xong (~1.2s) → unmount splash + báo App
-      const t2 = setTimeout(() => {
-        setVisible(false);
-        onFinish?.();
-      }, 1000 + 500);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
-  }, [done]);
+    const animate = (now) => {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / duration, 1);
+      const eased = Math.sin((t * Math.PI) / 2);
+      setProgress(eased * 100);
 
-  if (!visible) return null; // ✅ unmount thật sự khỏi DOM
+      if (t < 1) frameId = requestAnimationFrame(animate);
+      else {
+        setTimeout(() => setShine(true), 150);
+        setTimeout(() => setFade(true), 1100);
+        setTimeout(() => {
+          setVisible(false);
+          onFinish?.();
+        }, 1800);
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+
+    // cleanup nếu effect bị rerun hoặc unmount
+    return () => cancelAnimationFrame(frameId);
+  }, []); // ⚠️ chỉ chạy 1 lần
+
+  if (!visible) return null;
 
   return (
     <AnimatePresence>
@@ -52,14 +47,14 @@ export default function SplashScreen({ onFinish }) {
         }`}
         initial={{ opacity: 1 }}
         animate={{ opacity: fade ? 0 : 1 }}
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
       >
         {/* LOGO */}
         <motion.div
           className="relative inline-block w-fit overflow-hidden"
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
         >
           <img
             src={logo_full}
@@ -68,7 +63,7 @@ export default function SplashScreen({ onFinish }) {
             draggable={false}
           />
 
-          {/* ÁNH SÁNG QUÉT — chỉ chạy sau khi load xong */}
+          {/* ÁNH SÁNG QUÉT */}
           {shine && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/70 to-transparent blur-[6px] skew-x-[20deg]"
@@ -87,12 +82,12 @@ export default function SplashScreen({ onFinish }) {
           className="mt-8 w-40 h-1 bg-gray-700 rounded-full overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
+          transition={{ delay: 0.5 }}
         >
           <motion.div
             className="h-full bg-red-600 rounded-full origin-left"
             style={{ width: `${progress}%` }}
-            transition={{ duration: 0.1 }}
+            transition={{ duration: 0.05 }}
           />
         </motion.div>
       </motion.div>

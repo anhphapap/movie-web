@@ -185,6 +185,7 @@ export const homeContent = {
       nameList: "Mới trên Needflex",
       typeList: "list",
       type_slug: "phim-moi-cap-nhat",
+      sort_field: "modified.time",
       category: "",
       country: "",
     },
