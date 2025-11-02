@@ -2,13 +2,6 @@
   "redirects": [
     {
       "source": "/",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i)(?!.*(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)).*"
-        }
-      ],
       "destination": "/trang-chu",
       "permanent": true
     }
@@ -19,38 +12,11 @@
       "destination": "/$1"
     },
     {
-      "source": "/:path((?!api|_next|assets|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|svg|xml|txt)$).*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
-        }
-      ],
-      "destination": "https://service.prerender.io/:path"
-    },
-    {
       "source": "/((?!api).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
-    {
-      "source": "/:path((?!api|_next|assets|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|svg|xml|txt)$).*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
-        }
-      ],
-      "headers": [
-        {
-          "key": "X-Prerender-Token",
-          "value": "vsQfraBszpUwy7YdgQqr"
-        }
-      ]
-    },
     {
       "source": "/(.*)\\.xml",
       "headers": [
@@ -65,6 +31,24 @@
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=31536000,immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|avif|ico|js|css|woff2|ttf|svg)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public,max-age=31536000,immutable"
         }
       ]
     }
