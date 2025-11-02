@@ -8,8 +8,12 @@
   ],
   "rewrites": [
     {
-      "source": "/(sitemap\\.xml|robots\\.txt)",
-      "destination": "/$1"
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
     },
     {
       "source": "/:path((?!api|_next|assets|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|svg|xml|txt)$).*)",
@@ -23,13 +27,13 @@
       "destination": "https://needflex-prerender.onrender.com/:path"
     },
     {
-      "source": "/((?!api|.*\\.xml|.*\\.txt).*)",
+      "source": "/((?!api|_next|assets|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|svg|xml|txt)$).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/(.*)\\.xml",
+      "source": "/sitemap.xml",
       "headers": [
         {
           "key": "Content-Type",
@@ -42,6 +46,19 @@
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0"
         }
       ]
     },
