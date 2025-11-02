@@ -8,7 +8,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": "(?i)((?!.*(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)).*)"
+          "value": "(?i)(?!.*(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)).*"
         }
       ]
     }
@@ -26,7 +26,7 @@
       "destination": "https://service.prerender.io/trang-chu"
     },
     {
-      "source": "/:path(((?!api/|_next/|assets/|sitemap|robots|.*\\.(js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|eot|svg|xml|txt)$).*))",
+      "source": "/:path((?!api/|_next/|assets/|sitemap|robots|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|eot|svg|xml|txt)$).*)",
       "has": [
         {
           "type": "header",
