@@ -8,7 +8,7 @@
   ],
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/((?!api|sitemap\\.xml|robots\\.txt|.*\\.xml|.*\\.jpg|.*\\.png|.*\\.webp|.*\\.js|.*\\.css).*)",
       "has": [
         {
           "type": "header",
@@ -16,7 +16,7 @@
           "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
         }
       ],
-      "destination": "https://service.prerender.io/https://needflex.site/:path*"
+      "destination": "https://service.prerender.io/:path*"
     },
     {
       "source": "/((?!api).*)",
