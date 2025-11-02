@@ -12,6 +12,17 @@
       "destination": "/$1"
     },
     {
+      "source": "/:path((?!api|_next|assets|.*\\.(?:js|css|jpg|jpeg|png|webp|avif|ico|woff|woff2|ttf|svg|xml|txt)$).*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i)(googlebot|bingbot|yandex|duckduckbot|baiduspider|facebookexternalhit|twitterbot|linkedinbot)"
+        }
+      ],
+      "destination": "https://needflex-prerender.onrender.com/:path"
+    },
+    {
       "source": "/((?!api).*)",
       "destination": "/index.html"
     }
