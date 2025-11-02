@@ -23,7 +23,7 @@
       "destination": "https://needflex-prerender.onrender.com/:path"
     },
     {
-      "source": "/((?!api).*)",
+      "source": "/((?!api|.*\\.xml|.*\\.txt).*)",
       "destination": "/index.html"
     }
   ],
