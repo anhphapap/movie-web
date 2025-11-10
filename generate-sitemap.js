@@ -31,9 +31,7 @@ async function fetchMovies(limitPages = 10) {
       if (!movies.length) break;
       movies.forEach((m) =>
         urls.push({
-          loc: `${BASE_URL}/trang-chu?movie=${m.slug}&tmdb_id=${
-            m.tmdb.id || "null"
-          }&tmdb_type=${m.tmdb.type || "null"}`,
+          loc: `${BASE_URL}/phim/${m.slug}`,
           lastmod: new Date().toISOString(),
         })
       );

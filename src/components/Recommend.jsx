@@ -6,6 +6,7 @@ import axios from "axios";
 import { useFavorites } from "../context/FavouritesProvider";
 import { useNavigate } from "react-router-dom";
 import { useInView } from "react-intersection-observer";
+import { Play } from "lucide-react";
 export default function Recommend({
   type = "phim-moi-cap-nhat",
   sort_field = "_id",
@@ -49,7 +50,7 @@ export default function Recommend({
       setLoading(true);
       const api = `${
         import.meta.env.VITE_API_LIST
-      }${type}?sort_field=${sort_field}&category=${category}&country=${country}&page=${page}&limit=6`;
+      }${type}?sort_field=${sort_field}&category=${category}&country=${country}&page=${page}&limit=10`;
       const res = await axios.get(api);
       const items = res.data.data.items || [];
       setMovies((prev) => [...prev, ...items]);
@@ -83,22 +84,20 @@ export default function Recommend({
     <>
       <div ref={ref}></div>
       {visibleMovies.length > 0 && (
-        <div className="text-white pt-4 border-t-[1px] border-white/20">
-          <h2 className="text-base lg:text-xl font-bold">Nội dung tương tự</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+        <div className="text-white relative pb-4">
+          <h2 className="text-xl lg:text-2xl font-bold">Nội dung tương tự</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 mt-5">
             {visibleMovies.map((movie) => (
               <div
                 key={movie._id + "recommend"}
                 className="flex flex-col bg-[#2f2f2f] rounded overflow-hidden group cursor-pointer"
-                onClick={() =>
-                  navigate(`/xem-phim/${movie.slug}?svr=${0}&ep=${0}`)
-                }
+                onClick={() => navigate(`/phim/${movie.slug}`)}
               >
-                <div className="relative w-full aspect-video overflow-hidden">
+                <div className="relative w-full aspect-video overflow-hidden group/nextEpisode">
                   <LazyImage
                     src={movie.poster_url}
                     alt={movie.name}
-                    sizes="(max-width: 640px) 35vw,(max-width: 1280px) 20vw, (max-width: 1540px) 18vw,14vw"
+                    sizes="(max-width: 640px) 45vw,(max-width: 1024px) 29vw, (max-width: 1536px) 22vw,18vw"
                     quality={65}
                   />
                   <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b to-transparent from-[#141414]/50"></div>
@@ -107,14 +106,18 @@ export default function Recommend({
                       ? "Hoàn tất"
                       : movie.episode_current}
                   </span>
-                  <div className="absolute bottom-0 left-0 w-full h-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all ease-in duration-100">
-                    <div className="h-12 w-12 flex items-center justify-center bg-black/40 rounded-full border-[1px] border-white">
-                      <FontAwesomeIcon
-                        icon="fa-solid fa-play"
-                        size="2x"
-                        className="text-white translate-x-[2px]"
+                  <div className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-0 group-hover/nextEpisode:opacity-100 transition-all ease-linear duration-100 delay-100">
+                    <button
+                      className="group relative bg-white/10 backdrop-blur-md border-4 border-white/80 rounded-full p-2 sm:p-3 transition-all duration-300 hover:scale-110 hover:bg-white/20 hover:border-white shadow-2xl active:scale-95 hover:shadow-white/50"
+                      aria-label="Phát video"
+                    >
+                      <Play
+                        size={24}
+                        className="text-white fill-white drop-shadow-2xl"
+                        strokeWidth={2}
                       />
-                    </div>
+                      <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
+                    </button>
                   </div>
                 </div>
                 <div className="flex space-x-2 items-center justify-between text-white/80 text-sm p-2 sm:p-4">
@@ -194,16 +197,18 @@ export default function Recommend({
                 </div>
               ))}
           </div>
-          {hasMore && (
-            <div className="relative border-b-[1.6px] border-white/20 w-full">
+          {hasMore ? (
+            <div className="absolute bottom-4 left-0 border-b-[1.6px] border-white/20 w-full bg-gradient-to-t from-[#181818] to-transparent h-12">
               <button
                 onClick={() => setPage(page + 1)}
-                className="absolute group/tooltip bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#141414]/50 border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
+                className="absolute group/tooltip bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 aspect-square px-[10px] py-[1px] rounded-full bg-[#181818]/50 border-white/60 border-[1.4px] text-white hover:border-white transition-all ease-linear"
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="xs" />
                 <Tooltip content={"Xem thêm"} />
               </button>
             </div>
+          ) : (
+            <div className="h-6 border-b-[1.6px] border-white/20 w-full "></div>
           )}
         </div>
       )}

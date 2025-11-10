@@ -2,14 +2,6 @@ import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { UserAuth } from "../context/AuthContext";
-import { db } from "../firebase";
-import {
-  doc,
-  updateDoc,
-  arrayUnion,
-  getDoc,
-  arrayRemove,
-} from "firebase/firestore";
 import { toast } from "react-toastify";
 import Tooltip from "./Tooltip";
 import { formatSecondsToMinutes, getYoutubeId } from "../utils/data";
@@ -19,9 +11,8 @@ import Top10Icon from "../assets/images/Top10Icon.svg";
 import { useTop } from "../context/TopContext";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Captions, Server } from "lucide-react";
+import { Captions, ChevronDown, Info, Server } from "lucide-react";
 import { useFavorites } from "../context/FavouritesProvider";
-import Recommend from "./Recommend";
 import { useWatching } from "../context/WatchingContext";
 import { useSEOManager } from "../context/SEOManagerContext";
 import logo_n from "../assets/images/N_logo.png";
@@ -31,7 +22,7 @@ const customStyles = {
     left: "50%",
     bottom: "auto",
     transform: "translate(-50%)",
-    backgroundColor: "#141414",
+    backgroundColor: "#181818",
     boxShadow: "2px solid black",
     color: "white",
     padding: 0,
@@ -108,6 +99,7 @@ export default function MovieModal({
             if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
               player.pauseVideo();
               setIsVideoPaused(true);
+              setFadeOutImage(false);
             }
           } else {
             // Tab visible - tiếp tục phát video nếu đang pause
@@ -116,6 +108,7 @@ export default function MovieModal({
               console.log("Modal: Tiếp tục phát video sau khi quay lại tab");
               player.playVideo();
               setIsVideoPaused(false);
+              setFadeOutImage(true);
             }
           }
         } catch (error) {
@@ -145,6 +138,7 @@ export default function MovieModal({
             console.log("Modal: Tiếp tục phát video sau khi cửa sổ có focus");
             player.playVideo();
             setIsVideoPaused(false);
+            setFadeOutImage(true);
           }
         } catch (error) {
           console.warn("Modal: Error in window focus:", error);
@@ -163,6 +157,7 @@ export default function MovieModal({
             console.log("Modal: Dừng video do mất focus cửa sổ");
             player.pauseVideo();
             setIsVideoPaused(true);
+            setFadeOutImage(false);
           }
         } catch (error) {
           console.warn("Modal: Error in window blur:", error);
@@ -324,10 +319,10 @@ export default function MovieModal({
         onRequestClose={onClose}
         style={customStyles}
         ariaHideApp={false}
-        className="relative w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none "
+        className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none aspect-square lg:top-[5%] min-h-screen lg:min-h-0 2xl:!-translate-y-1/2 2xl:!top-[50%] 2xl:!-translate-x-1/2"
       >
         <button
-          className="aspect-square w-7 rounded-full bg-[#141414] absolute right-3 top-3 z-10 flex items-center justify-center"
+          className="aspect-square w-7 rounded-full bg-[#181818] absolute right-3 top-3 z-10 flex items-center justify-center"
           onClick={onClose}
         >
           <FontAwesomeIcon icon="fa-solid fa-xmark" />
@@ -349,7 +344,7 @@ export default function MovieModal({
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] min-h-screen lg:min-h-0"
+      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none lg:top-[5%] min-h-screen lg:min-h-0 2xl:!-translate-y-1/2 2xl:!top-[50%] 2xl:!-translate-x-1/2"
     >
       <div className="flex flex-col w-full lg:rounded-lg">
         <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
@@ -424,16 +419,22 @@ export default function MovieModal({
               />
             </div>
           )}
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-[#141414] to-transparent z-10" />
+          <div className="absolute top-1/2 left-0 bottom-0 right-0 bg-gradient-to-t from-[#181818] to-transparent z-10" />
           <button
-            className="bg-[#141414] absolute top-[3%] right-[5%] md:right-4  md:top-4 h-7 sm:h-10 aspect-square rounded-full flex items-center justify-center z-20"
+            className="bg-[#181818] absolute top-[3%] right-[5%] md:right-4  md:top-4 h-7 sm:h-10 aspect-square rounded-full flex items-center justify-center z-20 shadow-md"
             onClick={onClose}
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
-          <div className="flex flex-col space-x-2 space-y-2 lg:space-y-3 justify-between absolute left-[5%] right-[5%] bottom-[5%] z-20">
-            <div className="flex flex-col justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-2/3 sm:w-1/2 sm:px-0">
-              <div className="sm:flex hidden items-center space-x-1 justify-start">
+          <div className="flex flex-row-reverse items-end justify-between absolute left-[5%] right-[5%] bottom-[5%] top-[30%] z-20 lg:gap-10">
+            <div
+              className={`flex flex-col justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-1/2 sm:w-2/3 sm:px-0 ease-linear duration-[1000ms] ${
+                fadeOutImage
+                  ? "delay-[3000ms] scale-75 translate-x-[12.5%] translate-y-[12.5%]"
+                  : "delay-0 scale-100 translate-x-0 translate-y-0"
+              }`}
+            >
+              <div className="flex items-center space-x-1 justify-end sm:scale-100 scale-75 translate-x-[12.5%] sm:translate-x-0 w-full">
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
                   src={logo_n}
@@ -447,20 +448,10 @@ export default function MovieModal({
                     : "PHIM"}
                 </span>
               </div>
-              <div
-                className={`sm:w-2/3 w-1/2 lg:w-full sm:h-auto max-h-[30%] sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] ${
-                  fadeOutImage
-                    ? "delay-[3000ms] scale-75 -translate-x-[12.5%]"
-                    : "delay-0 scale-100 translate-x-0"
-                }`}
-              >
+              <div className={`w-2/3 transition-all self-end `}>
                 {modal?.tmdb_image?.logo && (
                   <LazyImage
-                    className={`object-cover sm:!h-full sm:!w-auto self-center ${
-                      modal?.tmdb_image?.aspect_ratio <= 2
-                        ? "!h-full !w-auto"
-                        : "!w-full !h-auto translate-x-0"
-                    }`}
+                    aspect="contain"
                     src={"https://image.tmdb.org/t/p/" + modal.tmdb_image.logo}
                     alt={modal.item.name}
                     sizes="(max-width: 640px) 30vw, (max-width: 1400px) 40vw, 50vw"
@@ -468,6 +459,8 @@ export default function MovieModal({
                   />
                 )}
               </div>
+            </div>
+            <div className="flex flex-col gap-2 justify-end min-w-[50%] sm:min-w-[35%] h-fit">
               {watchingMovie !== null && (
                 <div className="flex flex-col gap-1 w-full">
                   <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
@@ -487,10 +480,8 @@ export default function MovieModal({
                   </div>
                 </div>
               )}
-            </div>
-            <div className="flex space-x-2 justify-between w-full !ml-0">
-              <div className="flex space-x-2">
-                <div className="relative rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear">
+              <div className="flex sm:space-x-2 space-x-1">
+                <div className="w-full rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear cursor-pointer">
                   {(modal.item.episodes[0].server_data[0].link_embed != "" &&
                     (watchingMovie === null ? (
                       <div
@@ -499,9 +490,10 @@ export default function MovieModal({
                             `/xem-phim/${modal.item.slug}?svr=${0}&ep=${0}`
                           )
                         }
+                        className="cursor-pointer w-full h-full flex items-center justify-center"
                         key={modal.item._id + 0}
                       >
-                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
                           <FontAwesomeIcon icon="fa-solid fa-play" />
                           <span>Phát</span>
                         </button>
@@ -510,15 +502,16 @@ export default function MovieModal({
                       <div
                         onClick={() => handlePlayMovie(watchingMovie)}
                         key={modal.item._id + 0}
+                        className="cursor-pointer w-full h-full flex items-center justify-center"
                       >
-                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
+                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
                           <FontAwesomeIcon icon="fa-solid fa-play" />
-                          <span className="text-nowrap">Tiếp tục xem</span>
+                          <span className="text-nowrap">Xem tiếp</span>
                         </button>
                       </div>
                     ))) || (
                     <button
-                      className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2"
+                      className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2 w-full h-full justify-center"
                       onClick={() => {
                         toast.warning("Tính năng đang được phát triển.");
                       }}
@@ -541,61 +534,77 @@ export default function MovieModal({
                         ? "fa-solid fa-spinner"
                         : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
                     }
-                    className={`sm:text-lg ${
+                    className={`sm:text-lg sm:w-5 sm:h-5 h-3 w-3 ${
                       isFavourite ? "text-red-500" : "text-white"
                     } ${loadingFav ? "animate-spin" : ""}`}
                   />
                 </button>
+                {showTrailer && youtubeId && fadeOutImage && (
+                  <button
+                    onClick={handleToggleMute}
+                    className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
+                  >
+                    <div className="sm:w-5 sm:h-5 h-3 w-3 flex items-center justify-center">
+                      <FontAwesomeIcon
+                        icon={
+                          isMuted
+                            ? "fa-solid fa-volume-xmark"
+                            : "fa-solid fa-volume-high"
+                        }
+                        className="text-xs sm:text-lg"
+                        size="xs"
+                      />
+                    </div>
+                  </button>
+                )}
               </div>
-              {showTrailer && youtubeId && fadeOutImage && (
-                <button
-                  onClick={handleToggleMute}
-                  className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
-                >
-                  <div className="sm:w-5 sm:h-5 h-3 w-3 flex items-center justify-center">
-                    <FontAwesomeIcon
-                      icon={
-                        isMuted
-                          ? "fa-solid fa-volume-xmark"
-                          : "fa-solid fa-volume-high"
-                      }
-                      className="text-xs sm:text-lg"
-                      size="xs"
-                    />
-                  </div>
+              <div
+                className="rounded bg-white/10 backdrop-blur-md hover:bg-white/20 flex items-center justify-center transition-all ease-linear cursor-pointer"
+                onClick={() => navigate(`/phim/${modal.item.slug}`)}
+              >
+                <button className="py-1 sm:py-2 text-white font-medium flex items-center justify-center space-x-2 cursor-pointer">
+                  <Info
+                    strokeWidth={3}
+                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
+                  />
+                  <span className="line-clamp-1">Thông tin phim</span>
+                  {/* <ChevronDown
+                    strokeWidth={3}
+                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
+                  /> */}
                 </button>
-              )}
+              </div>
             </div>
           </div>
         </div>
-        <div className="flex flex-col p-[5%] space-y-4">
-          <div className="flex items-start space-y-3 sm:space-y-0 sm:space-x-[3%] flex-col sm:flex-row">
-            <div className="flex flex-col space-y-4 w-full sm:w-[70%]">
+        <div className="flex flex-col px-[5%] pb-[5%] pt-2 space-y-4">
+          <div className="flex items-start space-y-3 sm:space-y-0 gap-2 flex-col sm:flex-row">
+            <div className="flex flex-col space-y-4 w-full sm:w-[65%]">
               <div className="flex flex-col space-y-4">
-                <div className="flex items-center justify-between text-white/70">
+                <div className="flex items-center justify-between text-white/70 text-xs lg:text-sm">
                   <div className="flex space-x-2 items-center">
                     <span className="lowercase">{modal.item.year}</span>
                     {modal.item.time !== "? phút/tập" && (
                       <span className="lowercase">{modal.item.time}</span>
                     )}
-                    <span className="px-1 bg-[#e50914] text-xs rounded font-black text-white">
+                    <span className="px-1 bg-[#e20915] text-xs rounded font-black text-white">
                       {modal.item.quality}
                     </span>
                   </div>
                   {parseInt(modal.item.view) > 0 && (
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center pr-2 gap-1">
                       <span className="lowercase">{modal.item.view}</span>
                       <FontAwesomeIcon icon="fa-regular fa-eye" />
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs sm:text-sm flex-wrap">
-                  <span className="bg-white text-black font-semibold border-[1px] rounded-md py-1 px-2">
+                <div className="flex items-center gap-2 text-xs lg:text-sm flex-wrap">
+                  <span className="bg-white text-black font-semibold border-[1px] rounded-md py-1 px-2 text-xs lg:text-sm">
                     {modal.item.episode_current}
                   </span>
                   {modal.item.imdb?.vote_count > 0 && (
                     <a
-                      className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                      className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear text-xs lg:text-sm"
                       href={`https://www.imdb.com/title/${modal.item.imdb.id}`}
                       target="_blank"
                     >
@@ -607,7 +616,7 @@ export default function MovieModal({
                   )}
                   {modal.item.tmdb?.vote_count > 0 && (
                     <a
-                      className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                      className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear text-xs lg:text-sm"
                       href={`https://www.themoviedb.org/${
                         modal.item.type == "single" ? "movie" : "tv"
                       }/${modal.item.tmdb.id}`}
@@ -625,7 +634,7 @@ export default function MovieModal({
                     <img
                       src={Top10Icon}
                       alt="Top 10"
-                      className="w-7 sm:w-9 aspect-auto"
+                      className="w-7 aspect-auto"
                     />
                     <span className="text-white text-base sm:text-xl font-bold">
                       #
@@ -647,30 +656,38 @@ export default function MovieModal({
                 )}
               </div>
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold">
+                <h1 className="text-2xl lg:text-3xl font-bold">
                   {modal.item.name}
                 </h1>
-                <span className="font-light opacity-70">
+                {/* <span className="font-light opacity-70">
                   <i>({modal.item.origin_name})</i>
-                </span>
+                </span> */}
               </div>
               <div
                 dangerouslySetInnerHTML={{
                   __html: modal.item.content,
                 }}
-                className="text-white text-pretty"
+                className="text-white text-pretty line-clamp-3 text-sm lg:text-base"
               />
             </div>
-            <div className="flex flex-col space-y-3 w-full sm:w-[30%]">
+            <div className="flex flex-col space-y-3 w-full sm:w-[35%] text-sm lg:text-base">
               {modal.item.actor[0] != "" && (
                 <div>
                   <span className="opacity-50">Diễn viên: </span>
-                  {modal.item.actor.map((actor, index) => (
+                  {modal.item.actor.slice(0, 3).map((actor, index) => (
                     <span key={index}>
                       {actor}
                       {index !== modal.item.actor.length - 1 && <span>, </span>}
                     </span>
                   ))}
+                  {modal.item.actor.length > 3 && (
+                    <span
+                      className="italic hover:underline cursor-pointer"
+                      onClick={() => navigate(`/phim/${modal.item.slug}`)}
+                    >
+                      thêm
+                    </span>
+                  )}
                 </div>
               )}
               <div>
@@ -684,7 +701,7 @@ export default function MovieModal({
               </div>
               <div>
                 <span className="opacity-50">Thể loại: </span>
-                {modal.item.category.map((category, index) => (
+                {modal.item.category.slice(0, 3).map((category, index) => (
                   <span key={index}>
                     {category.name}
                     {index !== modal.item.category.length - 1 && (
@@ -692,6 +709,14 @@ export default function MovieModal({
                     )}
                   </span>
                 ))}
+                {modal.item.category.length > 3 && (
+                  <span
+                    className="italic hover:underline cursor-pointer"
+                    onClick={() => navigate(`/phim/${modal.item.slug}`)}
+                  >
+                    thêm
+                  </span>
+                )}
               </div>
               <div>
                 <span className="opacity-50">Ngày cập nhật: </span>
@@ -703,7 +728,7 @@ export default function MovieModal({
               </div>
             </div>
           </div>
-          <div>
+          {/* <div>
             {modal.item.type != "single" &&
               modal.item.episodes[server].server_data[server].link_embed !=
                 "" && (
@@ -789,13 +814,7 @@ export default function MovieModal({
                   </div>
                 </div>
               )}
-          </div>
-          <Recommend
-            type={modal.breadCrumb[0].slug.split("/danh-sach")[1]}
-            country={modal.item.country[0].slug}
-            category={modal.item.category[0].slug}
-            slug={modal.item.slug}
-          />
+          </div> */}
         </div>
       </div>
     </Modal>

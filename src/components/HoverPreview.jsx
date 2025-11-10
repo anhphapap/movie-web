@@ -216,6 +216,23 @@ export default function HoverPreview() {
                     size="sm"
                   />
                 </div>
+                <div
+                  className={
+                    "relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white border-white/40"
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/phim/${item.slug}`);
+                    onLeave();
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon="fa-solid fa-info"
+                    size="sm"
+                    className="text-white"
+                  />
+                  <Tooltip content="Thông tin phim" size="sm" />
+                </div>
                 {isWatching && (
                   <div
                     className={
@@ -241,7 +258,7 @@ export default function HoverPreview() {
                 `}
               >
                 <FontAwesomeIcon icon="fa-solid fa-chevron-down" size="sm" />
-                <Tooltip content="Xem chi tiết" size="sm" />
+                <Tooltip content="Xem thêm" size="sm" />
               </div>
             </div>
 

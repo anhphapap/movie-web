@@ -65,6 +65,10 @@ const Episodes = ({
         setHoveredEpisode(parseInt(episode));
         setTab(3);
       }}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="py-3 px-5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -85,7 +89,7 @@ const Episodes = ({
       </div>
       <div
         ref={episodesContainerRef}
-        className="flex flex-col overflow-y-auto h-full bg-[#262626]"
+        className="flex flex-col overflow-y-auto h-full bg-[#262626] pb-20"
       >
         {tab === 3 && (
           <>
@@ -134,7 +138,7 @@ const Episodes = ({
                         />
                         {hoveredEpisode !== parseInt(episode) && (
                           <div
-                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100 group-hover/Episodes:scale-125 transition-all ease-linear duration-100"
+                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100  transition-all ease-linear duration-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(
@@ -142,12 +146,20 @@ const Episodes = ({
                                   showEpisodes * 100 + index
                                 }`
                               );
+                              onClose();
                             }}
                           >
-                            <Play
-                              size={60}
-                              className="text-white bg-black/40 rounded-full p-2"
-                            />
+                            <button
+                              className="group relative bg-white/10 backdrop-blur-md border-4 border-white/80 rounded-full p-3 sm:p-4 transition-all duration-300 hover:scale-110 hover:bg-white/20 hover:border-white shadow-sm active:scale-95 hover:shadow-white/50"
+                              aria-label="Phát video"
+                            >
+                              <Play
+                                size={24}
+                                className="text-white fill-white drop-shadow-2xl"
+                                strokeWidth={2}
+                              />
+                              <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
+                            </button>
                           </div>
                         )}
                       </div>

@@ -129,7 +129,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                   }}
                   className={` ${
                     onTab === index || (item.href === pathname && index === 0)
-                      ? "font-bold text-white"
+                      ? "font-medium text-white"
                       : "text-white/80 hover:opacity-70 cursor-pointer"
                   }`}
                   key={item.href}
@@ -146,7 +146,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
                     }}
                     className={` ${
                       "/yeu-thich" === pathname && onTab === 5
-                        ? "font-bold text-white"
+                        ? "font-medium text-white"
                         : "text-white/80 hover:opacity-70 cursor-pointer"
                     }`}
                   >

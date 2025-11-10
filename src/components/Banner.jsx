@@ -11,6 +11,7 @@ import YouTube from "react-youtube";
 import { toast } from "react-toastify";
 import logo_n from "../assets/images/N_logo.png";
 import { useBannerCache } from "../context/BannerCacheContext";
+import { Info } from "lucide-react";
 
 const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [movie, setMovie] = useState(null);
@@ -45,6 +46,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
               player.pauseVideo();
               setIsVideoPaused(true);
+              setPlaying(false);
             }
           } else {
             // Tab visible - tiếp tục phát video nếu đang pause và không có modal
@@ -60,6 +62,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               if (isInViewport) {
                 player.playVideo();
                 setIsVideoPaused(false);
+                setPlaying(true);
               }
             }
           }
@@ -97,6 +100,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             if (isInViewport) {
               player.playVideo();
               setIsVideoPaused(false);
+              setPlaying(true);
             }
           }
         } catch (error) {
@@ -114,6 +118,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
             player.pauseVideo();
             setIsVideoPaused(true);
+            setPlaying(false);
           }
         } catch (error) {
           console.warn("Error in window blur:", error);
@@ -145,6 +150,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               if (state === window.YT.PlayerState.PAUSED) {
                 player.playVideo();
                 setIsVideoPaused(false);
+                setPlaying(true);
               }
             }
           } else {
@@ -155,6 +161,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             ) {
               player.pauseVideo();
               setIsVideoPaused(true);
+              setPlaying(false);
             }
           }
         } catch (error) {
@@ -184,6 +191,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         if (player.getPlayerState() === window.YT.PlayerState.PLAYING) {
           player.pauseVideo();
           setIsVideoPaused(true);
+          setPlaying(false);
         }
       } else if (isVideoPaused) {
         // Modal đóng và video đang bị pause - tiếp tục phát nếu trong viewport
@@ -197,6 +205,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         ) {
           player.playVideo();
           setIsVideoPaused(false);
+          setPlaying(true);
         }
       }
     } catch (error) {
@@ -400,22 +409,6 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         filter && "mt-12"
       }`}
     >
-      <div
-        className={`block absolute top-0 left-0 z-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
-          playing ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        <LazyImage
-          src={
-            movie?.tmdb_image?.backdrop
-              ? "https://image.tmdb.org/t/p/" + movie?.tmdb_image?.backdrop
-              : movie.item.poster_url.split("movies/")[1]
-          }
-          alt={movie.item.name}
-          priority
-          sizes="100vw"
-        />
-      </div>
       {youtubeId && (
         <div
           className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
@@ -511,7 +504,22 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           />
         </div>
       )}
-
+      <div
+        className={`block absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
+          playing ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        <LazyImage
+          src={
+            movie?.tmdb_image?.backdrop
+              ? "https://image.tmdb.org/t/p/" + movie?.tmdb_image?.backdrop
+              : movie.item.poster_url.split("movies/")[1]
+          }
+          alt={movie.item.name}
+          priority
+          sizes="100vw"
+        />
+      </div>
       {/* <div className="absolute top-0 left-0 w-full sm:hidden">
         <LazyImage
           src={movie.item.thumb_url.split("movies/")[1]}
@@ -583,7 +591,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             <div className="relative rounded bg-white hover:bg-white/80 w-1/2 sm:w-auto flex items-center justify-center">
               {movie.item.episodes[0].server_data[0].link_embed !== "" ? (
                 <button
-                  className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
+                  className="py-2 px-3 sm:px-7 lg:px-10 font-medium flex items-center justify-center space-x-2"
                   onClick={() =>
                     navigate(`/xem-phim/${movie.item.slug}?svr=${0}&ep=${0}`)
                   }
@@ -593,7 +601,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 </button>
               ) : (
                 <button
-                  className="py-2 px-3 sm:px-7 lg:px-10 font-semibold flex items-center justify-center space-x-2"
+                  className="py-2 px-3 sm:px-7 lg:px-10 font-medium flex items-center justify-center space-x-2"
                   onClick={() => {
                     toast.warning("Tính năng đang được phát triển.");
                   }}
@@ -603,9 +611,9 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                 </button>
               )}
             </div>
-            <div className="relative rounded bg-white/30 hover:bg-white/20 w-1/2 sm:w-auto flex items-center justify-center">
+            <div className="relative rounded bg-white/30 backdrop-blur-md hover:bg-white/20 w-1/2 sm:w-auto flex items-center justify-center">
               <button
-                className="py-2 px-3 sm:px-7 lg:px-10 text-white font-semibold flex items-center justify-center space-x-2"
+                className="py-2 px-3 sm:px-7 lg:px-10 text-white font-medium flex items-center justify-center space-x-2"
                 onClick={() =>
                   openModal(
                     movie.item.slug,
@@ -614,7 +622,10 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                   )
                 }
               >
-                <FontAwesomeIcon icon="fa-solid fa-circle-info" />
+                <Info
+                  strokeWidth={3}
+                  className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
+                />
                 <span className="line-clamp-1 hidden sm:block">
                   Thông tin khác
                 </span>
@@ -642,7 +653,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
               </button>
             )}
             <div className="sm:flex hidden text-white justify-center h-4 sm:h-8 lg:h-10 items-center pr-10 lg:pr-14 pl-2 bg-[#515151]/60 border-l-4 border-[#e50914]">
-              <span className="font-semibold">{movie.item.quality}</span>
+              <span className="font-medium">{movie.item.quality}</span>
             </div>
           </div>
         </div>

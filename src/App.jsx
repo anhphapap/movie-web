@@ -206,7 +206,7 @@ function App() {
                                         element={<SearchPage />}
                                       />
                                       <Route
-                                        path="/xem-phim-full/:movieSlug"
+                                        path="/phim/:movieSlug"
                                         element={<WatchPage />}
                                       />
                                       <Route

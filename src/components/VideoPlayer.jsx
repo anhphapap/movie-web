@@ -26,6 +26,7 @@ import {
   Sun,
   Clock,
   ArrowLeft,
+  ChevronLeft,
 } from "lucide-react";
 import { formatTime } from "../utils/data";
 import { useNavigate } from "react-router-dom";
@@ -49,6 +50,7 @@ const VideoPlayer = ({
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
   const inactivityTimer = useRef(null);
+  const controlsTimerRef = useRef(null);
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const touchStartTime = useRef(0);
@@ -75,6 +77,11 @@ const VideoPlayer = ({
   const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [centerOverlay, setCenterOverlay] = useState(null);
+  const [seekForwardAmount, setSeekForwardAmount] = useState(0); // Số giây seek forward
+  const [seekBackwardAmount, setSeekBackwardAmount] = useState(0); // Số giây seek backward
+  const [isSeekAnimating, setIsSeekAnimating] = useState(false);
+  const [seekAnimationKey, setSeekAnimationKey] = useState(0); // Key để trigger animation mới
+  const seekTimeoutRef = useRef(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [buffered, setBuffered] = useState(0);
   const [isBuffering, setIsBuffering] = useState(false);
@@ -91,6 +98,8 @@ const VideoPlayer = ({
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [previewTime, setPreviewTime] = useState(null);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
+  const [isHoveringControls, setIsHoveringControls] = useState(false);
+  const isHoveringControlsRef = useRef(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showQualityMenuState, setShowQualityMenuState] = useState(false);
 
@@ -160,17 +169,17 @@ const VideoPlayer = ({
       hls.on(Hls.Events.MANIFEST_LOADED, () => {
         setVideoReady(true);
 
-        // Autoplay với delay dài hơn để tránh conflict với resume data
-        if (shouldAutoPlay && !resumeData) {
+        // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
+        // Không auto-play nếu là lần đầu xem -> hiện button play
+        if (shouldAutoPlay && resumeData) {
           setTimeout(() => {
             if (video && hlsRef.current === hls) {
-              // Kiểm tra instance vẫn còn hợp lệ và không có resume data
               video.play().catch(console.error);
               setPlaying(true);
               setShowControls(true);
               setHasPlayedOnce(true);
             }
-          }, 500); // Tăng delay để tránh conflict với resume data
+          }, 500);
         }
       });
 
@@ -197,8 +206,9 @@ const VideoPlayer = ({
       const handleCanPlay = () => {
         setVideoReady(true);
 
-        // Autoplay với delay dài hơn để tránh conflict với resume data
-        if (shouldAutoPlay && !resumeData) {
+        // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
+        // Không auto-play nếu là lần đầu xem -> hiện button play
+        if (shouldAutoPlay && resumeData) {
           setTimeout(() => {
             if (video) {
               video.play().catch(console.error);
@@ -359,9 +369,13 @@ const VideoPlayer = ({
     };
   }, [resetPauseOverlayTimer]);
 
-  const showCenterOverlay = (icon) => {
+  const showCenterOverlay = (icon, duration = 800) => {
     setCenterOverlay(icon);
-    setTimeout(() => setCenterOverlay(null), 800);
+    setIsSeekAnimating(true);
+    setTimeout(() => {
+      setIsSeekAnimating(false);
+      setCenterOverlay(null);
+    }, duration);
   };
 
   const handleInitialPlay = () => {
@@ -452,12 +466,45 @@ const VideoPlayer = ({
     setPreviewTime(percent * duration);
   };
 
-  const handleSeek10s = (sec) => {
-    videoRef.current.currentTime = Math.min(
-      Math.max(videoRef.current.currentTime + sec, 0),
-      duration
-    );
-  };
+  const handleSeek10s = useCallback((sec) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const videoDuration = video.duration || 0;
+    if (videoDuration === 0) return;
+
+    // Xác định hướng seek
+    const direction = sec > 0 ? "forward" : "backward";
+
+    // Reset hướng ngược lại khi đổi hướng
+    if (direction === "forward") {
+      setSeekBackwardAmount(0);
+      setSeekForwardAmount((prev) => prev + Math.abs(sec));
+    } else {
+      setSeekForwardAmount(0);
+      setSeekBackwardAmount((prev) => prev + Math.abs(sec));
+    }
+
+    // Hiện overlay và tăng animation key để trigger animation mới
+    setCenterOverlay(direction);
+    setIsSeekAnimating(true);
+    setSeekAnimationKey((prev) => prev + 1); // Force re-trigger animation
+
+    // Clear timeout cũ và tạo mới
+    clearTimeout(seekTimeoutRef.current);
+
+    // Thực hiện seek
+    const newTime = video.currentTime + sec;
+    video.currentTime = Math.max(0, Math.min(newTime, videoDuration));
+
+    // Reset sau 1.2 giây (đủ thời gian để xem số)
+    seekTimeoutRef.current = setTimeout(() => {
+      setSeekForwardAmount(0);
+      setSeekBackwardAmount(0);
+      setIsSeekAnimating(false);
+      setCenterOverlay(null);
+    }, 1200);
+  }, []);
 
   const changePlaybackRate = (rate) => {
     const newRate = Math.min(Math.max(rate, 0.25), 2);
@@ -644,10 +691,8 @@ const VideoPlayer = ({
         const isLeftHalf = tapX < videoWidth / 2;
         if (isLeftHalf) {
           handleSeek10s(-10);
-          showCenterOverlay("backward");
         } else {
           handleSeek10s(10);
-          showCenterOverlay("forward");
         }
 
         lastTapTime.current = 0; // Reset để tránh triple tap
@@ -745,20 +790,46 @@ const VideoPlayer = ({
     return () => document.removeEventListener("click", handleClickOutside);
   }, [showSpeedMenu, showQualityMenuState]);
 
+  // Reset controls timer - expose để có thể gọi từ button clicks
+  const resetControlsTimer = useCallback(
+    (forceTimer = false) => {
+      setShowControls(true);
+      clearTimeout(controlsTimerRef.current);
+
+      // forceTimer = true: luôn start timer (button clicks/keyboard)
+      // forceTimer = false: chỉ start nếu không drag/hover progress
+      const shouldStartTimer = forceTimer
+        ? true
+        : !isDraggingProgress && !isHoveringProgress;
+
+      if (shouldStartTimer) {
+        controlsTimerRef.current = setTimeout(() => {
+          // Khi timer hết, check ref (real-time value) thay vì state
+          if (
+            !isHoveringControlsRef.current &&
+            !isDraggingProgress &&
+            !isHoveringProgress
+          ) {
+            setShowControls(false);
+          }
+        }, 3000);
+      }
+    },
+    [isDraggingProgress, isHoveringProgress]
+  );
+
   // Auto hide controls
   useEffect(() => {
-    let timeout;
-    const resetTimer = () => {
-      setShowControls(true);
-      clearTimeout(timeout);
-      // Không ẩn nếu đang tương tác với progress bar
-      if (!isDraggingProgress && !isHoveringProgress) {
-        timeout = setTimeout(() => setShowControls(false), 3000);
-      }
+    containerRef.current?.addEventListener("mousemove", resetControlsTimer);
+
+    return () => {
+      clearTimeout(controlsTimerRef.current);
+      containerRef.current?.removeEventListener(
+        "mousemove",
+        resetControlsTimer
+      );
     };
-    containerRef.current?.addEventListener("mousemove", resetTimer);
-    return () => clearTimeout(timeout);
-  }, [isDraggingProgress, isHoveringProgress]);
+  }, [resetControlsTimer]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -766,6 +837,22 @@ const VideoPlayer = ({
       // Không xử lý nếu focus vào input
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
         return;
+
+      // Hiện controls và reset timer khi nhấn phím tắt
+      const videoShortcuts = [
+        " ",
+        "arrowright",
+        "arrowleft",
+        "f",
+        "m",
+        "[",
+        "]",
+        "p",
+        "?",
+      ];
+      if (videoShortcuts.includes(e.key.toLowerCase())) {
+        resetControlsTimer(true); // Force timer bất kể hover state
+      }
 
       switch (e.key.toLowerCase()) {
         case " ":
@@ -775,6 +862,10 @@ const VideoPlayer = ({
             if (video.paused) {
               video.play().catch(console.error);
               showCenterOverlay("play");
+              // Set hasPlayedOnce nếu đây là lần đầu play
+              if (!hasPlayedOnce) {
+                setHasPlayedOnce(true);
+              }
             } else {
               video.pause();
               showCenterOverlay("pause");
@@ -784,12 +875,10 @@ const VideoPlayer = ({
         case "arrowright":
           e.preventDefault();
           handleSeek10s(10);
-          showCenterOverlay("forward");
           break;
         case "arrowleft":
           e.preventDefault();
           handleSeek10s(-10);
-          showCenterOverlay("backward");
           break;
         case "f":
           e.preventDefault();
@@ -814,14 +903,24 @@ const VideoPlayer = ({
         case "?":
           e.preventDefault();
           setShowShortcuts(!showShortcuts);
+          setShowControls(true);
           break;
         default:
           break;
       }
     };
+
     window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [playbackRate, pipSupported, showShortcuts]); // ❌ Bỏ playing khỏi dependency
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [
+    playbackRate,
+    pipSupported,
+    showShortcuts,
+    hasPlayedOnce,
+    resetControlsTimer,
+  ]);
 
   return (
     <div
@@ -846,17 +945,19 @@ const VideoPlayer = ({
 
       {/* Initial play button - CHỈ hiện lần đầu vào, chưa play bao giờ */}
       {videoReady && !hasPlayedOnce && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
-          <div className="flex flex-col items-center gap-4">
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black/50 via-black/60 to-black/70 backdrop-blur-sm z-20 animate-fadeIn">
+          <div className="flex flex-col items-center gap-6">
             <button
               onClick={handleInitialPlay}
-              className="group bg-black/40 border-2 border-white rounded-full p-3 sm:p-6 transition-all duration-300 hover:scale-110 shadow-2xl active:scale-95"
+              className="outline-none group relative bg-white/10 backdrop-blur-md border-4 border-white/80 rounded-full p-4 sm:p-6 transition-all duration-300 hover:scale-110 hover:bg-white/20 hover:border-white shadow-2xl active:scale-95 hover:shadow-white/50"
               aria-label="Phát video"
             >
               <Play
-                size={isMobile ? 32 : 64}
-                className="text-white fill-white"
+                size={isMobile ? 30 : 60}
+                className="text-white fill-white drop-shadow-2xl"
+                strokeWidth={2}
               />
+              <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
             </button>
           </div>
         </div>
@@ -933,27 +1034,81 @@ const VideoPlayer = ({
       {/* Center overlay */}
       {centerOverlay && (
         <div
-          className={`absolute inset-0 flex items-center ${
+          className={`absolute inset-0 flex items-center pointer-events-none transition-all duration-200 ${
             centerOverlay === "forward"
-              ? "justify-end px-[20%]"
+              ? "justify-end px-[6%]"
               : centerOverlay === "backward"
-              ? "justify-start px-[20%]"
+              ? "justify-start px-[6%]"
               : "justify-center"
           }`}
         >
-          <div className="animate-fadeInOut bg-black/40 rounded-full p-2 lg:p-6 opacity-50 duration-200 text-[24px] lg:!text-[64px] text-white">
-            {centerOverlay === "play" && <Play />}
-            {centerOverlay === "pause" && <Pause />}
-            {centerOverlay === "forward" && <RotateCw />}
-            {centerOverlay === "backward" && <RotateCcw />}
-            {centerOverlay === "mute" && <VolumeX />}
-            {centerOverlay === "unmute" && <Volume2 />}
+          <div
+            className={`bg-black/40 opacity-80 backdrop-blur-sm rounded-full p-6 lg:p-10 text-white shadow-2xl ${
+              isSeekAnimating
+                ? centerOverlay === "forward"
+                  ? "animate-slideInRight bg-transparent backdrop-blur-none shadow-none"
+                  : centerOverlay === "backward"
+                  ? "animate-slideInLeft bg-transparent backdrop-blur-none shadow-none"
+                  : "animate-fadeIn"
+                : "animate-fadeOut"
+            }`}
+          >
+            {centerOverlay === "play" && (
+              <Play
+                size={isMobile ? 48 : 80}
+                className="text-white fill-white drop-shadow-2xl"
+                strokeWidth={2}
+              />
+            )}
+            {centerOverlay === "pause" && (
+              <Pause
+                size={isMobile ? 48 : 80}
+                className="text-white fill-white drop-shadow-2xl"
+                strokeWidth={2}
+              />
+            )}
+            {centerOverlay === "forward" && (
+              <div className="flex items-center justify-center gap-1">
+                <div className="text-center">
+                  <span className="text-white text-3xl lg:text-5xl font-bold transition-all duration-100">
+                    + {seekForwardAmount}
+                  </span>
+                </div>
+                <ChevronRight
+                  size={isMobile ? 48 : 72}
+                  strokeWidth={2.5}
+                  className="animate-slideInRight"
+                  key={seekAnimationKey + "forward"}
+                />
+              </div>
+            )}
+            {centerOverlay === "backward" && (
+              <div className="flex items-center justify-center gap-1">
+                <ChevronLeft
+                  size={isMobile ? 48 : 72}
+                  strokeWidth={2.5}
+                  className="animate-slideInLeft"
+                  key={seekAnimationKey + "backward"}
+                />
+                <div className="text-center">
+                  <span className="text-white text-3xl lg:text-5xl font-bold transition-all duration-100">
+                    - {seekBackwardAmount}
+                  </span>
+                </div>
+              </div>
+            )}
+            {centerOverlay === "mute" && (
+              <VolumeX size={isMobile ? 40 : 80} strokeWidth={2.5} />
+            )}
+            {centerOverlay === "unmute" && (
+              <Volume2 size={isMobile ? 40 : 80} strokeWidth={2.5} />
+            )}
           </div>
         </div>
       )}
 
       {/* Pause overlay */}
-      {showOverlay && hasPlayedOnce && (
+      {showOverlay && hasPlayedOnce && !showControls && (
         <div className="absolute inset-0 bg-black/60 flex flex-col justify-center px-[10%] transition-opacity duration-500">
           <div className="text-white max-w-2xl pt-12 lg:pt-0">
             <p className="text-xs lg:text-base mb-2 text-white/70">Đang xem</p>
@@ -1036,7 +1191,7 @@ const VideoPlayer = ({
         >
           <button
             onClick={() => {
-              navigate("/trang-chu");
+              navigate(`/phim/${movie.slug}`);
             }}
             className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white `}
           >
@@ -1048,6 +1203,14 @@ const VideoPlayer = ({
       {/* Controls - chỉ hiện khi video ready VÀ đã play lần đầu */}
       {videoReady && hasPlayedOnce && (
         <div
+          onMouseEnter={() => {
+            setIsHoveringControls(true);
+            isHoveringControlsRef.current = true;
+          }}
+          onMouseLeave={() => {
+            setIsHoveringControls(false);
+            isHoveringControlsRef.current = false;
+          }}
           className={`absolute bottom-0 w-full bg-gradient-to-t from-black/50 to-transparent p-2 lg:p-4 text-white 
             transition-all duration-500 ease-in-out
             ${
@@ -1147,11 +1310,12 @@ const VideoPlayer = ({
                       showCenterOverlay("pause");
                     }
                   }
+                  resetControlsTimer(true); // Force timer khi click
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
                 aria-label={playing ? "Dừng" : "Phát"}
               >
                 {playing ? (
@@ -1172,12 +1336,12 @@ const VideoPlayer = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSeek10s(-10);
-                  showCenterOverlay("backward");
+                  resetControlsTimer(true); // Force timer khi click
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
                 aria-label="Quay lại 10 giây"
               >
                 <RotateCcw size={isMobile ? 30 : 34} />
@@ -1194,12 +1358,12 @@ const VideoPlayer = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   handleSeek10s(10);
-                  showCenterOverlay("forward");
+                  resetControlsTimer(true); // Force timer khi click
                 }}
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
                 aria-label="Tiến 10 giây"
               >
                 <RotateCw size={isMobile ? 30 : 34} />
@@ -1222,7 +1386,7 @@ const VideoPlayer = ({
                     onTouchEnd={(e) => {
                       e.stopPropagation();
                     }}
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-2"
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 outline-none"
                     aria-label={muted ? "Bật tiếng" : "Tắt tiếng"}
                   >
                     {muted ? (
@@ -1265,7 +1429,7 @@ const VideoPlayer = ({
                   movie.episodes[svr].server_data.length - 1 && (
                   <div className="relative group/episodes">
                     <button
-                      className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                      className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onNavigateToNextEpisode) {
@@ -1312,25 +1476,31 @@ const VideoPlayer = ({
                             }
                             sizes="10vw"
                           />
-                          <div
-                            className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-50 group-hover/nextEpisode:opacity-100 group-hover/nextEpisode:scale-105 transition-all ease-linear duration-100 delay-100"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (onNavigateToNextEpisode) {
-                                onNavigateToNextEpisode();
-                              } else {
-                                navigate(
-                                  `/xem-phim/${movie.slug}?svr=${svr}&ep=${
-                                    parseInt(episode) + 1
-                                  }`
-                                );
-                              }
-                            }}
-                          >
-                            <Play
-                              size={40}
-                              className="text-white bg-black/50 backdrop-blur-sm rounded-full p-2"
-                            />
+
+                          <div className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-50 group-hover/nextEpisode:opacity-100 group-hover/nextEpisode:scale-105 transition-all ease-linear duration-100 delay-100">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onNavigateToNextEpisode) {
+                                  onNavigateToNextEpisode();
+                                } else {
+                                  navigate(
+                                    `/xem-phim/${movie.slug}?svr=${svr}&ep=${
+                                      parseInt(episode) + 1
+                                    }`
+                                  );
+                                }
+                              }}
+                              className="outline-none group relative bg-white/10 backdrop-blur-md border-4 border-white/80 rounded-full p-2 sm:p-3 transition-all duration-300 hover:scale-110 hover:bg-white/20 hover:border-white shadow-2xl active:scale-95 hover:shadow-white/50"
+                              aria-label="Phát video"
+                            >
+                              <Play
+                                size={24}
+                                className="text-white fill-white drop-shadow-2xl"
+                                strokeWidth={2}
+                              />
+                              <div className="absolute inset-0 rounded-full bg-white/20 animate-pulse"></div>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -1338,33 +1508,34 @@ const VideoPlayer = ({
                   </div>
                 )}
               {/* Episodes */}
-              {movie.episodes[svr].server_data.length > 0 && (
-                <div className="group/episodes">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (isMobile) {
-                        setShowEpisodes(!showEpisodes);
-                        videoRef.current.pause();
-                      }
-                    }}
-                    className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2"
-                    aria-label="Danh sách tập"
-                  >
-                    <ListVideo size={34} />
-                  </button>
-                  <Episodes
-                    onClose={() => setShowEpisodes(false)}
-                    show={showEpisodes}
-                    name={movie.name}
-                    episodes={movie.episodes}
-                    svr={svr}
-                    poster_url={movie.poster_url}
-                    slug={movie.slug}
-                    episode={episode}
-                  />
-                </div>
-              )}
+              {movie.episodes[svr].server_data.length > 0 &&
+                movie.type !== "single" && (
+                  <div className="group/episodes">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (isMobile) {
+                          setShowEpisodes(!showEpisodes);
+                          videoRef.current.pause();
+                        }
+                      }}
+                      className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2 outline-none"
+                      aria-label="Danh sách tập"
+                    >
+                      <ListVideo size={34} />
+                    </button>
+                    <Episodes
+                      onClose={() => setShowEpisodes(false)}
+                      show={showEpisodes}
+                      name={movie.name}
+                      episodes={movie.episodes}
+                      svr={svr}
+                      poster_url={movie.poster_url}
+                      slug={movie.slug}
+                      episode={episode}
+                    />
+                  </div>
+                )}
               {/* Playback speed */}
               <div className="relative group">
                 <div className="relative group/speed">
@@ -1376,7 +1547,7 @@ const VideoPlayer = ({
                     onTouchEnd={(e) => {
                       e.stopPropagation();
                     }}
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative"
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative outline-none"
                     aria-label="Tốc độ phát"
                   >
                     <Gauge size={isMobile ? 30 : 34} />
@@ -1422,7 +1593,7 @@ const VideoPlayer = ({
                     onTouchEnd={(e) => {
                       e.stopPropagation();
                     }}
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative"
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative outline-none"
                     aria-label="Chất lượng"
                   >
                     <SlidersHorizontal size={34} />
@@ -1490,7 +1661,7 @@ const VideoPlayer = ({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
                 aria-label={fullscreen ? "Thu nhỏ" : "Phóng to"}
               >
                 {fullscreen ? (

@@ -2,82 +2,63 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
-import Tooltip from "../components/Tooltip";
 import { toast } from "react-toastify";
 import { UserAuth } from "../context/AuthContext";
-import { db } from "../firebase";
-import { LoaderCircle, Captions, Server, TvMinimalPlay } from "lucide-react";
 import {
-  doc,
-  updateDoc,
-  arrayUnion,
-  getDoc,
-  arrayRemove,
-} from "firebase/firestore";
-import VideoPlayer from "../components/VideoPlayer";
+  LoaderCircle,
+  Captions,
+  Server,
+  TvMinimalPlay,
+  Info,
+  Heart,
+} from "lucide-react";
+import logo_n from "../assets/images/N_logo.png";
 import LazyImage from "../components/LazyImage";
 import SEO from "../components/SEO";
-import { useCinema } from "../context/CinemaContext";
-
+import { useFavorites } from "../context/FavouritesProvider";
+import { useTop } from "../context/TopContext";
+import Top10Icon from "../assets/images/Top10Icon.svg";
+import { useWatching } from "../context/WatchingContext";
+import { formatSecondsToMinutes } from "../utils/data";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+import Recommend from "../components/Recommend";
 const WatchPage = () => {
   const { movieSlug } = useParams();
-  const queryParams = new URLSearchParams(window.location.search);
-  const ep = queryParams.get("ep") || 0;
-  const svr = queryParams.get("svr") || 0;
 
   // Đọc resume data từ localStorage
   const [resumeData, setResumeData] = useState(null);
   const [episodesRange, setEpisodesRange] = useState(0);
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const { cinema, setCinema } = useCinema();
-  const [autoEpisodes, setAutoEpisodes] = useState(true); // Mặc định bật
+  const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
+  const isFavourite = favoriteSlugs.includes(movieSlug);
   const [peoples, setPeoples] = useState([]);
-  const [server, setServer] = useState(svr);
+  const [server, setServer] = useState(0);
   const { user } = UserAuth();
   const navigate = useNavigate();
   const shouldAutoPlayRef = useRef(false);
+  const { topSet } = useTop();
+  const [watchingMovie, setWatchingMovie] = useState(null);
+  const { getWatchingMovie, watchingSlugs } = useWatching();
   useEffect(() => {
-    const checkSaved = async () => {
-      if (user?.email && movie?.movie) {
-        setLoading(true);
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
+    if (watchingSlugs.length === 0) return;
+    setWatchingMovie(getWatchingMovie(movieSlug) || null);
+  }, [watchingSlugs, movieSlug]);
 
-        if (
-          userSnap.exists() &&
-          userSnap.data().savedMovies.some((m) => m.slug === movie?.movie?.slug)
-        ) {
-          setSaved(true);
-        } else {
-          setSaved(false);
-        }
-        setLoading(false);
-      }
+  const handlePlayMovie = (movie) => {
+    // Lưu thông tin resume vào localStorage
+    const resumeData = {
+      slug: movie.slug,
+      currentTime: movie.currentTime || 0,
+      duration: movie.duration || 0,
+      progress: movie.progress || 0,
+      timestamp: Date.now(),
     };
-    checkSaved();
-  }, [user, movieSlug, movie]);
 
-  // Load resume data từ localStorage
-  useEffect(() => {
-    const savedResumeData = localStorage.getItem("resumeVideo");
-    if (savedResumeData) {
-      try {
-        const parsed = JSON.parse(savedResumeData);
-        // Chỉ sử dụng nếu cùng movie và trong vòng 24h
-        const isRecent = Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000;
-        if (parsed.slug === movieSlug && isRecent) {
-          setResumeData(parsed);
-        }
-        // Clear sau khi sử dụng
-        localStorage.removeItem("resumeVideo");
-      } catch (error) {
-        console.error("Error parsing resume data:", error);
-        localStorage.removeItem("resumeVideo");
-      }
-    }
-  }, [movieSlug]);
+    localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
+    navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
+  };
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -105,27 +86,8 @@ const WatchPage = () => {
         setLoading(false);
       }
     };
-
     fetchMovie();
   }, [movieSlug]);
-
-  // Cleanup cinema mode when leaving page
-  useEffect(() => {
-    return () => {
-      setCinema(false);
-    };
-  }, []);
-
-  // Reset autoplay flag after navigation
-  useEffect(() => {
-    setEpisodesRange(parseInt(ep / 100) * 100);
-    if (shouldAutoPlayRef.current) {
-      // Reset after a short delay to ensure video has loaded
-      setTimeout(() => {
-        shouldAutoPlayRef.current = false;
-      }, 1000);
-    }
-  }, [ep]);
 
   // Clear resume data sau khi video đã seek xong
   useEffect(() => {
@@ -152,59 +114,20 @@ const WatchPage = () => {
     }
   }, [movie, server]);
 
-  const handleSaveMovie = async () => {
-    if (!user?.email) {
-      toast.warning("Vui lòng đăng nhập để sử dụng chức năng này.");
-      return;
-    }
-
-    try {
-      const userRef = doc(db, "users", user.uid);
-
-      if (saved) {
-        await updateDoc(userRef, {
-          savedMovies: arrayRemove({
-            slug: movie.item.slug,
-            poster_url: movie.item.poster_url,
-            thumb_url: movie.item.thumb_url,
-            name: movie.item.name,
-            year: movie.item.year,
-            episode_current: movie.item.episode_current,
-            quality: movie.item.quality,
-            category: movie.item.category,
-            tmdb: movie.item.tmdb,
-            modified: movie.item.modified,
-          }),
-        });
-        toast.success("Đã xóa khỏi danh sách yêu thích.");
-      } else {
-        await updateDoc(userRef, {
-          savedMovies: arrayUnion({
-            slug: movie.item.slug,
-            poster_url: movie.item.poster_url,
-            thumb_url: movie.item.thumb_url,
-            name: movie.item.name,
-            year: movie.item.year,
-            episode_current: movie.item.episode_current,
-            quality: movie.item.quality,
-            category: movie.item.category,
-            tmdb: movie.item.tmdb,
-            modified: movie.item.modified,
-          }),
-        });
-        toast.success("Đã thêm vào danh sách yêu thích.");
-      }
-
-      setSaved(!saved);
-    } catch (error) {
-      console.log(error);
-      toast.error("Có lỗi xảy ra vui lòng thử lại sau.");
-    }
-  };
-
-  const handleNavigateToNextEpisode = () => {
-    shouldAutoPlayRef.current = true;
-    navigate(`/xem-phim/${movie.item.slug}?svr=${svr}&ep=${parseInt(ep) + 1}`);
+  const handleSaveMovie = () => {
+    toggleFavorite({
+      slug: movie.item.slug,
+      poster_url: movie.item.poster_url,
+      thumb_url: movie.item.thumb_url,
+      name: movie.item.name,
+      year: movie.item.year,
+      episode_current: movie.item.episode_current,
+      quality: movie.item.quality,
+      category: movie.item.category,
+      tmdb: movie.item.tmdb,
+      modified: movie.item.modified,
+      addedAt: new Date().toISOString(),
+    });
   };
 
   if (loading || !movie?.item)
@@ -218,523 +141,476 @@ const WatchPage = () => {
       </div>
     );
 
-  // Kiểm tra phim chỉ có trailer hoặc chưa có episodes
-  if (
-    !movie.item.episodes ||
-    movie.item.episodes.length === 0 ||
-    movie.item.episodes[0].server_data[0].link_m3u8 === ""
-  ) {
-    return (
-      <div className="min-h-screen text-white px-[3%] mt-16">
-        <div className="flex items-center gap-4 my-6 pt-2 px-2">
-          <button
-            className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
-            onClick={() => navigate("/trang-chu")}
-          >
-            <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
-          </button>
-          <h1 className="sm:text-2xl text-xl font-bold">{movie.item.name}</h1>
-        </div>
-
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6">
-          <div className="w-24 sm:w-32 sm:h-32 h-24 rounded-full bg-red-500/20 flex items-center justify-center">
-            <FontAwesomeIcon
-              icon="fa-solid fa-film"
-              size="3x"
-              className="text-red-500"
-            />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-3xl font-bold">Phim chưa có sẵn</h2>
-            <p className="text-white/70 max-w-md text-lg">
-              {movie.item.status === "trailer"
-                ? "Phim này hiện chỉ có trailer. Vui lòng quay lại sau khi phim được phát hành."
-                : "Phim này chưa có tập nào để xem. Vui lòng quay lại sau."}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() =>
-                navigate(
-                  `/trang-chu?movie=${movie.item.slug}&tmdb_id=${movie.item.tmdb.id}&tmdb_type=${movie.item.tmdb.type}`
-                )
-              }
-              className="sm:px-8 px-3 sm:py-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Chi tiết phim
-            </button>
-            <button
-              onClick={() => navigate("/trang-chu")}
-              className="sm:px-8 px-3 sm:py-3 py-2 bg-white/10 hover:bg-white/20 border-2 border-white/20 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Quay về Trang chủ
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Kiểm tra server và episode có tồn tại không
-  if (
-    !movie.item.episodes[svr] ||
-    !movie.item.episodes[svr].server_data ||
-    !movie.item.episodes[svr].server_data[ep]
-  ) {
-    return (
-      <div className="min-h-screen text-white px-[3%] mt-16">
-        <div className="flex items-center gap-4 my-6 pt-2 px-2">
-          <button
-            className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
-            onClick={() => navigate("/trang-chu")}
-          >
-            <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
-          </button>
-          <h1 className="text-2xl font-bold">{movie.item.name}</h1>
-        </div>
-
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-[3%]">
-          <div className="sm:w-32 sm:h-32 w-24 h-24 rounded-full bg-yellow-500/20 flex items-center justify-center">
-            <FontAwesomeIcon
-              icon="fa-solid fa-exclamation-triangle"
-              size="3x"
-              className="text-yellow-500"
-            />
-          </div>
-          <div className="space-y-3">
-            <h2 className="text-3xl font-bold">Tập phim không tồn tại</h2>
-            <p className="text-white/70 max-w-md text-lg">
-              Tập phim bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <button
-              onClick={() =>
-                navigate(`/xem-phim/${movie.item.slug}?svr=0&ep=0`)
-              }
-              className="sm:px-8 px-3 sm:py-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Xem tập đầu tiên
-            </button>
-            <button
-              onClick={() => navigate("/trang-chu")}
-              className="sm:px-8 px-3 sm:py-3 py-2 bg-white/10 hover:bg-white/20 border-2 border-white/20 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-            >
-              Quay về Trang chủ
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Custom SEO cho trang xem phim với thông tin tập
-  const watchPageSEO = movie?.seoOnPage
-    ? {
-        ...movie.seoOnPage,
-        titleHead: `Xem phim ${movie.item.name} - Tập ${movie.item.episodes[svr].server_data[ep].name}`,
-        descriptionHead: `Xem phim ${movie.item.name} tập ${
-          movie.item.episodes[svr].server_data[ep].name
-        } ${movie.item.quality} Vietsub. ${
-          movie.seoOnPage.descriptionHead ||
-          movie.item.content?.replace(/<[^>]*>/g, "").substring(0, 100) ||
-          ""
-        }`,
-      }
-    : null;
+  const watchPageSEO = movie?.seoOnPage;
 
   return (
-    <div
-      className={`min-h-screen text-white relative ${
-        cinema
-          ? "fixed inset-0 z-[9999] flex items-center justify-center bg-black"
-          : "px-[3%] mt-16"
-      }`}
-    >
+    <div className="min-h-screen flex flex-col">
       {watchPageSEO && (
         <SEO seoData={watchPageSEO} baseUrl={window.location.origin} />
       )}
-
-      {!cinema && (
-        <div className="flex items-center gap-4 my-6 pt-2 px-2">
-          <button
-            className="aspect-square w-8 p-1 rounded-full flex items-center justify-center text-white hover:text-white/80 transition-all ease-linear border border-white/40 hover:border-white"
-            onClick={() => navigate("/trang-chu")}
-          >
-            <FontAwesomeIcon icon="fa-solid fa-chevron-left" size="xs" />
-          </button>
-          <h1 className="text-2xl font-bold">
-            Xem phim {movie.item.name} - Tập{" "}
-            {movie.item.episodes[svr].server_data[ep].name}
-          </h1>
+      <div className="px-[3%] relative w-screen aspect-video lg:aspect-[16/6] overflow-visible">
+        <div
+          className={`block absolute top-0 left-0 w-full aspect-video lg:aspect-[16/6] transition-opacity duration-1000 ease-in-out`}
+        >
+          <LazyImage
+            src={movie.item.poster_url}
+            alt={movie.item.name}
+            sizes="100vw"
+            className="object-top"
+            priority
+          />
         </div>
-      )}
-      <div
-        className={`${
-          cinema ? "w-full max-w-screen-2xl mx-auto relative z-10" : ""
-        } rounded sm:rounded-xl overflow-hidden`}
-      >
-        <div className="relative w-full bg-black aspect-video">
-          <div className="absolute top-0 left-0 w-full aspect-video">
-            <VideoPlayer
-              movie={movie.item}
-              episode={ep}
-              svr={svr}
-              resumeData={resumeData}
-              autoEpisodes={autoEpisodes}
-              onVideoEnd={() => {
-                if (
-                  autoEpisodes &&
-                  parseInt(ep) < movie.item.episodes[svr].server_data.length - 1
-                ) {
-                  shouldAutoPlayRef.current = true;
-                  navigate(
-                    `/xem-phim/${movie.item.slug}?svr=${svr}&ep=${
-                      parseInt(ep) + 1
-                    }`
-                  );
-                }
-              }}
-              onNavigateToNextEpisode={handleNavigateToNextEpisode}
-              shouldAutoPlay={shouldAutoPlayRef.current}
-            />
+        <div className="absolute top-0 left-0 w-full aspect-video lg:aspect-[16/6] bg-gradient-to-t from-[#141414] to-transparent z-0" />
+        <div className="flex flex-col w-full h-full aspect-[16/3] items-center sm:items-start justify-center sm:justify-end gap-2">
+          <div className="h-full flex flex-col justify-end z-10 space-y-1 w-full sm:w-2/3 xl:w-1/2 px-[3%] sm:px-0">
+            <div className="flex items-center space-x-1 sm:justify-start justify-center">
+              <img
+                className="h-[15px] sm:h-[20px] object-cover"
+                src={logo_n}
+                alt="Needflex"
+              ></img>
+              <span className="font-bold text-white text-xs tracking-[3px]">
+                {movie.item.type === "series"
+                  ? "LOẠT PHIM"
+                  : movie.item.type === "hoathinh"
+                  ? "HOẠT HÌNH"
+                  : "PHIM"}
+              </span>
+            </div>
+            <div
+              className={`w-full max-h-[43.75%] sm:h-auto sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] `}
+            >
+              <h1
+                className="uppercase text-4xl md:text-6xl xl:text-7xl font-bold tracking-tighter text-white truncate line-clamp-3 sm:line-clamp-2 text-pretty text-center sm:text-left"
+                style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
+              >
+                {movie.item.origin_name}
+              </h1>
+            </div>
           </div>
-        </div>
-        <div className="bg-black px-2 sm:px-4 py-2 sm:py-3 flex flex-wrap gap-2 sm:gap-3">
-          {/* Nút Yêu thích */}
-          <button
-            className={`relative group/tooltip p-2 sm:px-5 sm:py-3 flex items-center justify-center rounded-lg transition-all duration-300 ease-out border-2 ${
-              saved
-                ? "bg-gradient-to-r from-red-600/20 to-pink-600/20 border-red-500/50 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:border-red-500"
-                : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40 hover:text-white"
-            } hover:scale-105 active:scale-95`}
-            onClick={handleSaveMovie}
-          >
-            <FontAwesomeIcon
-              icon={`fa-${saved ? "solid" : "regular"} fa-heart`}
-              className={`${
-                saved
-                  ? "text-red-500 animate-pulse"
-                  : "text-white/70 group-hover/tooltip:text-white"
-              } sm:text-xl text-base transition-all duration-300`}
-            />
-            <span className="ml-2 text-base font-medium hidden sm:block">
-              Yêu thích
-            </span>
-          </button>
-
-          {/* Nút Chuyển tập */}
-          <button
-            className={`relative group/tooltip p-2 sm:px-5 sm:py-3 flex items-center justify-center rounded-lg transition-all duration-300 ease-out border-2 ${
-              autoEpisodes
-                ? "bg-gradient-to-r from-green-600/20 to-emerald-600/20 border-green-500/50 text-white shadow-lg shadow-green-500/20 hover:shadow-green-500/40 hover:border-green-500"
-                : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40 hover:text-white"
-            } hover:scale-105 active:scale-95`}
-            onClick={() => setAutoEpisodes(!autoEpisodes)}
-          >
-            <FontAwesomeIcon
-              icon={`fa-solid fa-${autoEpisodes ? "toggle-on" : "toggle-off"}`}
-              className={`${
-                autoEpisodes
-                  ? "text-green-500"
-                  : "text-gray-400 group-hover/tooltip:text-white"
-              } sm:text-xl text-base transition-all duration-300`}
-            />
-            <span className="ml-2 text-base font-medium hidden sm:block">
-              Chuyển tập
-            </span>
-          </button>
-
-          {/* Nút Rạp phim */}
-          <button
-            className={`relative group/tooltip p-2 sm:px-5 sm:py-3 flex items-center justify-center rounded-lg transition-all duration-300 ease-out border-2 ${
-              cinema
-                ? "bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-purple-500/50 text-white shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 hover:border-purple-500"
-                : "bg-white/5 border-white/20 text-white/70 hover:bg-white/10 hover:border-white/40 hover:text-white"
-            } hover:scale-105 active:scale-95`}
-            onClick={() => setCinema(!cinema)}
-          >
-            <FontAwesomeIcon
-              icon="fa-solid fa-tv"
-              className={`${
-                cinema
-                  ? "text-purple-500"
-                  : "text-gray-400 group-hover/tooltip:text-white"
-              } sm:text-xl text-base transition-all duration-300`}
-            />
-            <span className="ml-2 text-base font-medium hidden sm:block">
-              Rạp phim
-            </span>
-          </button>
+          <div className="flex items-end sm:w-1/2 lg:w-full w-[80%] sm:px-0">
+            <div className="flex flex-col gap-1 w-full items-end lg:items-start">
+              {watchingMovie !== null && (
+                <div className="relative flex flex-col gap-1 w-full lg:w-1/2">
+                  <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                    Tập {watchingMovie.episodeName}
+                  </span>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="h-[3px] bg-[#5b5b5b] w-full">
+                      <div
+                        className="h-full bg-[#d80f16] transition-all duration-300"
+                        style={{ width: `${watchingMovie.progress || 0}%` }}
+                      />
+                    </div>
+                    <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                      {formatSecondsToMinutes(watchingMovie.currentTime || 0)}/
+                      {formatSecondsToMinutes(watchingMovie.duration || 0)}ph
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="flex sm:space-x-3 space-x-2 w-full lg:w-auto">
+                <div className="px-4 sm:px-7 lg:px-10 relative w-1/2 lg:w-fit rounded-md bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear cursor-pointer">
+                  {(movie.item.episodes[0].server_data[0].link_embed != "" &&
+                    (watchingMovie === null ? (
+                      <div
+                        onClick={() =>
+                          navigate(
+                            `/xem-phim/${movie.item.slug}?svr=${0}&ep=${0}`
+                          )
+                        }
+                        className="cursor-pointer"
+                        key={movie.item._id + 0}
+                      >
+                        <button className="px-2 font-medium text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span>Phát</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => handlePlayMovie(watchingMovie)}
+                        key={movie.item._id + 0}
+                        className="cursor-pointer"
+                      >
+                        <button className="px-2 font-medium text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span className="text-nowrap">Xem tiếp</span>
+                        </button>
+                      </div>
+                    ))) || (
+                    <button
+                      className="px-3 sm:px-7 lg:px-10 font-medium text-black text-nowrap flex flex-nowrap items-center space-x-2"
+                      onClick={() => {
+                        toast.warning("Tính năng đang được phát triển.");
+                      }}
+                    >
+                      <FontAwesomeIcon icon="fa-solid fa-bell" />
+                      <span>Nhắc tôi</span>
+                    </button>
+                  )}
+                </div>
+                <div
+                  className={`relative rounded-md  backdrop-blur-sm w-1/2 lg:w-auto flex items-center justify-center ${
+                    isFavourite
+                      ? "bg-red-500/30 hover:bg-red-500/20"
+                      : "bg-white/30 hover:bg-white/20"
+                  }`}
+                >
+                  <button
+                    className="py-2 px-3 sm:px-7 lg:px-10 text-white font-medium flex items-center justify-center space-x-2"
+                    onClick={handleSaveMovie}
+                  >
+                    <FontAwesomeIcon
+                      icon={
+                        loadingFav
+                          ? "fa-solid fa-spinner"
+                          : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
+                      }
+                      className={`sm:text-lg sm:w-5 sm:h-5 h-3 w-3 ${
+                        isFavourite ? "text-red-500" : "text-white"
+                      } ${loadingFav ? "animate-spin" : ""}`}
+                    />
+                    <span
+                      className={`text-nowrap ${
+                        isFavourite ? "text-red-500" : "text-white"
+                      }`}
+                    >
+                      {isFavourite ? "Đã thích" : "Yêu thích"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {!cinema && (
-        <div className="flex mt-4">
-          <div className="flex flex-col space-y-5 w-full md:pr-4">
-            <div className="items-start justify-between gap-3 hidden lg:flex">
-              <div className="w-[15%] rounded-md overflow-hidden">
-                <LazyImage
-                  src={movie.item.thumb_url}
-                  alt={movie.item.name}
-                  sizes="14vw"
-                />
-              </div>
-              <div className="w-[50%] p-2 space-y-2 ">
-                <h1 className="font-bold text-xl lg:text-2xl">
-                  {movie.item.name}
-                </h1>
-                <span className="text-white/70 text-base">
-                  {movie.item.origin_name}
-                </span>
-                <div className="flex items-center flex-wrap gap-2">
-                  {movie.item.imdb?.vote_count > 0 && (
-                    <a
-                      className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 text-sm bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
-                      href={`https://www.imdb.com/title/${movie.item.imdb.id}`}
-                      target="_blank"
-                    >
-                      <span className="text-yellow-500 font-medium">IMDb</span>
-                      <span className="font-semibold">
-                        {movie.item.imdb?.vote_average.toFixed(1)}
-                      </span>
-                    </a>
-                  )}
-                  {movie.item.tmdb?.vote_count > 0 && (
-                    <a
-                      className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 text-sm bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
-                      href={`https://www.themoviedb.org/${
-                        movie.item.type == "single" ? "movie" : "tv"
-                      }/${movie.item.tmdb.id}`}
-                      target="_blank"
-                    >
-                      <span className="text-[#01b4e4] font-medium">TMDB</span>
-                      <span className="font-semibold">
-                        {movie.item.tmdb?.vote_average.toFixed(1)}
-                      </span>
-                    </a>
-                  )}
-                  <span className="bg-white text-black font-medium rounded-md py-1 px-2 text-sm">
-                    {movie.item.episode_current}
-                  </span>
-                  <span className="border-[1px] rounded-md py-1 px-2 text-sm">
-                    {movie.item.year}
-                  </span>
-                  {movie.item.time !== "? phút/tập" && (
-                    <span className="border-[1px] rounded-md py-1 px-2 text-sm">
-                      {movie.item.time}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2 flex-wrap">
-                  {movie.item.category.map((category, index) => (
-                    <span
-                      key={index}
-                      className=" rounded-md py-1 px-2 text-xs bg-white/10"
-                    >
-                      {category.name}
-                    </span>
-                  ))}
-                </div>
-                {movie.item.type == "series" &&
-                  (movie.item.status == "ongoing" ? (
-                    <div className="flex items-center space-x-1 bg-orange-500/20 rounded-full px-2 py-1 w-fit ">
-                      <LoaderCircle
-                        className="text-orange-500 animate-spin"
-                        size={14}
-                      />
-                      <span className="text-sm pr-1 text-orange-500">
-                        {"Đã chiếu: "}
-                        {movie.item.episode_current.split(" ")[1]} /{" "}
-                        {movie.item.episode_total}
-                      </span>
-                    </div>
-                  ) : movie.item.status == "trailer" ? (
-                    <div className="flex items-center justify-center space-x-2 bg-red-500/20 rounded-full py-1 px-2 w-fit">
-                      <FontAwesomeIcon
-                        icon="fa-solid fa-clapperboard"
-                        size="xs"
-                        className="text-red-500"
-                      />
-                      <span className="text-sm text-red-500 pr-1">
-                        Sắp ra mắt
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center space-x-2 bg-green-500/20 rounded-full py-1 px-2 w-fit">
-                      <FontAwesomeIcon
-                        icon="fa-solid fa-circle-check"
-                        size="xs"
-                        className="text-green-500"
-                      />
-                      <span className="text-sm text-green-500 pr-1">
-                        {"Đã hoàn thành: "}
-                        {movie.item.episode_total.split(" ")[0]} /{" "}
-                        {movie.item.episode_total}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-              <div className="w-[35%] mt-2">
-                <div
-                  className=" text-white/70 text-pretty text-sm line-clamp-6 "
-                  dangerouslySetInnerHTML={{ __html: movie.item.content }}
-                />
-                <span
-                  className="text-sm text-green-400 cursor-pointer block mt-4"
-                  onClick={() =>
-                    navigate(
-                      `/trang-chu?movie=${movie.item.slug}&tmdb_id=${movie.item.tmdb.id}&tmdb_type=${movie.item.tmdb.type}`
-                    )
-                  }
-                >
-                  Thông tin chi tiết
-                  <FontAwesomeIcon
-                    icon="fa-solid fa-chevron-right"
-                    size="sm"
-                    className="ml-2 text-green-400"
+      <div className="flex mt-4 p-[3%] text-white">
+        <div className="flex flex-col space-y-5 w-full md:pr-4">
+          <div className="items-start justify-between gap-3 flex flex-col md:flex-row">
+            <div className="w-full xl:w-1/3 md:w-[50%] space-y-2 text-xs lg:text-sm">
+              {topSet && topSet.has(movie.item.slug) && (
+                <div className="flex items-center gap-2">
+                  <img
+                    src={Top10Icon}
+                    alt="Top 10"
+                    className="w-7 aspect-auto"
                   />
-                </span>
-              </div>
-            </div>
-            <div>
-              {/* Danh sách server và episodes */}
-              {movie.item.episodes &&
-                movie.item.episodes[server] &&
-                movie.item.episodes[server].server_data &&
-                movie.item.episodes[server].server_data.length > 0 && (
-                  <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
-                    <div className="flex gap-4 items-center">
-                      <span className="text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
-                        <Server size={16} strokeWidth={3} />
-                        Server
-                      </span>
-                      {movie.item.episodes.map((item, index) => (
-                        <div
-                          key={index}
-                          className={`${
-                            server == index
-                              ? " text-black bg-white border-[1px] border-white"
-                              : "text-white/70 hover:text-white hover:bg-white/10 border-[1px] border-white/70"
-                          } cursor-pointer px-2 py-1 rounded-md transition-all ease-linear flex items-center gap-2 text-base `}
-                          onClick={() => setServer(index)}
-                        >
-                          <Captions size={16} />
-                          <span>{item.server_name.split(" #")[0]}</span>
-                        </div>
-                      ))}
-                    </div>
-                    {movie.item.episodes[server].server_data.length > 100 && (
-                      <div className="flex gap-3 flex-wrap ">
-                        {Array.from({
-                          length: Math.ceil(
-                            movie.item.episodes[server].server_data.length / 100
-                          ),
-                        }).map((item, index) => (
-                          <button
-                            className={`text-xs rounded py-1.5 px-3 ${
-                              episodesRange == index * 100
-                                ? "bg-white text-black border-white"
-                                : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
-                            } transition-all ease-linear`}
-                            key={index}
-                            onClick={() => setEpisodesRange(index * 100)}
-                          >
-                            Tập{" "}
-                            {
-                              movie.item.episodes[server].server_data[
-                                index * 100
-                              ].name
-                            }{" "}
-                            -{" "}
-                            {movie.item.episodes[server].server_data?.[
-                              index * 100 + 99
-                            ]?.name ||
-                              movie.item.episodes[server].server_data[
-                                movie.item.episodes[server].server_data.length -
-                                  1
-                              ].name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 xl:grid-cols-6 2xl:grid-cols-8">
-                      {movie.item.episodes[server].server_data
-                        .slice(episodesRange, episodesRange + 100)
-                        .map((item, index) => (
-                          <div
-                            onClick={() =>
-                              navigate(
-                                `/xem-phim/${
-                                  movie.item.slug
-                                }?svr=${server}&ep=${episodesRange + index}`
-                              )
-                            }
-                            className={`relative rounded bg-[#242424] group ${
-                              episodesRange + index == ep && svr == server
-                                ? "bg-white/15 "
-                                : "hover:bg-opacity-70"
-                            }`}
-                            key={movie.item._id + episodesRange + index}
-                          >
-                            <button
-                              className={`py-2 transition-all ease-linear  sm:gap-2 gap-1 flex items-center justify-center text-nowrap ${
-                                episodesRange + index == ep && svr == server
-                                  ? "text-black bg-white"
-                                  : "text-white/70 group-hover:text-white"
-                              } text-center w-full rounded`}
-                            >
-                              <FontAwesomeIcon
-                                icon="fa-solid fa-play"
-                                className="text-xs"
-                              />
-                              <span className="sm:text-base text-sm">
-                                {" "}
-                                Tập {item.name}
-                              </span>
-                            </button>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
+                  <span className="text-white text-base sm:text-xl font-bold">
+                    #
+                    {movie.item.type === "single" ||
+                    movie.item.episode_total === "1"
+                      ? [...topSet].findIndex(
+                          (slug) => slug === movie.item.slug
+                        ) +
+                        1 +
+                        " Phim lẻ "
+                      : [...topSet].findIndex(
+                          (slug) => slug === movie.item.slug
+                        ) -
+                        9 +
+                        " Phim bộ "}
+                    hôm nay
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center flex-wrap gap-2">
+                {movie.item.imdb?.vote_count > 0 && (
+                  <a
+                    className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                    href={`https://www.imdb.com/title/${movie.item.imdb.id}`}
+                    target="_blank"
+                  >
+                    <span className="text-yellow-500 font-medium">IMDb</span>
+                    <span className="font-medium">
+                      {movie.item.imdb?.vote_average.toFixed(1)}
+                    </span>
+                  </a>
                 )}
+                {movie.item.tmdb?.vote_count > 0 && (
+                  <a
+                    className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                    href={`https://www.themoviedb.org/${
+                      movie.item.type == "single" ? "movie" : "tv"
+                    }/${movie.item.tmdb.id}`}
+                    target="_blank"
+                  >
+                    <span className="text-[#01b4e4] font-medium">TMDB</span>
+                    <span className="font-medium">
+                      {movie.item.tmdb?.vote_average.toFixed(1)}
+                    </span>
+                  </a>
+                )}
+                <span className="bg-white text-black font-medium rounded-md py-1 px-2">
+                  {movie.item.episode_current}
+                </span>
+                <span className="border-[1px] rounded-md py-1 px-2">
+                  {movie.item.year}
+                </span>
+                {movie.item.time !== "? phút/tập" && (
+                  <span className="border-[1px] rounded-md py-1 px-2">
+                    {movie.item.time}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {movie.item.category.map((category, index) => (
+                  <span
+                    key={index}
+                    className=" rounded-md py-1 px-2 text-xs bg-white/10"
+                  >
+                    {category.name}
+                  </span>
+                ))}
+              </div>
+              {movie.item.type == "series" &&
+                (movie.item.status == "ongoing" ? (
+                  <div className="flex items-center space-x-1 bg-orange-500/20 rounded-full px-2 py-1 w-fit ">
+                    <LoaderCircle
+                      className="text-orange-500 animate-spin"
+                      size={14}
+                    />
+                    <span className="text-sm pr-1 text-orange-500">
+                      {"Đã chiếu: "}
+                      {movie.item.episode_current.split(" ")[1]} /{" "}
+                      {movie.item.episode_total}
+                    </span>
+                  </div>
+                ) : movie.item.status == "trailer" ? (
+                  <div className="flex items-center justify-center space-x-2 bg-red-500/20 rounded-full py-1 px-2 w-fit">
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-clapperboard"
+                      size="xs"
+                      className="text-red-500"
+                    />
+                    <span className="text-sm text-red-500 pr-1">
+                      Sắp ra mắt
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center space-x-2 bg-green-500/20 rounded-full py-1 px-2 w-fit">
+                    <FontAwesomeIcon
+                      icon="fa-solid fa-circle-check"
+                      size="xs"
+                      className="text-green-500"
+                    />
+                    <span className="text-sm text-green-500 pr-1">
+                      {"Đã hoàn thành: "}
+                      {movie.item.episode_total.split(" ")[0]} /{" "}
+                      {movie.item.episode_total}
+                    </span>
+                  </div>
+                ))}
+            </div>
+            <div className="w-full xl:w-2/3 md:w-[50%] mt-2">
+              <div
+                className="text-pretty text-sm lg:text-base"
+                dangerouslySetInnerHTML={{ __html: movie.item.content }}
+              />
             </div>
           </div>
-          {peoples.length > 0 && (
-            <div className="flex-col space-y-5 w-[35%] p-2 hidden md:flex border-l-[0.5px] border-white/10 pl-4">
-              <div className="flex justify-between pl-2">
-                <span className="font-bold text-2xl">Diễn viên</span>
-              </div>
-              <div className="grid grid-cols-2 gap-6 xl:grid-cols-3">
-                {peoples.slice(0, 6).map(
-                  (people, index) =>
-                    people.profile_path && (
+          <div>
+            {/* Danh sách server và episodes */}
+            {movie.item.episodes &&
+              movie.item.episodes[server] &&
+              movie.item.episodes[server].server_data &&
+              movie.item.episodes[server].server_data.length > 0 && (
+                <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
+                  <span className="font-bold text-xl lg:text-2xl">
+                    Danh sách tập
+                  </span>
+                  <div className="flex gap-4 items-center">
+                    <span className="text-lg font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
+                      <Server size={16} strokeWidth={3} />
+                      Server
+                    </span>
+                    {movie.item.episodes.map((item, index) => (
                       <div
                         key={index}
-                        className="flex flex-col space-y-2 rounded-md overflow-hidden items-stretch justify-around"
+                        className={`${
+                          server == index
+                            ? " text-white bg-[#d80f16]"
+                            : "bg-white/10 hover:bg-white/20 hover:text-white hover:border-white text-white/70"
+                        } cursor-pointer px-2 py-1 rounded-md transition-all ease-linear flex items-center gap-2 text-base `}
+                        onClick={() => setServer(index)}
                       >
-                        <LazyImage
-                          src={
-                            "https://image.tmdb.org/t/p" + people.profile_path
-                          }
-                          alt={people.name}
-                          sizes="8vw"
-                          className="!w-full !h-auto rounded-full aspect-square"
-                        />
-                        <span className="text-sm font-semibold text-center text-pretty">
-                          {people.name}
-                        </span>
-                        <span className="text-sm text-center text-pretty">
-                          {people.character}
-                        </span>
+                        <Captions size={16} />
+                        <span>{item.server_name.split(" #")[0]}</span>
                       </div>
-                    )
-                )}
+                    ))}
+                  </div>
+                  {movie.item.episodes[server].server_data.length > 100 && (
+                    <div className="flex gap-3 flex-wrap ">
+                      {Array.from({
+                        length: Math.ceil(
+                          movie.item.episodes[server].server_data.length / 100
+                        ),
+                      }).map((item, index) => (
+                        <button
+                          className={`text-xs rounded-md py-1.5 px-3 ${
+                            episodesRange == index * 100
+                              ? "bg-white text-black border-white"
+                              : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
+                          } transition-all ease-linear`}
+                          key={index}
+                          onClick={() => setEpisodesRange(index * 100)}
+                        >
+                          Tập{" "}
+                          {
+                            movie.item.episodes[server].server_data[index * 100]
+                              .name
+                          }{" "}
+                          -{" "}
+                          {movie.item.episodes[server].server_data?.[
+                            index * 100 + 99
+                          ]?.name ||
+                            movie.item.episodes[server].server_data[
+                              movie.item.episodes[server].server_data.length - 1
+                            ].name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 xl:grid-cols-8 2xl:grid-cols-10">
+                    {movie.item.episodes[server].server_data
+                      .slice(episodesRange, episodesRange + 100)
+                      .map((item, index) => (
+                        <div
+                          onClick={() =>
+                            navigate(
+                              `/xem-phim/${movie.item.slug}?svr=${server}&ep=${
+                                episodesRange + index
+                              }`
+                            )
+                          }
+                          className={`relative rounded-md bg-[#242424] grouphover:bg-opacity-70`}
+                          key={movie.item._id + episodesRange + index}
+                        >
+                          <button
+                            className={`py-2 transition-all ease-linear  sm:gap-2 gap-1 flex items-center justify-center text-nowrap text-white/70 group-hover:text-white text-center w-full rounded-md`}
+                          >
+                            <FontAwesomeIcon
+                              icon="fa-solid fa-play"
+                              className="text-xs"
+                            />
+                            <span className="sm:text-base text-sm">
+                              {" "}
+                              Tập {item.name}
+                            </span>
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+          </div>
+          {peoples.length > 0 && (
+            <div className="flex-col space-y-5">
+              <div className="flex justify-between">
+                <span className="font-bold text-xl lg:text-2xl">Diễn viên</span>
+              </div>
+              <div className="flex">
+                <Swiper
+                  modules={[]}
+                  spaceBetween={10}
+                  slidesPerView={3}
+                  slidesPerGroup={3}
+                  navigation
+                  pagination={{ clickable: true }}
+                  breakpoints={{
+                    640: {
+                      slidesPerView: 4,
+                      slidesPerGroup: 4,
+                    },
+                    768: {
+                      slidesPerView: 5,
+                      slidesPerGroup: 5,
+                    },
+                    1024: {
+                      slidesPerView: 6,
+                      slidesPerGroup: 6,
+                    },
+                    1280: {
+                      slidesPerView: 8,
+                      slidesPerGroup: 8,
+                    },
+                  }}
+                  className="w-full cursor-pointer"
+                >
+                  {peoples.map(
+                    (people, index) =>
+                      people.profile_path && (
+                        <SwiperSlide key={index}>
+                          <div className="flex flex-col space-y-2 rounded-md overflow-hidden items-stretch justify-around">
+                            <div className="w-full h-full p-3">
+                              <LazyImage
+                                src={
+                                  "https://image.tmdb.org/t/p" +
+                                  people.profile_path
+                                }
+                                alt={people.name}
+                                sizes="(max-width: 640px) 20vw,(max-width: 768px) 14vw, (max-width: 1024px) 13vw,10vw"
+                                className="!w-full !h-auto rounded-full aspect-square"
+                              />
+                            </div>
+                            <span className="text-sm font-semibold text-center text-pretty">
+                              {people.name}
+                            </span>
+                            <span className="text-sm text-center text-pretty">
+                              {people.character}
+                            </span>
+                          </div>
+                        </SwiperSlide>
+                      )
+                  )}
+                </Swiper>
               </div>
             </div>
           )}
+          <Recommend
+            type={movie.breadCrumb[0].slug.split("/danh-sach")[1]}
+            country={movie.item.country[0].slug}
+            category={movie.item.category[0].slug}
+            slug={movie.item.slug}
+          />
+          <div className="flex flex-col gap-2" id={"more-info"}>
+            <h3 className="text-xl lg:text-2xl">
+              Giới thiệu về <b>{movie.item.origin_name}</b>
+            </h3>
+            {movie.item.director[0] !== "" && (
+              <div className="leading-3 text-justify text-sm text-white/80">
+                <span className="opacity-50 text-sm">Đạo diễn: </span>
+                {movie.item.director.map((director, index) => (
+                  <span key={index} className="text-sm text-white">
+                    {director}
+                    {index !== movie.item.director.length - 1 && (
+                      <span>, </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="leading-3 text-justify text-sm text-white/80">
+              <span className="opacity-50 text-sm">Diễn viên: </span>
+              {movie.item.actor.map((actor, index) => (
+                <span key={index} className="text-sm text-white">
+                  {actor}
+                  {index !== movie.item.actor.length - 1 && <span>, </span>}
+                </span>
+              ))}
+            </div>
+            <div className="leading-3 text-justify text-sm text-white/80">
+              <span className="opacity-50 text-sm">Thể loại: </span>
+              {movie.item.category.map((category, index) => (
+                <span key={index} className="text-sm text-white">
+                  {category.name}
+                  {index !== movie.item.category.length - 1 && <span>, </span>}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
