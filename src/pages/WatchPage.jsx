@@ -11,6 +11,8 @@ import {
   TvMinimalPlay,
   Info,
   Heart,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import logo_n from "../assets/images/N_logo.png";
 import LazyImage from "../components/LazyImage";
@@ -41,6 +43,13 @@ const WatchPage = () => {
   const { topSet } = useTop();
   const [watchingMovie, setWatchingMovie] = useState(null);
   const { getWatchingMovie, watchingSlugs } = useWatching();
+
+  // Swiper navigation refs
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
+  const [swiperHeight, setSwiperHeight] = useState(0);
+  const [canSlidePrev, setCanSlidePrev] = useState(false);
+  const [canSlideNext, setCanSlideNext] = useState(true);
   useEffect(() => {
     if (watchingSlugs.length === 0) return;
     setWatchingMovie(getWatchingMovie(movieSlug) || null);
@@ -148,9 +157,9 @@ const WatchPage = () => {
       {watchPageSEO && (
         <SEO seoData={watchPageSEO} baseUrl={window.location.origin} />
       )}
-      <div className="px-[3%] relative w-screen aspect-video lg:aspect-[16/6] overflow-visible">
+      <div className="px-[3%] relative w-screen aspect-square sm:aspect-video lg:aspect-[16/6] overflow-visible">
         <div
-          className={`block absolute top-0 left-0 w-full aspect-video lg:aspect-[16/6] transition-opacity duration-1000 ease-in-out`}
+          className={`sm:block hidden absolute top-0 left-0 w-full aspect-video lg:aspect-[16/6] transition-opacity duration-1000 ease-in-out`}
         >
           <LazyImage
             src={movie.item.poster_url}
@@ -160,8 +169,19 @@ const WatchPage = () => {
             priority
           />
         </div>
-        <div className="absolute top-0 left-0 w-full aspect-video lg:aspect-[16/6] bg-gradient-to-t from-[#141414] to-transparent z-0" />
-        <div className="flex flex-col w-full h-full aspect-[16/3] items-center sm:items-start justify-center sm:justify-end gap-2">
+        <div
+          className={`sm:hidden block absolute z-0 top-0 left-0 w-full aspect-[2/3] transition-opacity duration-1000 ease-in-out`}
+        >
+          <LazyImage
+            src={movie.item.thumb_url}
+            alt={movie.item.name}
+            sizes="100vw"
+            className="object-top"
+            priority
+          />
+        </div>
+        <div className="absolute top-0 left-0 w-full aspect-[2/3] sm:aspect-video lg:aspect-[16/6] bg-gradient-to-t from-[#141414] to-transparent z-0" />
+        <div className="flex flex-col w-full h-full aspect-square sm:aspect-[16/3] items-center sm:items-start justify-center sm:justify-end gap-2">
           <div className="h-full flex flex-col justify-end z-10 space-y-1 w-full sm:w-2/3 xl:w-1/2 px-[3%] sm:px-0">
             <div className="flex items-center space-x-1 sm:justify-start justify-center">
               <img
@@ -285,8 +305,8 @@ const WatchPage = () => {
           </div>
         </div>
       </div>
-      <div className="flex mt-4 p-[3%] text-white">
-        <div className="flex flex-col space-y-5 w-full md:pr-4">
+      <div className="flex mt-4 p-[3%] text-white z-10">
+        <div className="flex flex-col space-y-5 w-full">
           <div className="items-start justify-between gap-3 flex flex-col md:flex-row">
             <div className="w-full xl:w-1/3 md:w-[50%] space-y-2 text-xs lg:text-sm">
               {topSet && topSet.has(movie.item.slug) && (
@@ -317,7 +337,7 @@ const WatchPage = () => {
               <div className="flex items-center flex-wrap gap-2">
                 {movie.item.imdb?.vote_count > 0 && (
                   <a
-                    className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                    className="flex items-center space-x-2 border-[1px] border-yellow-500 rounded-md py-1 px-2 bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear backdrop-blur-sm sm:backdrop-blur-none"
                     href={`https://www.imdb.com/title/${movie.item.imdb.id}`}
                     target="_blank"
                   >
@@ -329,7 +349,7 @@ const WatchPage = () => {
                 )}
                 {movie.item.tmdb?.vote_count > 0 && (
                   <a
-                    className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                    className="flex items-center space-x-2 border-[1px] border-[#01b4e4] rounded-md py-1 px-2 bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear backdrop-blur-sm sm:backdrop-blur-none"
                     href={`https://www.themoviedb.org/${
                       movie.item.type == "single" ? "movie" : "tv"
                     }/${movie.item.tmdb.id}`}
@@ -344,11 +364,11 @@ const WatchPage = () => {
                 <span className="bg-white text-black font-medium rounded-md py-1 px-2">
                   {movie.item.episode_current}
                 </span>
-                <span className="border-[1px] rounded-md py-1 px-2">
+                <span className="border-[1px] rounded-md py-1 px-2 backdrop-blur-sm sm:backdrop-blur-none bg-white/10 sm:bg-transparent">
                   {movie.item.year}
                 </span>
                 {movie.item.time !== "? phút/tập" && (
-                  <span className="border-[1px] rounded-md py-1 px-2">
+                  <span className="border-[1px] rounded-md py-1 px-2 backdrop-blur-sm sm:backdrop-blur-none bg-white/10 sm:bg-transparent">
                     {movie.item.time}
                   </span>
                 )}
@@ -357,7 +377,7 @@ const WatchPage = () => {
                 {movie.item.category.map((category, index) => (
                   <span
                     key={index}
-                    className=" rounded-md py-1 px-2 text-xs bg-white/10"
+                    className=" rounded-md py-1 px-2 text-xs bg-white/10 backdrop-blur-sm sm:backdrop-blur-none"
                   >
                     {category.name}
                   </span>
@@ -365,7 +385,7 @@ const WatchPage = () => {
               </div>
               {movie.item.type == "series" &&
                 (movie.item.status == "ongoing" ? (
-                  <div className="flex items-center space-x-1 bg-orange-500/20 rounded-full px-2 py-1 w-fit ">
+                  <div className="flex items-center space-x-1 bg-orange-500/20 rounded-full px-2 py-1 w-fit backdrop-blur-sm sm:backdrop-blur-none">
                     <LoaderCircle
                       className="text-orange-500 animate-spin"
                       size={14}
@@ -377,7 +397,7 @@ const WatchPage = () => {
                     </span>
                   </div>
                 ) : movie.item.status == "trailer" ? (
-                  <div className="flex items-center justify-center space-x-2 bg-red-500/20 rounded-full py-1 px-2 w-fit">
+                  <div className="flex items-center justify-center space-x-2 bg-red-500/20 rounded-full py-1 px-2 w-fit backdrop-blur-sm sm:backdrop-blur-none">
                     <FontAwesomeIcon
                       icon="fa-solid fa-clapperboard"
                       size="xs"
@@ -388,7 +408,7 @@ const WatchPage = () => {
                     </span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center space-x-2 bg-green-500/20 rounded-full py-1 px-2 w-fit">
+                  <div className="flex items-center justify-center space-x-2 bg-green-500/20 rounded-full py-1 px-2 w-fit backdrop-blur-sm sm:backdrop-blur-none">
                     <FontAwesomeIcon
                       icon="fa-solid fa-circle-check"
                       size="xs"
@@ -414,7 +434,8 @@ const WatchPage = () => {
             {movie.item.episodes &&
               movie.item.episodes[server] &&
               movie.item.episodes[server].server_data &&
-              movie.item.episodes[server].server_data.length > 0 && (
+              movie.item.episodes[server].server_data.length > 0 &&
+              movie.item.episodes[server].server_data[0].link_m3u8 !== "" && (
                 <div className="flex flex-col space-y-5 lg:border-t-[0.5px] border-white/10 lg:pt-4">
                   <span className="font-bold text-xl lg:text-2xl">
                     Danh sách tập
@@ -509,14 +530,37 @@ const WatchPage = () => {
               <div className="flex justify-between">
                 <span className="font-bold text-xl lg:text-2xl">Diễn viên</span>
               </div>
-              <div className="flex">
+              <div className="flex relative group/carousel">
                 <Swiper
-                  modules={[]}
+                  modules={[Navigation]}
                   spaceBetween={10}
                   slidesPerView={3}
                   slidesPerGroup={3}
-                  navigation
-                  pagination={{ clickable: true }}
+                  speed={500}
+                  loop={peoples.filter((p) => p.profile_path).length >= 16}
+                  loopAdditionalSlides={
+                    peoples.filter((p) => p.profile_path).length >= 16 ? 8 : 0
+                  }
+                  navigation={{
+                    prevEl: prevRef.current,
+                    nextEl: nextRef.current,
+                  }}
+                  onInit={(swiper) => {
+                    swiper.params.navigation.prevEl = prevRef.current;
+                    swiper.params.navigation.nextEl = nextRef.current;
+                    swiper.navigation.init();
+                    swiper.navigation.update();
+                    setSwiperHeight(swiper.el.clientHeight);
+                    setCanSlidePrev(!swiper.isBeginning);
+                    setCanSlideNext(!swiper.isEnd);
+                  }}
+                  onSlideChange={(swiper) => {
+                    setCanSlidePrev(!swiper.isBeginning);
+                    setCanSlideNext(!swiper.isEnd);
+                  }}
+                  onResize={(swiper) => {
+                    setSwiperHeight(swiper.el.clientHeight);
+                  }}
                   breakpoints={{
                     640: {
                       slidesPerView: 4,
@@ -564,6 +608,32 @@ const WatchPage = () => {
                       )
                   )}
                 </Swiper>
+                <button
+                  ref={prevRef}
+                  style={{ height: swiperHeight + 1 || "100%" }}
+                  className={`group/left absolute -left-[3.3%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-e-sm transition-all ease-in-out duration-100 cursor-pointer ${
+                    canSlidePrev ? "visible" : "invisible"
+                  }`}
+                  disabled={!canSlidePrev}
+                >
+                  <ChevronLeft
+                    className="sm:size-8 size-6 group-hover/left:scale-[1.35] transition-all ease-in-out duration-200"
+                    strokeWidth={2}
+                  />
+                </button>
+                <button
+                  ref={nextRef}
+                  style={{ height: swiperHeight + 1 || "100%" }}
+                  className={`group/right absolute -right-[3.3%] -bottom-[0.5px] z-20 bg-black/50 group-hover/carousel:bg-black/80 text-transparent group-hover/carousel:text-white w-[3%] flex items-center justify-center rounded-s-sm transition-all ease-in-out duration-100 cursor-pointer ${
+                    canSlideNext ? "visible" : "invisible"
+                  }`}
+                  disabled={!canSlideNext}
+                >
+                  <ChevronRight
+                    className="sm:size-8 size-6 group-hover/right:scale-[1.35] transition-all ease-in-out duration-200"
+                    strokeWidth={2}
+                  />
+                </button>
               </div>
             </div>
           )}

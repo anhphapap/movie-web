@@ -24,7 +24,8 @@ export default function Recommend({
   const navigate = useNavigate();
   const { ref, inView } = useInView({
     triggerOnce: true,
-    threshold: 0.2,
+    threshold: 0,
+    rootMargin: "300px 0px",
   });
 
   const handleToggleFavorite = (e, movie) => {

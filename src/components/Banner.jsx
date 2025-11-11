@@ -22,6 +22,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
   const [intervalId, setIntervalId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const bannerRef = useRef(null);
   const { openModal, isModalOpen } = useMovieModal();
@@ -32,6 +33,15 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
       if (intervalId) clearInterval(intervalId);
     };
   }, [intervalId]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Page Visibility API - dừng video khi chuyển tab hoặc mất focus
   useEffect(() => {
@@ -409,7 +419,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         filter && "mt-12"
       }`}
     >
-      {youtubeId && (
+      {youtubeId && !isMobile && (
         <div
           className={`absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
             showTrailer && hasValidTrailer
@@ -505,7 +515,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
         </div>
       )}
       <div
-        className={`block absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
+        className={`sm:block hidden absolute top-0 left-0 w-full aspect-video transition-opacity duration-1000 ease-in-out ${
           playing ? "opacity-0" : "opacity-100"
         }`}
       >
@@ -513,22 +523,22 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
           src={
             movie?.tmdb_image?.backdrop
               ? "https://image.tmdb.org/t/p/" + movie?.tmdb_image?.backdrop
-              : movie.item.poster_url.split("movies/")[1]
+              : import.meta.env.VITE_API_IMAGE + movie.item.poster_url
           }
           alt={movie.item.name}
           priority
           sizes="100vw"
         />
       </div>
-      {/* <div className="absolute top-0 left-0 w-full sm:hidden">
+      <div className="absolute top-0 left-0 w-full aspect-[2/3] sm:hidden block">
         <LazyImage
-          src={movie.item.thumb_url.split("movies/")[1]}
+          src={import.meta.env.VITE_API_IMAGE + movie.item.thumb_url}
           alt={movie.item.name}
           priority
           sizes="100vw"
         />
-      </div> */}
-      <div className="absolute top-0 left-0 w-full aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
+      </div>
+      <div className="absolute top-0 left-0 w-full aspect-[2/3] sm:aspect-video bg-gradient-to-t from-[#141414] to-transparent z-0" />
       <div className="flex flex-col w-full h-full pb-4 sm:pb-0 sm:aspect-[16/6] items-center sm:items-start justify-center sm:justify-end gap-2 sm:gap-4">
         <div className="h-full flex flex-col justify-end z-10 space-y-2 sm:space-y-3 w-full sm:w-2/3 xl:w-1/2 px-[3%] sm:px-0">
           <div className="flex items-center space-x-1 sm:justify-start justify-center">
@@ -634,7 +644,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
             </div>
           </div>
           <div className="absolute right-[3%] sm:right-0 bottom-[55%] -translate-x-1/2 sm:-translate-x-0 sm:bottom-0 flex items-center justify-center z-10 sm:space-x-3">
-            {showTrailer && youtubeId && playing && (
+            {showTrailer && youtubeId && playing && !isMobile && (
               <button
                 onClick={handleToggleMute}
                 className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square h-full rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"

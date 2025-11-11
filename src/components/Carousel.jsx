@@ -273,6 +273,8 @@ export default function Carousel({
             0: { slidesPerView: 2, slidesPerGroup: 2 },
           }}
           speed={500}
+          loop={movies.length >= 12}
+          loopAdditionalSlides={movies.length >= 12 ? 6 : 0}
           className="w-full"
           ref={swiperRef}
         >
@@ -466,6 +468,8 @@ export default function Carousel({
             0: { slidesPerView: 3, slidesPerGroup: 3 },
           }}
           speed={500}
+          loop={movies.length >= 12}
+          loopAdditionalSlides={movies.length >= 12 ? 6 : 0}
           className="w-full"
           ref={swiperRef}
         >
@@ -575,7 +579,7 @@ export default function Carousel({
                   data-index={movies.length + index}
                   className="!overflow-visible px-[.4vw] md:px-[.2vw]"
                 >
-                  <div className="bg-neutral-600 animate-pulse w-full aspect-[2/3] md:aspect-video rounded-[.2vw]" />
+                  <div className="bg-neutral-600 w-full animate-pulse aspect-[2/3] md:aspect-video rounded-[.2vw]" />
                 </SwiperSlide>
               ))}
           </>
@@ -694,6 +698,8 @@ export default function Carousel({
           0: { slidesPerView: 3, slidesPerGroup: 3 },
         }}
         speed={500}
+        loop={watchingPage.length >= 12}
+        loopAdditionalSlides={watchingPage.length >= 12 ? 6 : 0}
         className="w-full"
         ref={swiperRef}
       >

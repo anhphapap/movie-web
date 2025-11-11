@@ -426,15 +426,15 @@ export default function MovieModal({
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
-          <div className="flex flex-row-reverse items-end justify-between absolute left-[5%] right-[5%] bottom-[5%] top-[30%] z-20 lg:gap-10">
+          <div className="flex sm:flex-row-reverse items-end justify-between absolute left-[5%] right-[5%] bottom-[5%] top-[30%] z-20 lg:gap-10">
             <div
-              className={`flex flex-col justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-1/2 sm:w-2/3 sm:px-0 ease-linear duration-[1000ms] ${
+              className={`flex flex-col justify-start sm:justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-2/3 sm:px-0 ease-linear duration-[1000ms] ${
                 fadeOutImage
-                  ? "delay-[3000ms] scale-75 translate-x-[12.5%] translate-y-[12.5%]"
+                  ? "delay-[3000ms] scale-75 sm:translate-x-[12.5%] translate-y-[12.5%] -translate-x-[12.5%]"
                   : "delay-0 scale-100 translate-x-0 translate-y-0"
               }`}
             >
-              <div className="flex items-center space-x-1 justify-end sm:scale-100 scale-75 translate-x-[12.5%] sm:translate-x-0 w-full">
+              <div className="flex items-center space-x-1 justify-start sm:justify-end sm:scale-100 scale-75 -translate-x-[12.5%] sm:translate-x-0 w-full">
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
                   src={logo_n}
@@ -448,7 +448,7 @@ export default function MovieModal({
                     : "PHIM"}
                 </span>
               </div>
-              <div className={`w-2/3 transition-all self-end `}>
+              <div className={`w-2/3 transition-all sm:self-end `}>
                 {modal?.tmdb_image?.logo && (
                   <LazyImage
                     aspect="contain"
@@ -460,7 +460,7 @@ export default function MovieModal({
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-2 justify-end min-w-[50%] sm:min-w-[35%] h-fit">
+            <div className="sm:flex flex-col gap-2 justify-end min-w-[50%] sm:min-w-[35%] h-fit hidden">
               {watchingMovie !== null && (
                 <div className="flex flex-col gap-1 w-full">
                   <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
@@ -575,10 +575,137 @@ export default function MovieModal({
                 </button>
               </div>
             </div>
+            {showTrailer && youtubeId && fadeOutImage && (
+              <button
+                onClick={handleToggleMute}
+                className="sm:hidden text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
+              >
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <FontAwesomeIcon
+                    icon={
+                      isMuted
+                        ? "fa-solid fa-volume-xmark"
+                        : "fa-solid fa-volume-high"
+                    }
+                    className="text-xs sm:text-lg"
+                    size="xs"
+                  />
+                </div>
+              </button>
+            )}
           </div>
         </div>
         <div className="flex flex-col px-[5%] pb-[5%] pt-2 space-y-4">
           <div className="flex items-start space-y-3 sm:space-y-0 gap-2 flex-col sm:flex-row">
+            <div className="flex flex-col gap-2 justify-end w-full h-fit sm:hidden">
+              {watchingMovie !== null && (
+                <div className="flex flex-col gap-1 w-full">
+                  <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                    Tập {watchingMovie.episodeName}
+                  </span>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="h-[3px] bg-[#5b5b5b] w-full">
+                      <div
+                        className="h-full bg-[#d80f16] transition-all duration-300"
+                        style={{ width: `${watchingMovie.progress || 0}%` }}
+                      />
+                    </div>
+                    <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
+                      {formatSecondsToMinutes(watchingMovie.currentTime || 0)}/
+                      {formatSecondsToMinutes(watchingMovie.duration || 0)}ph
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="flex sm:space-x-2 space-x-1 ">
+                <div className="py-2 sm:py-3 px-4 sm:px-7 lg:px-10 w-1/2 rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear cursor-pointer">
+                  {(modal.item.episodes[0].server_data[0].link_embed != "" &&
+                    (watchingMovie === null ? (
+                      <div
+                        onClick={() =>
+                          navigate(
+                            `/xem-phim/${modal.item.slug}?svr=${0}&ep=${0}`
+                          )
+                        }
+                        className="cursor-pointer w-full h-full flex items-center justify-center"
+                        key={modal.item._id + 0}
+                      >
+                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span>Phát</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => handlePlayMovie(watchingMovie)}
+                        key={modal.item._id + 0}
+                        className="cursor-pointer w-full h-full flex items-center justify-center"
+                      >
+                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
+                          <FontAwesomeIcon icon="fa-solid fa-play" />
+                          <span className="text-nowrap">Xem tiếp</span>
+                        </button>
+                      </div>
+                    ))) || (
+                    <button
+                      className="font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2 w-full h-full justify-center"
+                      onClick={() => {
+                        toast.warning("Tính năng đang được phát triển.");
+                      }}
+                    >
+                      <FontAwesomeIcon icon="fa-solid fa-bell" />
+                      <span>Nhắc tôi</span>
+                    </button>
+                  )}
+                </div>
+                <div
+                  className={`h-full relative rounded-md  backdrop-blur-sm w-1/2 lg:w-auto flex items-center justify-center ${
+                    isFavourite
+                      ? "bg-red-500/30 hover:bg-red-500/20"
+                      : "bg-white/30 hover:bg-white/20"
+                  }`}
+                >
+                  <button
+                    className="py-2 sm:py-3 sm:px-7 lg:px-10 text-white font-medium flex items-center justify-center space-x-2"
+                    onClick={handleSaveMovie}
+                  >
+                    <FontAwesomeIcon
+                      icon={
+                        loadingFav
+                          ? "fa-solid fa-spinner"
+                          : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
+                      }
+                      className={`sm:text-lg sm:w-5 sm:h-5 h-3 w-3 ${
+                        isFavourite ? "text-red-500" : "text-white"
+                      } ${loadingFav ? "animate-spin" : ""}`}
+                    />
+                    <span
+                      className={`text-nowrap ${
+                        isFavourite ? "text-red-500" : "text-white"
+                      }`}
+                    >
+                      {isFavourite ? "Đã thích" : "Yêu thích"}
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div
+                className="rounded bg-white/10 backdrop-blur-md hover:bg-white/20 flex items-center justify-center transition-all ease-linear cursor-pointer"
+                onClick={() => navigate(`/phim/${modal.item.slug}`)}
+              >
+                <button className="py-2 sm:py-3 text-white font-medium flex items-center justify-center space-x-2 cursor-pointer">
+                  <Info
+                    strokeWidth={3}
+                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
+                  />
+                  <span className="line-clamp-1">Thông tin phim</span>
+                  {/* <ChevronDown
+                    strokeWidth={3}
+                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
+                  /> */}
+                </button>
+              </div>
+            </div>
             <div className="flex flex-col space-y-4 w-full sm:w-[65%]">
               <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between text-white/70 text-xs lg:text-sm">
@@ -728,93 +855,6 @@ export default function MovieModal({
               </div>
             </div>
           </div>
-          {/* <div>
-            {modal.item.type != "single" &&
-              modal.item.episodes[server].server_data[server].link_embed !=
-                "" && (
-                <div className="flex flex-col space-y-5 border-t-[0.5px] border-white/10 pt-4">
-                  <div className="flex gap-4 items-center">
-                    <span className="text-base lg:text-xl font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
-                      <Server size={16} strokeWidth={3} />
-                      Server
-                    </span>
-                    {modal.item.episodes.map((item, index) => (
-                      <div
-                        key={index}
-                        className={`${
-                          server == index
-                            ? " text-black bg-white border-[1px] border-white"
-                            : "text-white/70 hover:text-white hover:bg-white/10 border-[1px] border-white/70"
-                        } cursor-pointer px-2 py-1 rounded-md transition-all ease-linear flex items-center gap-2 text-xs lg:text-base `}
-                        onClick={() => setServer(index)}
-                      >
-                        <Captions size={16} />
-                        <span>{item.server_name.split(" #")[0]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {modal.item.episodes[server].server_data.length > 100 && (
-                    <div className="flex gap-3 flex-wrap">
-                      {Array.from({
-                        length: Math.ceil(
-                          modal.item.episodes[server].server_data.length / 100
-                        ),
-                      }).map((item, index) => (
-                        <button
-                          className={`text-xs rounded py-1.5 px-3 ${
-                            episodesRange == index * 100
-                              ? "bg-white text-black border-white"
-                              : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
-                          } transition-all ease-linear duration-300`}
-                          key={index}
-                          onClick={() => setEpisodesRange(index * 100)}
-                        >
-                          Tập{" "}
-                          {
-                            modal.item.episodes[server].server_data[index * 100]
-                              .name
-                          }{" "}
-                          -{" "}
-                          {modal.item.episodes[server].server_data?.[
-                            index * 100 + 99
-                          ]?.name ||
-                            modal.item.episodes[server].server_data[
-                              modal.item.episodes[server].server_data.length - 1
-                            ].name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:grid-cols-5 lg:grid-cols-6">
-                    {modal.item.episodes[server].server_data
-                      .slice(episodesRange, episodesRange + 100)
-                      .map((item, index) => (
-                        <div
-                          onClick={() =>
-                            navigate(
-                              `/xem-phim/${modal.item.slug}?svr=${server}&ep=${index}`
-                            )
-                          }
-                          className={`relative rounded bg-[#242424] group hover:bg-opacity-70 cursor-pointer 
-                      `}
-                          key={modal.item._id + index}
-                        >
-                          <button className="py-2 transition-all ease-linear text-xs gap-2 flex items-center justify-center text-white/70 group-hover:text-white text-center w-full rounded">
-                            <FontAwesomeIcon
-                              icon="fa-solid fa-play"
-                              className="text-xs"
-                            />
-                            <span className="text-xs lg:text-base">
-                              {" "}
-                              Tập {item.name}
-                            </span>
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              )}
-          </div> */}
         </div>
       </div>
     </Modal>
