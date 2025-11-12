@@ -11,7 +11,7 @@ import Top10Badge from "../assets/images/Top10Badge.svg";
 import SEO from "./SEO";
 import logo_n from "../assets/images/N_logo.png";
 const MovieList = ({
-  type_slug = "phim-moi-cap-nhat",
+  type_slug = "phim-moi",
   sort_field = "_id",
   country = "",
   category = "",
@@ -28,53 +28,6 @@ const MovieList = ({
   const { openModal } = useMovieModal();
   const { onEnter, onLeave } = useHoverPreview();
   const { topSet } = useTop();
-  const fetchMovies = async () => {
-    console.log("fetchMovies");
-    setLoading(true);
-    var api = null;
-
-    if (!search) {
-      api = `${
-        import.meta.env.VITE_API_LIST
-      }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`;
-    } else {
-      const encodedQuery = keyword.trim().replace(/ /g, "+");
-      api = `${import.meta.env.VITE_API_SEARCH}keyword=${encodedQuery}`;
-    }
-
-    try {
-      const listResponse = await axios.get(`${api}&page=${page}`);
-      const totalPages = Math.ceil(
-        listResponse.data.data.params.pagination.totalItems /
-          listResponse.data.data.params.pagination.totalItemsPerPage
-      );
-
-      if (page > totalPages) {
-        setHasMore(false);
-      } else {
-        if (page === 1) {
-          setMovies(listResponse.data.data.items);
-          setSeoOnPage(listResponse.data.data.seoOnPage);
-        } else {
-          setMovies((prev) => [...prev, ...listResponse.data.data.items]);
-        }
-
-        if (!titleHead) {
-          const yearNow = new Date().getFullYear();
-
-          setTitleHead(
-            listResponse.data.data.seoOnPage.titleHead
-              .replace(/Ophim.Tv/g, "Needflex")
-              .replace(/2022/g, yearNow.toString())
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching movies:", error);
-    }
-
-    setLoading(false);
-  };
 
   const getColumns = () => {
     if (window.innerWidth >= 1024) return 6;
@@ -129,11 +82,67 @@ const MovieList = ({
   }, [hasMore]);
 
   useEffect(() => {
+    const fetchMovies = async () => {
+      setLoading(true);
+      var api = null;
+
+      if (!search) {
+        api = `${
+          import.meta.env.VITE_API_LIST
+        }${type_slug}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`;
+      } else {
+        const encodedQuery = keyword.trim().replace(/ /g, "+");
+        api = `${import.meta.env.VITE_API_SEARCH}keyword=${encodedQuery}`;
+      }
+
+      try {
+        const listResponse = await axios.get(`${api}&page=${page}`);
+        const totalPages = Math.ceil(
+          listResponse.data.data.params.pagination.totalItems /
+            listResponse.data.data.params.pagination.totalItemsPerPage
+        );
+
+        if (page > totalPages) {
+          setHasMore(false);
+        } else {
+          if (page === 1) {
+            setMovies(listResponse.data.data.items);
+            setSeoOnPage(listResponse.data.data.seoOnPage);
+          } else {
+            setMovies((prev) => [...prev, ...listResponse.data.data.items]);
+          }
+
+          if (!titleHead) {
+            const yearNow = new Date().getFullYear();
+
+            setTitleHead(
+              listResponse.data.data.seoOnPage.titleHead
+                .replace(/Ophim.Tv/g, "Needflex")
+                .replace(/2022/g, yearNow.toString())
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+      }
+
+      setLoading(false);
+    };
+
     fetchMovies();
-  }, [page, keyword, type_slug, country, category, year, sort_field]);
+  }, [
+    page,
+    keyword,
+    type_slug,
+    country,
+    category,
+    year,
+    sort_field,
+    search,
+    titleHead,
+  ]);
 
   useEffect(() => {
-    console.log(keyword);
     setMovies([]);
     setPage(1);
     setTitleHead(null);
@@ -158,7 +167,13 @@ const MovieList = ({
               <span className="opacity-50">Kết quả tìm kiếm của: </span>
               <span>{keyword}</span>
             </>
-          )) || <span className="opacity-50 ">{titleHead} </span>}
+          )) || (
+            <span className="opacity-50 ">
+              {!loading && movies.length === 0
+                ? "Không có kết quả nào khớp với yêu cầu tìm kiếm của bạn."
+                : titleHead}{" "}
+            </span>
+          )}
         </h1>
       )}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">

@@ -321,9 +321,7 @@ const Header = ({ filter = false, type_slug = "" }) => {
         </div>
       </div>
 
-      {filter && (
-        <FilterNavbar type_slug={type_slug.slice(1)} open={showMenu} />
-      )}
+      {filter && <FilterNavbar open={showMenu} />}
     </div>
   );
 };

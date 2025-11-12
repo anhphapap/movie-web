@@ -1,30 +1,70 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  listCategory,
-  listCountry,
-  listSortField,
-  listType,
-} from "../utils/data";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { listSortField, listType } from "../utils/data";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useBannerCache } from "../context/BannerCacheContext";
-function FilterNavbar({ type_slug, open }) {
+import axios from "axios";
+function FilterNavbar({ open }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
-  const [sort_field, setSortField] = useState(
-    searchParams.get("sort_field") || "_id"
-  );
-  const [type, setType] = useState(type_slug || "phim-moi-cap-nhat");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [year, setYear] = useState(searchParams.get("year") || "");
-  const [country, setCountry] = useState(searchParams.get("country") || "");
+
+  // Extract typeSlug from pathname
+  const typeSlug = location.pathname.startsWith("/duyet-tim/")
+    ? location.pathname.replace("/duyet-tim/", "").split("?")[0]
+    : null;
+  const [sort_field, setSortField] = useState("");
+  const [type, setType] = useState("");
+  const [category, setCategory] = useState("");
+  const [year, setYear] = useState("");
+  const [country, setCountry] = useState("");
+  const [listCountry, setListCountry] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
+  const [listYear, setListYear] = useState([]);
   const { playing } = useBannerCache();
+
+  // Sync state với URL khi thay đổi
+  useEffect(() => {
+    setType(typeSlug || "phim-bo");
+    setSortField(searchParams.get("sort_field") || "_id");
+    setCategory(searchParams.get("category") || "");
+    setYear(searchParams.get("year") || "");
+    setCountry(searchParams.get("country") || "");
+  }, [typeSlug, searchParams, location.pathname]);
+
+  useEffect(() => {
+    try {
+      const fetchData = async () => {
+        const [responseCountry, responseCategory, responseYear] =
+          await Promise.all([
+            axios.get(`${import.meta.env.VITE_API_COUNTRIES}`),
+            axios.get(`${import.meta.env.VITE_API_CATEGORIES}`),
+            axios.get(`${import.meta.env.VITE_API_YEARS}`),
+          ]);
+        setListCountry(responseCountry.data.data.items);
+        setListCategory(responseCategory.data.data.items);
+        setListYear(responseYear.data.data.items);
+      };
+      fetchData();
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }, []);
+
   const handleFilter = () => {
+    // Use current type value or typeSlug as fallback
+    const currentType = type || typeSlug || "phim-bo";
+
+    // Remove any existing "duyet-tim/" prefix from type to prevent duplication
+    const cleanType = currentType.startsWith("duyet-tim/")
+      ? currentType.replace("duyet-tim/", "")
+      : currentType;
+
     navigate(
-      `/duyet-tim/${type}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
+      `/duyet-tim/${cleanType}?sort_field=${sort_field}&category=${category}&country=${country}&year=${year}`
     );
     setShowMenu(false);
   };
@@ -78,7 +118,7 @@ function FilterNavbar({ type_slug, open }) {
           <select
             onChange={(e) => setSortField(e.target.value)}
             className="px-1 pr-4 py-[1px] mt-1 border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={sort_field}
+            value={sort_field}
           >
             {listSortField.map((cate, index) => {
               return (
@@ -95,7 +135,7 @@ function FilterNavbar({ type_slug, open }) {
           <select
             onChange={(e) => setType(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={type}
+            value={type || typeSlug || "phim-bo"}
           >
             {listType.map((cate, index) => {
               return (
@@ -112,16 +152,12 @@ function FilterNavbar({ type_slug, open }) {
           <select
             onChange={(e) => setCategory(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={category}
+            value={category}
           >
             <option value="">Thể loại</option>
-            {listCategory.map((cate, index) => {
+            {listCategory.map((cate) => {
               return (
-                <option
-                  key={index + cate.value}
-                  value={cate.value}
-                  className="bg-black"
-                >
+                <option key={cate._id} value={cate.slug} className="bg-black">
                   {cate.name}
                 </option>
               );
@@ -130,16 +166,12 @@ function FilterNavbar({ type_slug, open }) {
           <select
             onChange={(e) => setCountry(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={country}
+            value={country}
           >
             <option value="">Quốc gia</option>
-            {listCountry.map((ct, index) => {
+            {listCountry.map((ct) => {
               return (
-                <option
-                  key={index + ct.value}
-                  value={ct.value}
-                  className="bg-black"
-                >
+                <option key={ct._id} value={ct.slug} className="bg-black">
                   {ct.name}
                 </option>
               );
@@ -148,14 +180,17 @@ function FilterNavbar({ type_slug, open }) {
           <select
             onChange={(e) => setYear(e.target.value)}
             className="px-1 pr-4 py-[1px] border-white border-[1px] bg-black cursor-pointer hover:bg-white/10 transition-all ease-linear"
-            defaultValue={year}
+            value={year}
           >
             <option value="">Năm</option>
-            {[...Array(2025 - 2010 + 1)].map((_, index) => {
-              var year = 2025 - index;
+            {listYear.map((yearItem) => {
               return (
-                <option key={year} value={year} className="bg-black">
-                  {year}
+                <option
+                  key={yearItem.year}
+                  value={yearItem.year}
+                  className="bg-black"
+                >
+                  {yearItem.year}
                 </option>
               );
             })}

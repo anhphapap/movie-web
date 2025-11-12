@@ -140,11 +140,7 @@ const FullWatchPage = () => {
           </div>
           <div className="flex gap-4">
             <button
-              onClick={() =>
-                navigate(
-                  `/trang-chu?movie=${movie.item.slug}&tmdb_id=${movie.item.tmdb.id}&tmdb_type=${movie.item.tmdb.type}`
-                )
-              }
+              onClick={() => navigate(`/phim/${movie.item.slug}`)}
               className="sm:px-8 px-3 sm:py-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
             >
               Chi tiết phim
