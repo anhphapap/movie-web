@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { useWatching } from "../context/WatchingContext";
 import { formatSecondsToMinutes, formatTime } from "../utils/data";
 import logo_n from "../assets/images/N_logo.png";
+import { useEffect, useState } from "react";
 export default function HoverPreview() {
   const { hovered, onEnter, onLeave } = useHoverPreview();
   const navigate = useNavigate();
@@ -21,7 +22,21 @@ export default function HoverPreview() {
   const { topSet } = useTop();
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
   const isFavourite = favoriteSlugs.includes(hovered?.item?.slug);
-  const { toggleWatching } = useWatching();
+  const { toggleWatching, getWatchingMovie, watchingSlugs } = useWatching();
+  const [watchingMovie, setWatchingMovie] = useState(null);
+  useEffect(() => {
+    if (hovered?.isWatching) {
+      setWatchingMovie(hovered?.item);
+      return;
+    }
+    if (watchingSlugs.length === 0) return;
+    setWatchingMovie(getWatchingMovie(hovered?.item?.slug) || null);
+  }, [
+    watchingSlugs,
+    hovered?.item?.slug,
+    getWatchingMovie,
+    hovered?.isWatching,
+  ]);
   const handleToggleFavorite = (e, item) => {
     e.stopPropagation();
     toggleFavorite({
@@ -233,14 +248,14 @@ export default function HoverPreview() {
                   />
                   <Tooltip content="Thông tin phim" size="sm" />
                 </div>
-                {isWatching && (
+                {(isWatching || watchingMovie !== null) && (
                   <div
                     className={
                       "relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white border-white/40"
                     }
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleWatching(item);
+                      toggleWatching(watchingMovie || item);
                       onLeave();
                     }}
                   >
@@ -264,14 +279,14 @@ export default function HoverPreview() {
 
             <h3
               className={`font-bold text-base text-white ${
-                isWatching ? "" : "truncate"
+                isWatching || watchingMovie !== null ? "" : "truncate"
               }`}
             >
-              {!isWatching
+              {!(isWatching || watchingMovie !== null)
                 ? item.name
-                : `${item.name} - Tập ${item.episodeName}`}
+                : `${watchingMovie?.name} - Tập ${watchingMovie?.episodeName}`}
             </h3>
-            {!isWatching ? (
+            {!(isWatching || watchingMovie !== null) ? (
               <>
                 <div className="flex space-x-2 items-center text-white/80 text-sm">
                   <span className="lowercase">{item.year}</span>
@@ -305,12 +320,12 @@ export default function HoverPreview() {
                 <div className="h-[3px] bg-[#5b5b5b] w-full">
                   <div
                     className="h-full bg-[#d80f16] transition-all duration-300"
-                    style={{ width: `${item.progress || 0}%` }}
+                    style={{ width: `${watchingMovie?.progress || 0}%` }}
                   />
                 </div>
                 <span className="text-white/80 text-sm whitespace-nowrap text-nowrap font-medium">
-                  {formatSecondsToMinutes(item.currentTime || 0)}/
-                  {formatSecondsToMinutes(item.duration || 0)}ph
+                  {formatSecondsToMinutes(watchingMovie?.currentTime || 0)}/
+                  {formatSecondsToMinutes(watchingMovie?.duration || 0)}ph
                 </span>
               </div>
             )}

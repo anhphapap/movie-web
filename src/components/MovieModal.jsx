@@ -50,13 +50,21 @@ export default function MovieModal({
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [server, setServer] = useState(0);
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
-  const isFavourite = favoriteSlugs.includes(slug);
+  const [isFavourite, setIsFavourite] = useState(false);
   const navigate = useNavigate();
   const { topSet } = useTop();
   const { getWatchingMovie, watchingSlugs } = useWatching();
   const { pushSEO } = useSEOManager();
   const [watchingMovie, setWatchingMovie] = useState(null);
   const [seoOnPage, setSeoOnPage] = useState(null);
+
+  useEffect(() => {
+    if (favoriteSlugs.includes(slug)) {
+      setIsFavourite(true);
+    } else {
+      setIsFavourite(false);
+    }
+  }, [favoriteSlugs, slug]);
 
   const handlePlayMovie = (movie) => {
     // Lưu thông tin resume vào localStorage

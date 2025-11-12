@@ -34,7 +34,7 @@ const WatchPage = () => {
   const [movie, setMovie] = useState([]);
   const [loading, setLoading] = useState(false);
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
-  const isFavourite = favoriteSlugs.includes(movieSlug);
+  const [isFavourite, setIsFavourite] = useState(false);
   const [peoples, setPeoples] = useState([]);
   const [server, setServer] = useState(0);
   const { user } = UserAuth();
@@ -42,7 +42,7 @@ const WatchPage = () => {
   const shouldAutoPlayRef = useRef(false);
   const { topSet } = useTop();
   const [watchingMovie, setWatchingMovie] = useState(null);
-  const { getWatchingMovie, watchingSlugs } = useWatching();
+  const { getWatchingMovie, watchingSlugs, loadingWatching } = useWatching();
 
   // Swiper navigation refs
   const prevRef = useRef(null);
@@ -51,9 +51,18 @@ const WatchPage = () => {
   const [canSlidePrev, setCanSlidePrev] = useState(false);
   const [canSlideNext, setCanSlideNext] = useState(true);
   useEffect(() => {
-    if (watchingSlugs.length === 0) return;
+    // Đợi cho đến khi watching data đã load xong
+    if (loadingWatching) return;
     setWatchingMovie(getWatchingMovie(movieSlug) || null);
-  }, [watchingSlugs, movieSlug]);
+  }, [watchingSlugs, movieSlug, loadingWatching, getWatchingMovie]);
+
+  useEffect(() => {
+    if (favoriteSlugs.includes(movieSlug)) {
+      setIsFavourite(true);
+    } else {
+      setIsFavourite(false);
+    }
+  }, [favoriteSlugs, movieSlug]);
 
   const handlePlayMovie = (movie) => {
     // Lưu thông tin resume vào localStorage
@@ -537,10 +546,6 @@ const WatchPage = () => {
                   slidesPerView={3}
                   slidesPerGroup={3}
                   speed={500}
-                  loop={peoples.filter((p) => p.profile_path).length >= 16}
-                  loopAdditionalSlides={
-                    peoples.filter((p) => p.profile_path).length >= 16 ? 8 : 0
-                  }
                   navigation={{
                     prevEl: prevRef.current,
                     nextEl: nextRef.current,
@@ -660,15 +665,17 @@ const WatchPage = () => {
                 ))}
               </div>
             )}
-            <div className="leading-3 text-justify text-sm text-white/80">
-              <span className="opacity-50 text-sm">Diễn viên: </span>
-              {movie.item.actor.map((actor, index) => (
-                <span key={index} className="text-sm text-white">
-                  {actor}
-                  {index !== movie.item.actor.length - 1 && <span>, </span>}
-                </span>
-              ))}
-            </div>
+            {movie.item.actor.length > 0 && movie.item.actor[0] !== "" && (
+              <div className="leading-3 text-justify text-sm text-white/80">
+                <span className="opacity-50 text-sm">Diễn viên: </span>
+                {movie.item.actor.map((actor, index) => (
+                  <span key={index} className="text-sm text-white">
+                    {actor}
+                    {index !== movie.item.actor.length - 1 && <span>, </span>}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="leading-3 text-justify text-sm text-white/80">
               <span className="opacity-50 text-sm">Thể loại: </span>
               {movie.item.category.map((category, index) => (

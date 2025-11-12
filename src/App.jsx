@@ -157,7 +157,8 @@ function App() {
                               >
                                 <ToastContainer
                                   position="bottom-right"
-                                  autoClose={5000}
+                                  autoClose={3000}
+                                  limit={3}
                                   hideProgressBar={false}
                                   closeOnClick
                                   draggable
@@ -166,7 +167,7 @@ function App() {
                                   className="z-[99999]"
                                   toastClassName={(context) =>
                                     contextClass[context?.type || "default"] +
-                                    " relative flex p-4 mt-2 w-[350px] min-h-14 rounded-md items-center overflow-hidden cursor-pointer shadow-lg "
+                                    "relative flex p-4 mt-2 sm:w-[400px] w-[92vw] min-h-14 rounded-md items-center overflow-hidden cursor-pointer backdrop-blur-sm shadow-lg"
                                   }
                                 />
                                 <BannerCacheProvider>

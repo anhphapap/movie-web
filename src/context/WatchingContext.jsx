@@ -39,17 +39,21 @@ export const WatchingProvider = ({ children }) => {
 
   const { user } = UserAuth();
 
-  // 🪄 Cache slug từ sessionStorage khi load lại web
+  // 🪄 Cache slug và watchingPage từ sessionStorage khi load lại web
   useEffect(() => {
-    const cached = sessionStorage.getItem("watchingSlugs");
-    if (cached) setWatchingSlugs(JSON.parse(cached));
+    const cachedSlugs = sessionStorage.getItem("watchingSlugs");
+    const cachedPage = sessionStorage.getItem("watchingPage");
+    if (cachedSlugs) setWatchingSlugs(JSON.parse(cachedSlugs));
+    if (cachedPage) setWatchingPage(JSON.parse(cachedPage));
   }, []);
 
-  // 🔹 Lắng nghe realtime chỉ để đồng bộ slugs (không load data)
+  // 🔹 Lắng nghe realtime để đồng bộ cả slugs và data
   useEffect(() => {
     if (!user) {
       setWatchingSlugs([]);
       setWatchingPage([]);
+      sessionStorage.removeItem("watchingSlugs");
+      sessionStorage.removeItem("watchingPage");
       setLoadingWatching(false);
       return;
     }
@@ -57,8 +61,13 @@ export const WatchingProvider = ({ children }) => {
     const ref = collection(db, "users", user.uid, "watching");
     const unsub = onSnapshot(ref, (snap) => {
       const slugs = snap.docs.map((d) => d.id);
+      const watchingData = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
       setWatchingSlugs(slugs);
+      setWatchingPage(watchingData);
+
       sessionStorage.setItem("watchingSlugs", JSON.stringify(slugs));
+      sessionStorage.setItem("watchingPage", JSON.stringify(watchingData));
       setLoadingWatching(false);
     });
 
@@ -118,8 +127,16 @@ export const WatchingProvider = ({ children }) => {
         toast.success("Đã xóa khỏi danh sách đang xem.");
 
         // ⚡ Update local ngay
-        setWatchingSlugs((prev) => prev.filter((slug) => slug !== movie.slug));
-        setWatchingPage((prev) => prev.filter((m) => m.slug !== movie.slug));
+        setWatchingSlugs((prev) => {
+          const newSlugs = prev.filter((slug) => slug !== movie.slug);
+          sessionStorage.setItem("watchingSlugs", JSON.stringify(newSlugs));
+          return newSlugs;
+        });
+        setWatchingPage((prev) => {
+          const newPage = prev.filter((m) => m.slug !== movie.slug);
+          sessionStorage.setItem("watchingPage", JSON.stringify(newPage));
+          return newPage;
+        });
       } else {
         // Thêm vào Firestore
         await setDoc(ref, {
@@ -129,8 +146,16 @@ export const WatchingProvider = ({ children }) => {
         });
 
         // ⚡ Update local ngay
-        setWatchingSlugs((prev) => [...prev, movie.slug]);
-        setWatchingPage((prev) => [{ ...movie }, ...prev]);
+        setWatchingSlugs((prev) => {
+          const newSlugs = [...prev, movie.slug];
+          sessionStorage.setItem("watchingSlugs", JSON.stringify(newSlugs));
+          return newSlugs;
+        });
+        setWatchingPage((prev) => {
+          const newPage = [{ ...movie }, ...prev];
+          sessionStorage.setItem("watchingPage", JSON.stringify(newPage));
+          return newPage;
+        });
       }
     } catch (error) {
       console.error(error);
@@ -192,7 +217,10 @@ export const WatchingProvider = ({ children }) => {
           (movie) => movie.slug !== movieSlug
         );
 
-        return [updatedMovie, ...otherMovies];
+        const newWatchingPage = [updatedMovie, ...otherMovies];
+        // Cache vào sessionStorage
+        sessionStorage.setItem("watchingPage", JSON.stringify(newWatchingPage));
+        return newWatchingPage;
       });
       return true;
     } catch (error) {
