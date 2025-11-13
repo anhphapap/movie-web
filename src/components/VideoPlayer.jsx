@@ -563,21 +563,69 @@ const VideoPlayer = ({
     setMuted(videoRef.current.volume === 0);
   };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {});
-      setFullscreen(true);
-      // Lock landscape orientation khi fullscreen
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock("landscape").catch(() => {});
+  const toggleFullscreen = async () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    try {
+      // Check if already in fullscreen
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+
+      if (!isFullscreen) {
+        // Lock orientation TRƯỚC khi vào fullscreen (quan trọng cho mobile)
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock("landscape");
+          } catch (err) {
+            console.log("Orientation lock failed:", err);
+          }
+        }
+
+        // Request fullscreen với fallback cho các browser khác nhau
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          // Safari iOS & old Chrome
+          await container.webkitRequestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+          // Firefox
+          await container.mozRequestFullScreen();
+        } else if (container.msRequestFullscreen) {
+          // IE11
+          await container.msRequestFullscreen();
+        }
+
+        setFullscreen(true);
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          await document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          await document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          await document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          await document.msExitFullscreen();
+        }
+
+        setFullscreen(false);
+
+        // Unlock orientation sau khi thoát fullscreen
+        if (screen.orientation && screen.orientation.unlock) {
+          try {
+            screen.orientation.unlock();
+          } catch (err) {
+            console.log("Orientation unlock failed:", err);
+          }
+        }
       }
-    } else {
-      document.exitFullscreen();
-      setFullscreen(false);
-      // Unlock orientation khi thoát fullscreen
-      if (screen.orientation && screen.orientation.unlock) {
-        screen.orientation.unlock();
-      }
+    } catch (error) {
+      console.error("Fullscreen error:", error);
     }
   };
 
@@ -805,17 +853,19 @@ const VideoPlayer = ({
       if (shouldStartTimer) {
         controlsTimerRef.current = setTimeout(() => {
           // Khi timer hết, check ref (real-time value) thay vì state
+          // KHÔNG hide nếu Episodes đang mở (quan trọng cho mobile)
           if (
             !isHoveringControlsRef.current &&
             !isDraggingProgress &&
-            !isHoveringProgress
+            !isHoveringProgress &&
+            !showEpisodes
           ) {
             setShowControls(false);
           }
         }, 3000);
       }
     },
-    [isDraggingProgress, isHoveringProgress]
+    [isDraggingProgress, isHoveringProgress, showEpisodes]
   );
 
   // Auto hide controls
@@ -830,6 +880,60 @@ const VideoPlayer = ({
       );
     };
   }, [resetControlsTimer]);
+
+  // Sync fullscreen state với browser events (quan trọng cho mobile)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
+      setFullscreen(isFullscreen);
+
+      // Unlock orientation khi user thoát fullscreen bằng gesture
+      if (!isFullscreen && screen.orientation && screen.orientation.unlock) {
+        try {
+          screen.orientation.unlock();
+        } catch (err) {
+          console.log("Orientation unlock failed:", err);
+        }
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("msfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "mozfullscreenchange",
+        handleFullscreenChange
+      );
+      document.removeEventListener(
+        "msfullscreenchange",
+        handleFullscreenChange
+      );
+    };
+  }, []);
+
+  // Khi Episodes mở/đóng, reset timer để giữ controls hiển thị
+  useEffect(() => {
+    if (showEpisodes) {
+      setShowControls(true);
+      clearTimeout(controlsTimerRef.current);
+    } else {
+      // Khi đóng Episodes, reset timer bình thường
+      resetControlsTimer(false);
+    }
+  }, [showEpisodes, resetControlsTimer]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -934,7 +1038,7 @@ const VideoPlayer = ({
         ref={videoRef}
         poster={import.meta.env.VITE_API_IMAGE + movie?.poster_url}
         className={`w-full h-full bg-black transition-all duration-300 ${
-          fullscreen ? "object-contain" : "object-cover"
+          fullscreen || isMobile ? "object-contain" : "object-cover"
         }`}
         style={{ filter: `brightness(${brightness}%)` }}
         onTimeUpdate={user?.email ? handleTimeUpdate : undefined}
@@ -1183,17 +1287,19 @@ const VideoPlayer = ({
 
       {videoReady && hasPlayedOnce && (
         <div
-          className={`absolute top-0 left-0 w-full bg-gradient-to-b from-black/30 to-transparent ${
-            showControls
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
+          className={`absolute top-0 left-0 w-full bg-gradient-to-b from-black/30 to-transparent transition-opacity duration-300 ${
+            showControls || showEpisodes ? "opacity-100" : "opacity-0"
           }`}
         >
           <button
             onClick={() => {
               navigate(`/phim/${movie.slug}`);
             }}
-            className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white `}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              navigate(`/phim/${movie.slug}`);
+            }}
+            className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white z-50 pointer-events-auto active:scale-95`}
           >
             <ArrowLeft size={isMobile ? 30 : 34} />
           </button>
@@ -1515,17 +1621,32 @@ const VideoPlayer = ({
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isMobile) {
-                          setShowEpisodes(!showEpisodes);
-                          videoRef.current.pause();
+                          const newShowState = !showEpisodes;
+                          setShowEpisodes(newShowState);
+                          if (newShowState) {
+                            // Pause video khi mở Episodes
+                            videoRef.current.pause();
+                            // Đảm bảo controls luôn hiển thị
+                            setShowControls(true);
+                          }
                         }
                       }}
-                      className="group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2 outline-none"
+                      onTouchEnd={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className={`group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2 outline-none ${
+                        showEpisodes && isMobile ? "text-red-500" : ""
+                      }`}
                       aria-label="Danh sách tập"
                     >
-                      <ListVideo size={34} />
+                      <ListVideo size={isMobile ? 30 : 34} />
                     </button>
                     <Episodes
-                      onClose={() => setShowEpisodes(false)}
+                      onClose={() => {
+                        setShowEpisodes(false);
+                        setShowControls(true);
+                        resetControlsTimer(false);
+                      }}
                       show={showEpisodes}
                       name={movie.name}
                       episodes={movie.episodes}

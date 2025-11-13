@@ -24,7 +24,7 @@ export default function Carousel({
   sort_field = "_id",
   country = "",
   category = "",
-  year = new Date().getFullYear(),
+  year = "",
   size = 16,
   prefetchMovies = [],
 }) {

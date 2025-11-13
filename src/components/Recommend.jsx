@@ -123,13 +123,9 @@ export default function Recommend({
                 </div>
                 <div className="flex space-x-2 items-center justify-between text-white/80 text-sm p-2 sm:p-4">
                   <div className="flex gap-x-2 gap-y-1  items-center flex-wrap">
-                    <span className="text-xs leading-[14px] px-1 py-0 border-[0.5px] rounded uppercase flex items-center justify-center">
-                      {movie.quality}
-                    </span>
-                    <span className="lowercase">{movie.year}</span>
                     {movie.imdb?.vote_count > 0 ? (
                       <a
-                        className="flex items-center space-x-1 text-xs border-[1px] border-yellow-500 rounded-md leading-[14px] px-1 py-[2px] bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
+                        className="flex items-center space-x-1 text-xs border-[1px] border-yellow-500 rounded leading-[14px] px-1 py-[2px] bg-yellow-500/10 hover:bg-yellow-500/20 transition-all ease-linear"
                         href={`https://www.imdb.com/title/${movie.imdb.id}`}
                         target="_blank"
                         onClick={(e) => e.stopPropagation()}
@@ -142,7 +138,7 @@ export default function Recommend({
                     ) : (
                       movie.tmdb?.vote_count > 0 && (
                         <a
-                          className="flex items-center space-x-1 text-xs border-[1px] border-[#01b4e4] rounded-md leading-[14px] px-1 py-[2px] bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
+                          className="flex items-center space-x-1 text-xs border-[1px] border-[#01b4e4] rounded leading-[14px] px-1 py-[2px] bg-[#01b4e4]/10 hover:bg-[#01b4e4]/20 transition-all ease-linear"
                           href={`https://www.themoviedb.org/${
                             movie.type == "single" ? "movie" : "tv"
                           }/${movie.tmdb.id}`}
@@ -156,6 +152,10 @@ export default function Recommend({
                         </a>
                       )
                     )}
+                    <span className="text-xs leading-[14px] px-1 py-0 border-[0.5px] rounded uppercase flex items-center justify-center">
+                      {movie.quality}
+                    </span>
+                    <span className="lowercase">{movie.year}</span>
                   </div>
                   <div
                     className={`relative group/tooltip aspect-square text-white border-2 cursor-pointer bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white ${
