@@ -113,6 +113,56 @@ const VideoPlayer = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Auto fullscreen trên mobile khi vào trang xem phim
+  useEffect(() => {
+    if (!isMobile || !videoReady) return;
+
+    // Delay nhỏ để đảm bảo video đã render xong
+    const timer = setTimeout(async () => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      try {
+        // Check if already in fullscreen
+        const isFullscreen = !!(
+          document.fullscreenElement ||
+          document.webkitFullscreenElement ||
+          document.mozFullScreenElement ||
+          document.msFullscreenElement
+        );
+
+        if (!isFullscreen) {
+          // Lock orientation trước
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              await screen.orientation.lock("landscape");
+            } catch (err) {
+              console.log("Orientation lock failed:", err);
+            }
+          }
+
+          // Request fullscreen
+          if (container.requestFullscreen) {
+            await container.requestFullscreen();
+          } else if (container.webkitRequestFullscreen) {
+            await container.webkitRequestFullscreen();
+          } else if (container.mozRequestFullScreen) {
+            await container.mozRequestFullScreen();
+          } else if (container.msRequestFullscreen) {
+            await container.msRequestFullscreen();
+          }
+
+          setFullscreen(true);
+        }
+      } catch (err) {
+        // Nếu browser block auto fullscreen, sẽ trigger khi user click play
+        console.log("Auto fullscreen blocked:", err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [isMobile, videoReady]);
+
   // Check PiP support
   useEffect(() => {
     setPipSupported(document.pictureInPictureEnabled);
@@ -172,12 +222,51 @@ const VideoPlayer = ({
         // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
         // Không auto-play nếu là lần đầu xem -> hiện button play
         if (shouldAutoPlay && resumeData) {
-          setTimeout(() => {
+          setTimeout(async () => {
             if (video && hlsRef.current === hls) {
               video.play().catch(console.error);
               setPlaying(true);
               setShowControls(true);
               setHasPlayedOnce(true);
+
+              // Auto fullscreen trên mobile khi autoplay
+              if (window.innerWidth < 1024 && containerRef.current) {
+                try {
+                  const isFullscreen = !!(
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                  );
+
+                  if (!isFullscreen) {
+                    // Lock orientation
+                    if (screen.orientation && screen.orientation.lock) {
+                      try {
+                        await screen.orientation.lock("landscape");
+                      } catch (err) {
+                        console.log("Orientation lock failed:", err);
+                      }
+                    }
+
+                    // Request fullscreen
+                    const container = containerRef.current;
+                    if (container.requestFullscreen) {
+                      await container.requestFullscreen();
+                    } else if (container.webkitRequestFullscreen) {
+                      await container.webkitRequestFullscreen();
+                    } else if (container.mozRequestFullScreen) {
+                      await container.mozRequestFullScreen();
+                    } else if (container.msRequestFullscreen) {
+                      await container.msRequestFullscreen();
+                    }
+
+                    setFullscreen(true);
+                  }
+                } catch (err) {
+                  console.log("Fullscreen on autoplay failed:", err);
+                }
+              }
             }
           }, 500);
         }
@@ -209,12 +298,51 @@ const VideoPlayer = ({
         // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
         // Không auto-play nếu là lần đầu xem -> hiện button play
         if (shouldAutoPlay && resumeData) {
-          setTimeout(() => {
+          setTimeout(async () => {
             if (video) {
               video.play().catch(console.error);
               setPlaying(true);
               setShowControls(true);
               setHasPlayedOnce(true);
+
+              // Auto fullscreen trên mobile khi autoplay (Safari)
+              if (window.innerWidth < 1024 && containerRef.current) {
+                try {
+                  const isFullscreen = !!(
+                    document.fullscreenElement ||
+                    document.webkitFullscreenElement ||
+                    document.mozFullScreenElement ||
+                    document.msFullscreenElement
+                  );
+
+                  if (!isFullscreen) {
+                    // Lock orientation
+                    if (screen.orientation && screen.orientation.lock) {
+                      try {
+                        await screen.orientation.lock("landscape");
+                      } catch (err) {
+                        console.log("Orientation lock failed:", err);
+                      }
+                    }
+
+                    // Request fullscreen
+                    const container = containerRef.current;
+                    if (container.requestFullscreen) {
+                      await container.requestFullscreen();
+                    } else if (container.webkitRequestFullscreen) {
+                      await container.webkitRequestFullscreen();
+                    } else if (container.mozRequestFullScreen) {
+                      await container.mozRequestFullScreen();
+                    } else if (container.msRequestFullscreen) {
+                      await container.msRequestFullscreen();
+                    }
+
+                    setFullscreen(true);
+                  }
+                } catch (err) {
+                  console.log("Fullscreen on autoplay failed:", err);
+                }
+              }
             }
           }, 500);
         }
@@ -378,13 +506,22 @@ const VideoPlayer = ({
     }, duration);
   };
 
-  const handleInitialPlay = () => {
+  const handleInitialPlay = async () => {
     const video = videoRef.current;
     if (video) {
       video.play();
       setPlaying(true);
       setShowControls(true);
       setHasPlayedOnce(true);
+
+      // Auto fullscreen trên mobile khi bấm play (fallback nếu auto fullscreen bị block)
+      if (isMobile && !fullscreen) {
+        try {
+          await toggleFullscreen();
+        } catch (err) {
+          console.log("Fullscreen on play failed:", err);
+        }
+      }
 
       // Lưu phim vào danh sách đang xem
       const movieData = {
@@ -393,6 +530,9 @@ const VideoPlayer = ({
         thumb_url: movie.thumb_url,
         name: movie.name,
         tmdb: movie.tmdb,
+        year: movie.year,
+        quality: movie.quality,
+        category: movie.category,
         modified: movie.modified,
         episode_current: movie.episode_current,
         episode: episode,
@@ -415,11 +555,13 @@ const VideoPlayer = ({
     const currentTime = videoRef.current.currentTime;
     const videoDuration = videoRef.current.duration;
 
+    // ✅ Luôn update UI progress/duration (cho cả guest và logged-in user)
     setProgress(currentTime);
     setDuration(videoDuration);
 
-    // Lưu tiến độ xem phim mỗi 5 giây
+    // ✅ CHỈ lưu watching progress khi user đã đăng nhập
     if (
+      user?.email &&
       videoDuration > 0 &&
       currentTime > 0 &&
       Math.floor(currentTime) % 5 === 0
@@ -1041,7 +1183,7 @@ const VideoPlayer = ({
           fullscreen || isMobile ? "object-contain" : "object-cover"
         }`}
         style={{ filter: `brightness(${brightness}%)` }}
-        onTimeUpdate={user?.email ? handleTimeUpdate : undefined}
+        onTimeUpdate={handleTimeUpdate}
         onClick={isMobile ? undefined : handleVideoClick}
         preload="auto"
         playsInline
@@ -1150,9 +1292,9 @@ const VideoPlayer = ({
             className={`bg-black/40 opacity-80 backdrop-blur-sm rounded-full p-6 lg:p-10 text-white shadow-2xl ${
               isSeekAnimating
                 ? centerOverlay === "forward"
-                  ? "animate-slideInRight bg-transparent backdrop-blur-none shadow-none"
+                  ? "animate-slideInRight bg-transparent !backdrop-blur-none !shadow-none"
                   : centerOverlay === "backward"
-                  ? "animate-slideInLeft bg-transparent backdrop-blur-none shadow-none"
+                  ? "animate-slideInLeft bg-transparent !backdrop-blur-none !shadow-none"
                   : "animate-fadeIn"
                 : "animate-fadeOut"
             }`}

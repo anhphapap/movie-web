@@ -248,7 +248,7 @@ export default function HoverPreview() {
                   />
                   <Tooltip content="Thông tin phim" size="sm" />
                 </div>
-                {(isWatching || watchingMovie !== null) && (
+                {isWatching && (
                   <div
                     className={
                       "relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white border-white/40"

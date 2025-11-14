@@ -44,7 +44,16 @@ export const WatchingProvider = ({ children }) => {
     const cachedSlugs = sessionStorage.getItem("watchingSlugs");
     const cachedPage = sessionStorage.getItem("watchingPage");
     if (cachedSlugs) setWatchingSlugs(JSON.parse(cachedSlugs));
-    if (cachedPage) setWatchingPage(JSON.parse(cachedPage));
+    if (cachedPage) {
+      const parsedPage = JSON.parse(cachedPage);
+      // ✅ Sort cache theo lastWatched (mới nhất lên đầu)
+      const sortedCache = parsedPage.sort((a, b) => {
+        const timeA = a.lastWatched || 0;
+        const timeB = b.lastWatched || 0;
+        return timeB - timeA; // DESC: mới nhất trên đầu
+      });
+      setWatchingPage(sortedCache);
+    }
   }, []);
 
   // 🔹 Lắng nghe realtime để đồng bộ cả slugs và data
@@ -61,13 +70,30 @@ export const WatchingProvider = ({ children }) => {
     const ref = collection(db, "users", user.uid, "watching");
     const unsub = onSnapshot(ref, (snap) => {
       const slugs = snap.docs.map((d) => d.id);
-      const watchingData = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const watchingData = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          // Convert Firestore Timestamp to number for sessionStorage compatibility
+          lastWatched: data.lastWatched?.toMillis?.() || Date.now(),
+          addedAt: data.addedAt?.toMillis?.() || Date.now(),
+        };
+      });
+
+      // ✅ Sort theo lastWatched (mới nhất lên đầu)
+      const sortedWatchingData = watchingData.sort((a, b) => {
+        return b.lastWatched - a.lastWatched; // DESC: mới nhất trên đầu
+      });
 
       setWatchingSlugs(slugs);
-      setWatchingPage(watchingData);
+      setWatchingPage(sortedWatchingData);
 
       sessionStorage.setItem("watchingSlugs", JSON.stringify(slugs));
-      sessionStorage.setItem("watchingPage", JSON.stringify(watchingData));
+      sessionStorage.setItem(
+        "watchingPage",
+        JSON.stringify(sortedWatchingData)
+      );
       setLoadingWatching(false);
     });
 
@@ -145,14 +171,21 @@ export const WatchingProvider = ({ children }) => {
           lastWatched: serverTimestamp(),
         });
 
-        // ⚡ Update local ngay
+        // ⚡ Update local ngay với timestamp tạm để sort đúng
+        const now = Date.now();
         setWatchingSlugs((prev) => {
           const newSlugs = [...prev, movie.slug];
           sessionStorage.setItem("watchingSlugs", JSON.stringify(newSlugs));
           return newSlugs;
         });
         setWatchingPage((prev) => {
-          const newPage = [{ ...movie }, ...prev];
+          // Thêm lastWatched tạm cho local state để sort đúng (sẽ được update từ Firestore sau)
+          const newMovie = {
+            ...movie,
+            lastWatched: now, // Number timestamp
+            addedAt: now,
+          };
+          const newPage = [newMovie, ...prev];
           sessionStorage.setItem("watchingPage", JSON.stringify(newPage));
           return newPage;
         });
@@ -198,9 +231,16 @@ export const WatchingProvider = ({ children }) => {
       await setDoc(ref, progressData, { merge: true });
 
       // ⚡ Update local ngay và move lên đầu theo lastWatched
+      const now = Date.now();
       setWatchingPage((prev) => {
         const updatedMovies = prev.map((movie) =>
-          movie.slug === movieSlug ? { ...movie, ...progressData } : movie
+          movie.slug === movieSlug
+            ? {
+                ...movie,
+                ...progressData,
+                lastWatched: now, // Number timestamp
+              }
+            : movie
         );
 
         // Tìm phim vừa update và move lên đầu

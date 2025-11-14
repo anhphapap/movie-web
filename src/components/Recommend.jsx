@@ -94,7 +94,13 @@ export default function Recommend({
                 className="flex flex-col bg-[#2f2f2f] rounded overflow-hidden group cursor-pointer"
                 onClick={() => navigate(`/phim/${movie.slug}`)}
               >
-                <div className="relative w-full aspect-video overflow-hidden group/nextEpisode">
+                <div
+                  className="relative w-full aspect-video overflow-hidden group/nextEpisode"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/xem-phim/${movie.slug}?svr=0&ep=0`);
+                  }}
+                >
                   <LazyImage
                     src={movie.poster_url}
                     alt={movie.name}
