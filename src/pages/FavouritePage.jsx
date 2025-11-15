@@ -79,13 +79,8 @@ function FavouritePage() {
   };
 
   return (
-    <div className="text-white px-[3%] mt-24 min-h-screen pb-20">
+    <div className="text-white px-[3%] mt-[23vh] min-h-screen pb-20">
       <SEO seoData={seoData} />
-      <h1 className="text-xl md:text-2xl">
-        {favoritesPage?.length === 0
-          ? "Danh sách của bạn hiện đang trống!"
-          : "Danh sách của tôi"}
-      </h1>
 
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 md:gap-x-[.4vw] gap-x-[.8vw] md:gap-y-[4vw] gap-y-[8vw] mt-5">
         {favoritesPage?.map((item, index) => (

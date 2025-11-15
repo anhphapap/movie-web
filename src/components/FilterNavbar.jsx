@@ -86,14 +86,14 @@ function FilterNavbar({ open }) {
   }, []);
   return (
     <div
-      className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white z-10 ${
+      className={`lg:flex-row flex-col flex lg:items-center justify-between py-3 transition-all duration-500 ease-linear text-white ${
         isScrolled || showMenu || open || playing
           ? "bg-[#141414]"
           : "bg-transparent"
       }`}
     >
       <div className="flex lg:inline-block justify-between w-full lg:w-auto pl-[3%]">
-        <h1 className="text-2xl font-semibold">Duyệt tìm</h1>
+        <h1 className="text-2xl lg:text-3xl">Duyệt tìm</h1>
         <div className="flex items-center lg:hidden pr-[3%]">
           <button
             type="button"

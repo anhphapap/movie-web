@@ -152,7 +152,7 @@ const MovieList = ({
   if (!movies) return <></>;
 
   return (
-    <div className="text-white mt-[20vh] px-[3%] min-h-screen">
+    <div className="text-white mt-[23vh] px-[3%] min-h-screen">
       {seoOnPage && (
         <SEO seoData={seoOnPage} baseUrl={window.location.origin} />
       )}
@@ -169,9 +169,9 @@ const MovieList = ({
             </>
           )) || (
             <span className="opacity-50 ">
-              {!loading && movies.length === 0
-                ? "Không có kết quả nào khớp với yêu cầu tìm kiếm của bạn."
-                : titleHead}{" "}
+              {!loading &&
+                movies.length === 0 &&
+                "Không có kết quả nào khớp với yêu cầu tìm kiếm của bạn."}
             </span>
           )}
         </h1>

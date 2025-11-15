@@ -82,15 +82,19 @@ const Search = () => {
 
   return (
     <div
-      className={`relative flex items-center transition-all duration-300 ease-in-out `}
+      className={`relative flex items-center transition-all duration-300 ease-in-out md:mr-2`}
       onBlur={handleBlur}
     >
       {!isSearchOpen && (
         <button
-          className="flex items-center justify-center focus:outline-none py-1 px-3"
+          className="flex items-center justify-center focus:outline-none py-1 px-2"
           onClick={toggleSearch}
         >
-          <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" color="white" />
+          <FontAwesomeIcon
+            icon="fa-solid fa-magnifying-glass"
+            color="white"
+            className="text-base"
+          />
         </button>
       )}
 
