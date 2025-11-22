@@ -5,7 +5,6 @@ import Tooltip from "./Tooltip";
 import axios from "axios";
 import { useFavorites } from "../context/FavouritesProvider";
 import { useNavigate } from "react-router-dom";
-import { useInView } from "react-intersection-observer";
 import { Play } from "lucide-react";
 export default function Recommend({
   type = "phim-moi-cap-nhat",
@@ -22,11 +21,6 @@ export default function Recommend({
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
   const isFavourite = (slug) => favoriteSlugs.includes(slug);
   const navigate = useNavigate();
-  const { ref, inView } = useInView({
-    triggerOnce: true,
-    threshold: 0,
-    rootMargin: "300px 0px",
-  });
 
   const handleToggleFavorite = (e, movie) => {
     e.stopPropagation();
@@ -45,62 +39,66 @@ export default function Recommend({
     });
   };
 
-  const fetchMovies = async () => {
-    try {
-      if (!hasMore) return;
-      setLoading(true);
-      const api = `${
-        import.meta.env.VITE_API_LIST
-      }${type}?sort_field=${sort_field}&category=${category}&country=${country}&page=${page}&limit=10`;
-      const res = await axios.get(api);
-      const items = res.data.data.items || [];
-      setMovies((prev) => [...prev, ...items]);
-      if (items.length < 6) setHasMore(false);
-      else setHasMore(page < totalPage);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!inView) return;
-    fetchMovies();
-  }, [inView]);
-
   useEffect(() => {
     setMovies([]);
     setPage(1);
     setHasMore(true);
-  }, [type, sort_field, country, category]);
+  }, [type, sort_field, country, category, slug]);
 
   useEffect(() => {
-    if (inView && hasMore) fetchMovies();
-  }, [page]);
+    let isMounted = true;
 
-  const visibleMovies = movies.filter((m) => slug && m.slug !== slug);
+    const fetchMovies = async () => {
+      try {
+        if (!hasMore) return;
+        setLoading(true);
+        const api = `${
+          import.meta.env.VITE_API_LIST
+        }${type}?sort_field=${sort_field}&category=${category}&country=${country}&page=${page}&limit=8`;
+        const res = await axios.get(api);
+        const items = res.data.data.items || [];
+
+        if (isMounted) {
+          setMovies((prev) => [...prev, ...items]);
+          if (items.length < 8) setHasMore(false);
+          else setHasMore(page < totalPage);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchMovies();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, type, sort_field, country, category, hasMore, totalPage]);
+
+  const visibleMovies = movies.filter(
+    (m) => slug && m.slug !== slug && m.episode_current !== "Trailer"
+  );
 
   return (
     <>
-      <div ref={ref}></div>
       {visibleMovies.length > 0 && (
-        <div className="text-white relative pb-4">
+        <div className="text-white relative py-6">
           <h2 className="text-xl lg:text-2xl font-bold">Nội dung tương tự</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 mt-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-5">
             {visibleMovies.map((movie) => (
               <div
                 key={movie._id + "recommend"}
                 className="flex flex-col bg-[#2f2f2f] rounded overflow-hidden group cursor-pointer"
-                onClick={() => navigate(`/phim/${movie.slug}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/xem-phim/${movie.slug}?svr=0&ep=0`);
+                }}
               >
-                <div
-                  className="relative w-full aspect-video overflow-hidden group/nextEpisode"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/xem-phim/${movie.slug}?svr=0&ep=0`);
-                  }}
-                >
+                <div className="relative w-full aspect-video overflow-hidden group/nextEpisode">
                   <LazyImage
                     src={movie.poster_url}
                     alt={movie.name}
@@ -127,7 +125,7 @@ export default function Recommend({
                     </button>
                   </div>
                 </div>
-                <div className="flex space-x-2 items-center justify-between text-white/80 text-sm p-2 sm:p-4">
+                <div className="flex space-x-2 items-center justify-between text-white/80 text-sm p-3 sm:p-4">
                   <div className="flex gap-x-2 gap-y-1  items-center flex-wrap">
                     {movie.imdb?.vote_count > 0 ? (
                       <a
@@ -192,7 +190,7 @@ export default function Recommend({
                     />
                   </div>
                 </div>
-                <h2 className="text-white text-sm sm:text-base font-bold truncate p-2 sm:p-4 !pt-0">
+                <h2 className="text-white text-sm sm:text-base font-bold truncate p-3 sm:p-4 !pt-0">
                   {movie.name}
                 </h2>
               </div>

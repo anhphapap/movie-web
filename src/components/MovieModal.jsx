@@ -16,6 +16,7 @@ import { useFavorites } from "../context/FavouritesProvider";
 import { useWatching } from "../context/WatchingContext";
 import { useSEOManager } from "../context/SEOManagerContext";
 import logo_n from "../assets/images/N_logo.png";
+import Recommend from "./Recommend";
 const customStyles = {
   content: {
     position: "absolute",
@@ -47,6 +48,7 @@ export default function MovieModal({
   const [modal, setModal] = useState(null);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [episodesRange, setEpisodesRange] = useState(0);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
   const [server, setServer] = useState(0);
   const { favoriteSlugs, toggleFavorite, loadingFav } = useFavorites();
@@ -57,7 +59,12 @@ export default function MovieModal({
   const { pushSEO } = useSEOManager();
   const [watchingMovie, setWatchingMovie] = useState(null);
   const [seoOnPage, setSeoOnPage] = useState(null);
-
+  const scrollToMoreInfo = () => {
+    const moreInfo = document.getElementById("more-info");
+    if (moreInfo) {
+      moreInfo.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   useEffect(() => {
     if (favoriteSlugs.includes(slug)) {
       setIsFavourite(true);
@@ -352,7 +359,7 @@ export default function MovieModal({
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none lg:top-[5%] min-h-screen lg:min-h-0 2xl:!-translate-y-1/2 2xl:!top-[50%] 2xl:!-translate-x-1/2"
+      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] min-h-screen lg:min-h-0"
     >
       <div className="flex flex-col w-full lg:rounded-lg">
         <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
@@ -434,15 +441,15 @@ export default function MovieModal({
           >
             <FontAwesomeIcon icon="fa-solid fa-xmark" className="text-lg" />
           </button>
-          <div className="flex sm:flex-row-reverse items-end justify-between absolute left-[5%] right-[5%] bottom-[5%] top-[30%] z-20 lg:gap-10">
+          <div className="flex flex-row sm:flex-col space-x-2 space-y-2 lg:space-y-3 justify-between absolute left-[5%] right-[5%] bottom-[5%] z-20">
             <div
               className={`flex flex-col justify-start sm:justify-end space-y-1 sm:space-y-2 lg:space-y-3 w-2/3 sm:px-0 ease-linear duration-[1000ms] ${
                 fadeOutImage
-                  ? "delay-[3000ms] scale-75 sm:translate-x-[12.5%] translate-y-[12.5%] -translate-x-[12.5%]"
+                  ? "delay-[3000ms] scale-75 translate-y-[12.5%] -translate-x-[12.5%]"
                   : "delay-0 scale-100 translate-x-0 translate-y-0"
               }`}
             >
-              <div className="flex items-center space-x-1 justify-start sm:justify-end sm:scale-100 scale-75 -translate-x-[12.5%] sm:translate-x-0 w-full">
+              <div className="flex items-center space-x-1 justify-start sm:scale-100 scale-75 -translate-x-[12.5%] sm:translate-x-0 w-full">
                 <img
                   className="h-[15px] sm:h-[20px] object-cover"
                   src={logo_n}
@@ -456,8 +463,8 @@ export default function MovieModal({
                     : "PHIM"}
                 </span>
               </div>
-              <div className={`w-2/3 transition-all sm:self-end `}>
-                {modal?.tmdb_image?.logo && (
+              <div className={`w-2/3 transition-all `}>
+                {modal?.tmdb_image?.logo ? (
                   <LazyImage
                     aspect="contain"
                     src={"https://image.tmdb.org/t/p/" + modal.tmdb_image.logo}
@@ -465,12 +472,21 @@ export default function MovieModal({
                     sizes="(max-width: 640px) 30vw, (max-width: 1400px) 40vw, 50vw"
                     priority
                   />
+                ) : (
+                  <div
+                    className={`w-full max-h-[43.75%] sm:h-auto sm:max-h-[40%] object-cover transition-all ease-linear duration-[1000ms] `}
+                  >
+                    <h1
+                      className="uppercase text-4xl md:text-6xl xl:text-7xl font-bold tracking-tighter text-white truncate line-clamp-3 sm:line-clamp-2 text-pretty text-start"
+                      style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.6)" }}
+                    >
+                      {modal.item.origin_name}
+                    </h1>
+                  </div>
                 )}
               </div>
-            </div>
-            <div className="sm:flex flex-col gap-2 justify-end min-w-[50%] sm:min-w-[35%] h-fit hidden">
               {watchingMovie !== null && (
-                <div className="flex flex-col gap-1 w-full">
+                <div className="sm:flex hidden flex-col gap-1 w-full">
                   <span className="text-white/80 text-xs sm:text-sm whitespace-nowrap text-nowrap font-medium">
                     Tập {watchingMovie.episodeName}
                   </span>
@@ -488,8 +504,30 @@ export default function MovieModal({
                   </div>
                 </div>
               )}
-              <div className="flex sm:space-x-2 space-x-1">
-                <div className="w-full rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear cursor-pointer">
+            </div>
+            <div className="sm:hidden flex items-end justify-center">
+              {showTrailer && youtubeId && fadeOutImage && (
+                <button
+                  onClick={handleToggleMute}
+                  className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-2 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
+                >
+                  <div className="h-5 w-5 flex items-center justify-center">
+                    <FontAwesomeIcon
+                      icon={
+                        isMuted
+                          ? "fa-solid fa-volume-xmark"
+                          : "fa-solid fa-volume-high"
+                      }
+                      className="text-lg"
+                      size="xs"
+                    />
+                  </div>
+                </button>
+              )}
+            </div>
+            <div className="sm:flex hidden space-x-2 justify-between w-full !ml-0">
+              <div className="flex space-x-2">
+                <div className="relative rounded bg-white hover:bg-white/80 flex flex-nowrap items-center justify-center transition-all ease-linear">
                   {(modal.item.episodes[0].server_data[0].link_embed != "" &&
                     (watchingMovie === null ? (
                       <div
@@ -498,10 +536,9 @@ export default function MovieModal({
                             `/xem-phim/${modal.item.slug}?svr=${0}&ep=${0}`
                           )
                         }
-                        className="cursor-pointer w-full h-full flex items-center justify-center"
                         key={modal.item._id + 0}
                       >
-                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
+                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                           <FontAwesomeIcon icon="fa-solid fa-play" />
                           <span>Phát</span>
                         </button>
@@ -510,16 +547,15 @@ export default function MovieModal({
                       <div
                         onClick={() => handlePlayMovie(watchingMovie)}
                         key={modal.item._id + 0}
-                        className="cursor-pointer w-full h-full flex items-center justify-center"
                       >
-                        <button className="px-2 font-semibold text-black flex items-center space-x-2">
+                        <button className="px-4 sm:px-7 lg:px-10 font-semibold text-black flex items-center space-x-2">
                           <FontAwesomeIcon icon="fa-solid fa-play" />
-                          <span className="text-nowrap">Xem tiếp</span>
+                          <span className="text-nowrap">Tiếp tục xem</span>
                         </button>
                       </div>
                     ))) || (
                     <button
-                      className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2 w-full h-full justify-center"
+                      className="px-4 sm:px-7 lg:px-10 font-semibold text-black text-nowrap flex flex-nowrap items-center space-x-2"
                       onClick={() => {
                         toast.warning("Tính năng đang được phát triển.");
                       }}
@@ -542,65 +578,31 @@ export default function MovieModal({
                         ? "fa-solid fa-spinner"
                         : `fa-${isFavourite ? "solid" : "regular"} fa-heart`
                     }
-                    className={`sm:text-lg sm:w-5 sm:h-5 h-3 w-3 ${
+                    className={`sm:text-lg ${
                       isFavourite ? "text-red-500" : "text-white"
                     } ${loadingFav ? "animate-spin" : ""}`}
                   />
                 </button>
-                {showTrailer && youtubeId && fadeOutImage && (
-                  <button
-                    onClick={handleToggleMute}
-                    className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
-                  >
-                    <div className="sm:w-5 sm:h-5 h-3 w-3 flex items-center justify-center">
-                      <FontAwesomeIcon
-                        icon={
-                          isMuted
-                            ? "fa-solid fa-volume-xmark"
-                            : "fa-solid fa-volume-high"
-                        }
-                        className="text-xs sm:text-lg"
-                        size="xs"
-                      />
-                    </div>
-                  </button>
-                )}
               </div>
-              <div
-                className="rounded bg-white/10 backdrop-blur-md hover:bg-white/20 flex items-center justify-center transition-all ease-linear cursor-pointer"
-                onClick={() => navigate(`/phim/${modal.item.slug}`)}
-              >
-                <button className="py-1 sm:py-2 text-white font-medium flex items-center justify-center space-x-2 cursor-pointer">
-                  <Info
-                    strokeWidth={3}
-                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
-                  />
-                  <span className="line-clamp-1">Thông tin phim</span>
-                  {/* <ChevronDown
-                    strokeWidth={3}
-                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
-                  /> */}
+              {showTrailer && youtubeId && fadeOutImage && (
+                <button
+                  onClick={handleToggleMute}
+                  className="text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
+                >
+                  <div className="sm:w-5 sm:h-5 h-3 w-3 flex items-center justify-center">
+                    <FontAwesomeIcon
+                      icon={
+                        isMuted
+                          ? "fa-solid fa-volume-xmark"
+                          : "fa-solid fa-volume-high"
+                      }
+                      className="text-xs sm:text-lg"
+                      size="xs"
+                    />
+                  </div>
                 </button>
-              </div>
+              )}
             </div>
-            {showTrailer && youtubeId && fadeOutImage && (
-              <button
-                onClick={handleToggleMute}
-                className="sm:hidden text-white border-2 cursor-pointer border-white/40 bg-black/10 p-1 sm:p-2 lg:p-3 aspect-square rounded-full flex items-center justify-center hover:border-white transition-all ease-linear"
-              >
-                <div className="w-5 h-5 flex items-center justify-center">
-                  <FontAwesomeIcon
-                    icon={
-                      isMuted
-                        ? "fa-solid fa-volume-xmark"
-                        : "fa-solid fa-volume-high"
-                    }
-                    className="text-xs sm:text-lg"
-                    size="xs"
-                  />
-                </div>
-              </button>
-            )}
           </div>
         </div>
         <div className="flex flex-col px-[5%] pb-[5%] pt-2 space-y-4">
@@ -697,22 +699,6 @@ export default function MovieModal({
                   </button>
                 </div>
               </div>
-              <div
-                className="rounded bg-white/10 backdrop-blur-md hover:bg-white/20 flex items-center justify-center transition-all ease-linear cursor-pointer"
-                onClick={() => navigate(`/phim/${modal.item.slug}`)}
-              >
-                <button className="py-2 sm:py-3 text-white font-medium flex items-center justify-center space-x-2 cursor-pointer">
-                  <Info
-                    strokeWidth={3}
-                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
-                  />
-                  <span className="line-clamp-1">Thông tin phim</span>
-                  {/* <ChevronDown
-                    strokeWidth={3}
-                    className="size-3 sm:size-4 lg:size-5 xl:size-6 2xl:size-7"
-                  /> */}
-                </button>
-              </div>
             </div>
             <div className="flex flex-col space-y-4 w-full sm:w-[65%]">
               <div className="flex flex-col space-y-4">
@@ -794,16 +780,43 @@ export default function MovieModal({
                 <h1 className="text-2xl lg:text-3xl font-bold">
                   {modal.item.name}
                 </h1>
-                {/* <span className="font-light opacity-70">
-                  <i>({modal.item.origin_name})</i>
-                </span> */}
               </div>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: modal.item.content,
-                }}
-                className="text-white text-pretty line-clamp-3 text-sm lg:text-base"
-              />
+              <div className="relative">
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: modal.item.content,
+                  }}
+                  className={`text-white text-pretty text-sm lg:text-base transition-all duration-300 ${
+                    isContentExpanded ? "" : "line-clamp-3"
+                  }`}
+                />
+                {modal.item.content && modal.item.content.length > 200 && (
+                  <button
+                    onClick={() => setIsContentExpanded(!isContentExpanded)}
+                    className="text-white/70 hover:text-white text-sm lg:text-base flex items-center gap-0.5 transition-colors"
+                  >
+                    {isContentExpanded ? (
+                      <>
+                        Thu gọn
+                        <ChevronDown
+                          size={16}
+                          strokeWidth={3}
+                          className="rotate-180 transition-transform"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        Xem thêm
+                        <ChevronDown
+                          size={16}
+                          strokeWidth={3}
+                          className="transition-transform"
+                        />
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
             </div>
             <div className="flex flex-col space-y-3 w-full sm:w-[35%] text-sm lg:text-base">
               {modal.item.actor[0] != "" && (
@@ -818,7 +831,7 @@ export default function MovieModal({
                   {modal.item.actor.length > 3 && (
                     <span
                       className="italic hover:underline cursor-pointer"
-                      onClick={() => navigate(`/phim/${modal.item.slug}`)}
+                      onClick={() => scrollToMoreInfo()}
                     >
                       thêm
                     </span>
@@ -828,26 +841,44 @@ export default function MovieModal({
               <div>
                 <span className="opacity-50">Quốc gia: </span>
                 {modal.item.country.map((country, index) => (
-                  <span key={index}>
-                    {country.name}
+                  <>
+                    <span
+                      key={index}
+                      className="hover:underline cursor-pointer"
+                      onClick={() =>
+                        navigate(`/duyet-tim/phim-moi?country=${country.slug}`)
+                      }
+                    >
+                      {country.name}
+                    </span>
                     {index !== modal.item.country.length - 1 && <span>, </span>}
-                  </span>
+                  </>
                 ))}
               </div>
               <div>
                 <span className="opacity-50">Thể loại: </span>
                 {modal.item.category.slice(0, 3).map((category, index) => (
-                  <span key={index}>
-                    {category.name}
+                  <>
+                    <span
+                      key={index}
+                      className="hover:underline cursor-pointer"
+                      onClick={() =>
+                        navigate(
+                          `/duyet-tim/phim-moi?category=${category.slug}`
+                        )
+                      }
+                    >
+                      {category.name}
+                    </span>
                     {index !== modal.item.category.length - 1 && (
                       <span>, </span>
                     )}
-                  </span>
+                  </>
                 ))}
                 {modal.item.category.length > 3 && (
                   <span
                     className="italic hover:underline cursor-pointer"
-                    onClick={() => navigate(`/phim/${modal.item.slug}`)}
+                    onClick={() => scrollToMoreInfo()}
                   >
                     thêm
                   </span>
@@ -861,6 +892,148 @@ export default function MovieModal({
                   )}
                 </span>
               </div>
+            </div>
+          </div>
+          <div>
+            {modal.item.type != "single" &&
+              modal.item.episodes[server].server_data[server].link_embed !=
+                "" && (
+                <div className="flex flex-col space-y-5 pt-6">
+                  <h2 className="text-xl lg:text-2xl font-bold">
+                    Danh sách tập
+                  </h2>
+                  <div className="flex gap-4 items-center">
+                    <span className="text-base lg:text-lg font-bold border-r-[0.5px] border-white/50 pr-4 flex items-center gap-1">
+                      <Server size={16} strokeWidth={3} />
+                      Server
+                    </span>
+                    {modal.item.episodes.map((item, index) => (
+                      <div
+                        key={index}
+                        className={`${
+                          server == index
+                            ? " text-black bg-white border-[1px] border-white"
+                            : "text-white/70 hover:text-white hover:bg-white/10 border-[1px] border-white/70"
+                        } cursor-pointer px-2 py-1 rounded-md transition-all ease-linear flex items-center gap-2 text-xs lg:text-base `}
+                        onClick={() => setServer(index)}
+                      >
+                        <Captions size={16} />
+                        <span>{item.server_name.split(" #")[0]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {modal.item.episodes[server].server_data.length > 100 && (
+                    <div className="flex gap-3 flex-wrap">
+                      {Array.from({
+                        length: Math.ceil(
+                          modal.item.episodes[server].server_data.length / 100
+                        ),
+                      }).map((item, index) => (
+                        <button
+                          className={`text-xs rounded py-1.5 px-3 ${
+                            episodesRange == index * 100
+                              ? "bg-white text-black border-white"
+                              : "bg-white/[15%] hover:bg-white/10 hover:text-white hover:border-white text-white/70"
+                          } transition-all ease-linear duration-300`}
+                          key={index}
+                          onClick={() => setEpisodesRange(index * 100)}
+                        >
+                          Tập{" "}
+                          {
+                            modal.item.episodes[server].server_data[index * 100]
+                              .name
+                          }{" "}
+                          -{" "}
+                          {modal.item.episodes[server].server_data?.[
+                            index * 100 + 99
+                          ]?.name ||
+                            modal.item.episodes[server].server_data[
+                              modal.item.episodes[server].server_data.length - 1
+                            ].name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 md:grid-cols-5 lg:grid-cols-6">
+                    {modal.item.episodes[server].server_data
+                      .slice(episodesRange, episodesRange + 100)
+                      .map((item, index) => (
+                        <div
+                          onClick={() =>
+                            navigate(
+                              `/xem-phim/${modal.item.slug}?svr=${server}&ep=${index}`
+                            )
+                          }
+                          className={`relative rounded bg-[#242424] group hover:bg-opacity-70 cursor-pointer 
+                      `}
+                          key={modal.item._id + index}
+                        >
+                          <button className="py-2 transition-all ease-linear text-xs gap-2 flex items-center justify-center text-white/70 group-hover:text-white text-center w-full rounded">
+                            <FontAwesomeIcon
+                              icon="fa-solid fa-play"
+                              className="text-xs"
+                            />
+                            <span className="text-xs lg:text-base">
+                              {" "}
+                              Tập {item.name}
+                            </span>
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+          </div>
+          <Recommend
+            type={modal.breadCrumb[0].slug.split("/danh-sach")[1]}
+            country={modal.item.country[0].slug}
+            category={modal.item.category[0].slug}
+            slug={modal.item.slug}
+          />
+          <div className="flex flex-col gap-2" id={"more-info"}>
+            <h3 className="text-xl lg:text-2xl">
+              Giới thiệu về <b>{modal.item.origin_name}</b>
+            </h3>
+            {modal.item.director[0] !== "" && (
+              <div className="leading-3 text-justify text-sm text-white/80">
+                <span className="opacity-50 text-sm">Đạo diễn: </span>
+                {modal.item.director.map((director, index) => (
+                  <span key={index} className="text-sm text-white">
+                    {director}
+                    {index !== modal.item.director.length - 1 && (
+                      <span>, </span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            {modal.item.actor.length > 0 && modal.item.actor[0] !== "" && (
+              <div className="leading-3 text-justify text-sm text-white/80">
+                <span className="opacity-50 text-sm">Diễn viên: </span>
+                {modal.item.actor.map((actor, index) => (
+                  <span key={index} className="text-sm text-white">
+                    {actor}
+                    {index !== modal.item.actor.length - 1 && <span>, </span>}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="leading-3 text-justify text-sm text-white/80">
+              <span className="opacity-50 text-sm">Thể loại: </span>
+              {modal.item.category.map((category, index) => (
+                <>
+                  <span
+                    key={index}
+                    className="text-sm text-white hover:underline cursor-pointer"
+                    onClick={() =>
+                      navigate(`/duyet-tim/phim-moi?category=${category.slug}`)
+                    }
+                  >
+                    {category.name}
+                  </span>
+                  {index !== modal.item.category.length - 1 && <span>, </span>}
+                </>
+              ))}
             </div>
           </div>
         </div>

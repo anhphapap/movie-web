@@ -1435,11 +1435,15 @@ const VideoPlayer = ({
         >
           <button
             onClick={() => {
-              navigate(`/phim/${movie.slug}`);
+              navigate(
+                `/trang-chu?movie=${movie.slug}&tmdb_id=${movie.tmdb.id}&tmdb_type=${movie.tmdb.type}`
+              );
             }}
             onTouchEnd={(e) => {
               e.stopPropagation();
-              navigate(`/phim/${movie.slug}`);
+              navigate(
+                `/trang-chu?movie=${movie.slug}&tmdb_id=${movie.tmdb.id}&tmdb_type=${movie.tmdb.type}`
+              );
             }}
             className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white z-50 pointer-events-auto active:scale-95`}
           >

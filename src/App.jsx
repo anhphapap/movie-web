@@ -206,10 +206,10 @@ function App() {
                                         path="/tim-kiem"
                                         element={<SearchPage />}
                                       />
-                                      <Route
+                                      {/* <Route
                                         path="/phim/:movieSlug"
                                         element={<WatchPage />}
-                                      />
+                                      /> */}
                                       <Route
                                         path="/xem-phim/:movieSlug"
                                         element={<FullWatchPage />}

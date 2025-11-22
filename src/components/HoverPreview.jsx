@@ -24,12 +24,25 @@ export default function HoverPreview() {
   const isFavourite = favoriteSlugs.includes(hovered?.item?.slug);
   const { toggleWatching, getWatchingMovie, watchingSlugs } = useWatching();
   const [watchingMovie, setWatchingMovie] = useState(null);
+
+  // Reset watchingMovie khi không hover
   useEffect(() => {
+    if (!hovered) {
+      setWatchingMovie(null);
+    }
+  }, [hovered]);
+
+  useEffect(() => {
+    if (!hovered?.item?.slug) return;
+
     if (hovered?.isWatching) {
       setWatchingMovie(hovered?.item);
       return;
     }
-    if (watchingSlugs.length === 0) return;
+    if (watchingSlugs.length === 0) {
+      setWatchingMovie(null);
+      return;
+    }
     setWatchingMovie(getWatchingMovie(hovered?.item?.slug) || null);
   }, [
     watchingSlugs,
@@ -37,6 +50,7 @@ export default function HoverPreview() {
     getWatchingMovie,
     hovered?.isWatching,
   ]);
+
   const handleToggleFavorite = (e, item) => {
     e.stopPropagation();
     toggleFavorite({
@@ -200,7 +214,8 @@ export default function HoverPreview() {
                 >
                   <FontAwesomeIcon
                     icon={`fa-solid ${
-                      item.episode_current.toLowerCase().includes("trailer")
+                      item.episode_current.toLowerCase().includes("trailer") ||
+                      item.episode_current.toLowerCase().includes("tập 0")
                         ? "fa-bell"
                         : "fa-play"
                     }`}
@@ -231,23 +246,6 @@ export default function HoverPreview() {
                     size="sm"
                   />
                 </div>
-                <div
-                  className={
-                    "relative group/tooltip text-white border-2 cursor-pointer  bg-black/10 rounded-full h-[40px] w-[40px] flex items-center justify-center hover:border-white border-white/40"
-                  }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/phim/${item.slug}`);
-                    onLeave();
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon="fa-solid fa-info"
-                    size="sm"
-                    className="text-white"
-                  />
-                  <Tooltip content="Thông tin phim" size="sm" />
-                </div>
                 {isWatching && (
                   <div
                     className={
@@ -256,6 +254,7 @@ export default function HoverPreview() {
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleWatching(watchingMovie || item);
+                      setWatchingMovie(null);
                       onLeave();
                     }}
                   >
