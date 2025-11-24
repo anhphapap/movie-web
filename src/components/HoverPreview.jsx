@@ -74,7 +74,7 @@ export default function HoverPreview() {
     openModal(slug, tmdb_id, tmdb_type);
     onLeave();
   };
-  const handlePlayMovie = (e, isTrailer = false) => {
+  const handlePlayMovie = async (e, isTrailer = false) => {
     e.stopPropagation();
     if (isWatching) {
       const resumeData = {
@@ -86,9 +86,39 @@ export default function HoverPreview() {
       };
 
       localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
-      navigate(
-        `/xem-phim/${hovered.item.slug}?svr=${hovered.item.svr}&ep=${hovered.item.episode}`
-      );
+
+      // Trên mobile, request fullscreen NGAY trước khi navigate
+      if (window.innerWidth < 1024) {
+        try {
+          const docEl = document.documentElement;
+
+          if (docEl.requestFullscreen) {
+            await docEl.requestFullscreen();
+          } else if (docEl.webkitRequestFullscreen) {
+            await docEl.webkitRequestFullscreen();
+          } else if (docEl.mozRequestFullScreen) {
+            await docEl.mozRequestFullScreen();
+          } else if (docEl.msRequestFullscreen) {
+            await docEl.msRequestFullscreen();
+          }
+
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              await screen.orientation.lock("landscape");
+            } catch (err) {
+              console.log("Orientation lock failed:", err);
+            }
+          }
+        } catch (err) {
+          console.log("Fullscreen before navigate failed:", err);
+        }
+      }
+
+      setTimeout(() => {
+        navigate(
+          `/xem-phim/${hovered.item.slug}?svr=${hovered.item.svr}&ep=${hovered.item.episode}`
+        );
+      }, 100);
     } else if (isTrailer) {
       toast.warning("Tính năng đang được phát triển.");
     } else {
@@ -150,6 +180,7 @@ export default function HoverPreview() {
                 src={item.poster_url}
                 alt={item.name}
                 sizes="24vw"
+                mode="blur"
                 priority={true}
               />
               {item.sub_docquyen && (

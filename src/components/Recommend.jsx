@@ -102,7 +102,7 @@ export default function Recommend({
                   <LazyImage
                     src={movie.poster_url}
                     alt={movie.name}
-                    sizes="(max-width: 640px) 45vw,(max-width: 1024px) 29vw, (max-width: 1536px) 22vw,18vw"
+                    sizes="(max-width: 768px) 45vw,(max-width: 1280px) 28vw, 20vw"
                     quality={65}
                   />
                   <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b to-transparent from-[#141414]/50"></div>

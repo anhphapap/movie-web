@@ -136,7 +136,8 @@ const Episodes = ({
                           }
                           sizes="10vw"
                         />
-                        {hoveredEpisode !== parseInt(episode) && (
+                        {(hoveredEpisode !== parseInt(episode) ||
+                          showServer !== parseInt(svr)) && (
                           <div
                             className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100  transition-all ease-linear duration-100"
                             onClick={(e) => {

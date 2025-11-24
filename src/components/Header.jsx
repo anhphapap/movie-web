@@ -331,9 +331,9 @@ const Header = ({ filter = false, type_slug = "" }) => {
           }`}
         >
           <h1 className="text-2xl lg:text-3xl text-white px-[3%]">
-            {favoritesPage?.length === 0
-              ? "Danh sách của bạn hiện đang trống!"
-              : "Danh sách của tôi"}
+            {favoritesPage.length > 0
+              ? "Danh sách của tôi"
+              : "Danh sách của bạn hiện đang trống!"}
           </h1>
         </div>
       )}

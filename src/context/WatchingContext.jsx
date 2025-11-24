@@ -209,7 +209,7 @@ export const WatchingProvider = ({ children }) => {
     currentTime,
     duration,
     episode,
-    server,
+    svr,
     episodeName
   ) => {
     if (!user?.email) {
@@ -223,7 +223,7 @@ export const WatchingProvider = ({ children }) => {
         currentTime,
         duration,
         episode,
-        server,
+        svr,
         lastWatched: serverTimestamp(),
         progress: duration > 0 ? (currentTime / duration) * 100 : 0,
       };

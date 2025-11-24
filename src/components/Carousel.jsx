@@ -60,7 +60,7 @@ export default function Carousel({
   const { ref, inView } = useInView({
     triggerOnce: true,
     threshold: 0,
-    rootMargin: "300px 0px",
+    rootMargin: "500px 0px",
   });
 
   useEffect(() => {
@@ -155,7 +155,7 @@ export default function Carousel({
     if (page > 1) fetchMoviesChunk(page);
   }, [page]);
 
-  const handlePlayMovie = (movie) => {
+  const handlePlayMovie = async (movie) => {
     // Chỉ lưu resume data nếu có currentTime > 0
     if (movie.currentTime && movie.currentTime > 0) {
       const resumeData = {
@@ -166,12 +166,44 @@ export default function Carousel({
         timestamp: Date.now(),
       };
       localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
+
+      // Trên mobile, request fullscreen NGAY trước khi navigate
+      if (window.innerWidth < 1024) {
+        try {
+          const docEl = document.documentElement;
+
+          if (docEl.requestFullscreen) {
+            await docEl.requestFullscreen();
+          } else if (docEl.webkitRequestFullscreen) {
+            await docEl.webkitRequestFullscreen();
+          } else if (docEl.mozRequestFullScreen) {
+            await docEl.mozRequestFullScreen();
+          } else if (docEl.msRequestFullscreen) {
+            await docEl.msRequestFullscreen();
+          }
+
+          if (screen.orientation && screen.orientation.lock) {
+            try {
+              await screen.orientation.lock("landscape");
+            } catch (err) {
+              console.log("Orientation lock failed:", err);
+            }
+          }
+        } catch (err) {
+          console.log("Fullscreen before navigate failed:", err);
+        }
+      }
+
+      setTimeout(() => {
+        navigate(
+          `/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`
+        );
+      }, 100);
     } else {
       // Clear resume data nếu không có currentTime
       localStorage.removeItem("resumeVideo");
+      navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
     }
-
-    navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
   };
 
   const handleEnter = (item, e, index, isWatching = false) => {

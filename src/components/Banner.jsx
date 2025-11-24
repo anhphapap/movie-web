@@ -569,6 +569,7 @@ const Banner = ({ type_slug = "phim-bo", filter = false }) => {
                     ? "!h-full !w-auto"
                     : "!w-full !h-auto translate-x-0"
                 }`}
+                mode="blur"
                 src={"https://image.tmdb.org/t/p/" + movie.tmdb_image.logo}
                 alt={movie.item.name}
                 sizes="(max-width: 640px) 60vw, (max-width: 1400px) 40vw, 50vw"

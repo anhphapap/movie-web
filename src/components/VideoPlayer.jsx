@@ -106,62 +106,81 @@ const VideoPlayer = ({
   // Detect mobile
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const width = window.innerWidth;
+      // Chỉ dựa vào width để dễ test trên DevTools
+      const isMobileDetected = width < 1024;
+      setIsMobile(isMobileDetected);
+      console.log("Mobile detection:", { width, isMobile: isMobileDetected });
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Auto fullscreen trên mobile khi vào trang xem phim
-  useEffect(() => {
-    if (!isMobile || !videoReady) return;
+  // Auto fullscreen trên mobile khi user click play
+  const handleAutoFullscreen = async () => {
+    // Check mobile based on current window width (avoid closure issue)
+    const isMobileNow = window.innerWidth < 1024;
+    console.log(
+      "handleAutoFullscreen called, isMobile:",
+      isMobileNow,
+      "width:",
+      window.innerWidth
+    );
 
-    // Delay nhỏ để đảm bảo video đã render xong
-    const timer = setTimeout(async () => {
-      const container = containerRef.current;
-      if (!container) return;
+    if (!isMobileNow) {
+      console.log("Not mobile width, skipping auto fullscreen");
+      return;
+    }
 
-      try {
-        // Check if already in fullscreen
-        const isFullscreen = !!(
-          document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement
-        );
+    const container = containerRef.current;
+    if (!container) {
+      console.log("No container ref, skipping auto fullscreen");
+      return;
+    }
 
-        if (!isFullscreen) {
-          // Lock orientation trước
-          if (screen.orientation && screen.orientation.lock) {
-            try {
-              await screen.orientation.lock("landscape");
-            } catch (err) {
-              console.log("Orientation lock failed:", err);
-            }
-          }
+    try {
+      // Check if already in fullscreen
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement
+      );
 
-          // Request fullscreen
-          if (container.requestFullscreen) {
-            await container.requestFullscreen();
-          } else if (container.webkitRequestFullscreen) {
-            await container.webkitRequestFullscreen();
-          } else if (container.mozRequestFullScreen) {
-            await container.mozRequestFullScreen();
-          } else if (container.msRequestFullscreen) {
-            await container.msRequestFullscreen();
-          }
+      console.log("Current fullscreen state:", isFullscreen);
 
-          setFullscreen(true);
+      if (!isFullscreen) {
+        console.log("Requesting fullscreen...");
+
+        // Request fullscreen
+        if (container.requestFullscreen) {
+          await container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          await container.webkitRequestFullscreen();
+        } else if (container.mozRequestFullScreen) {
+          await container.mozRequestFullScreen();
+        } else if (container.msRequestFullscreen) {
+          await container.msRequestFullscreen();
         }
-      } catch (err) {
-        // Nếu browser block auto fullscreen, sẽ trigger khi user click play
-        console.log("Auto fullscreen blocked:", err);
-      }
-    }, 500);
 
-    return () => clearTimeout(timer);
-  }, [isMobile, videoReady]);
+        console.log("Fullscreen requested successfully");
+        setFullscreen(true);
+
+        // Lock orientation sau khi fullscreen (iOS cần fullscreen trước)
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock("landscape");
+            console.log("Orientation locked to landscape");
+          } catch (err) {
+            console.log("Orientation lock failed:", err);
+          }
+        }
+      }
+    } catch (err) {
+      console.log("Auto fullscreen failed:", err);
+    }
+  };
 
   // Check PiP support
   useEffect(() => {
@@ -222,53 +241,25 @@ const VideoPlayer = ({
         // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
         // Không auto-play nếu là lần đầu xem -> hiện button play
         if (shouldAutoPlay && resumeData) {
+          // Giảm timeout để giữ user gesture context
           setTimeout(async () => {
             if (video && hlsRef.current === hls) {
-              video.play().catch(console.error);
+              // Auto fullscreen trước khi play trên mobile (PHẢI AWAIT!)
+              console.log("HLS manifest loaded, triggering auto fullscreen");
+              try {
+                await handleAutoFullscreen();
+                console.log("Fullscreen completed, now playing video");
+              } catch (err) {
+                console.log("Fullscreen on autoplay (HLS) failed:", err);
+              }
+
+              // Play video sau khi fullscreen
+              await video.play().catch(console.error);
               setPlaying(true);
               setShowControls(true);
               setHasPlayedOnce(true);
-
-              // Auto fullscreen trên mobile khi autoplay
-              if (window.innerWidth < 1024 && containerRef.current) {
-                try {
-                  const isFullscreen = !!(
-                    document.fullscreenElement ||
-                    document.webkitFullscreenElement ||
-                    document.mozFullScreenElement ||
-                    document.msFullscreenElement
-                  );
-
-                  if (!isFullscreen) {
-                    // Lock orientation
-                    if (screen.orientation && screen.orientation.lock) {
-                      try {
-                        await screen.orientation.lock("landscape");
-                      } catch (err) {
-                        console.log("Orientation lock failed:", err);
-                      }
-                    }
-
-                    // Request fullscreen
-                    const container = containerRef.current;
-                    if (container.requestFullscreen) {
-                      await container.requestFullscreen();
-                    } else if (container.webkitRequestFullscreen) {
-                      await container.webkitRequestFullscreen();
-                    } else if (container.mozRequestFullScreen) {
-                      await container.mozRequestFullScreen();
-                    } else if (container.msRequestFullscreen) {
-                      await container.msRequestFullscreen();
-                    }
-
-                    setFullscreen(true);
-                  }
-                } catch (err) {
-                  console.log("Fullscreen on autoplay failed:", err);
-                }
-              }
             }
-          }, 500);
+          }, 100); // Giảm từ 500ms → 100ms để giữ user gesture
         }
       });
 
@@ -298,53 +289,25 @@ const VideoPlayer = ({
         // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
         // Không auto-play nếu là lần đầu xem -> hiện button play
         if (shouldAutoPlay && resumeData) {
+          // Giảm timeout để giữ user gesture context
           setTimeout(async () => {
             if (video) {
-              video.play().catch(console.error);
+              // Auto fullscreen trước khi play trên mobile (Safari - PHẢI AWAIT!)
+              console.log("Safari canplay event, triggering auto fullscreen");
+              try {
+                await handleAutoFullscreen();
+                console.log("Fullscreen completed, now playing video");
+              } catch (err) {
+                console.log("Fullscreen on autoplay (Safari) failed:", err);
+              }
+
+              // Play video sau khi fullscreen
+              await video.play().catch(console.error);
               setPlaying(true);
               setShowControls(true);
               setHasPlayedOnce(true);
-
-              // Auto fullscreen trên mobile khi autoplay (Safari)
-              if (window.innerWidth < 1024 && containerRef.current) {
-                try {
-                  const isFullscreen = !!(
-                    document.fullscreenElement ||
-                    document.webkitFullscreenElement ||
-                    document.mozFullScreenElement ||
-                    document.msFullscreenElement
-                  );
-
-                  if (!isFullscreen) {
-                    // Lock orientation
-                    if (screen.orientation && screen.orientation.lock) {
-                      try {
-                        await screen.orientation.lock("landscape");
-                      } catch (err) {
-                        console.log("Orientation lock failed:", err);
-                      }
-                    }
-
-                    // Request fullscreen
-                    const container = containerRef.current;
-                    if (container.requestFullscreen) {
-                      await container.requestFullscreen();
-                    } else if (container.webkitRequestFullscreen) {
-                      await container.webkitRequestFullscreen();
-                    } else if (container.mozRequestFullScreen) {
-                      await container.mozRequestFullScreen();
-                    } else if (container.msRequestFullscreen) {
-                      await container.msRequestFullscreen();
-                    }
-
-                    setFullscreen(true);
-                  }
-                } catch (err) {
-                  console.log("Fullscreen on autoplay failed:", err);
-                }
-              }
             }
-          }, 500);
+          }, 100); // Giảm từ 500ms → 100ms để giữ user gesture
         }
       };
 
@@ -509,19 +472,24 @@ const VideoPlayer = ({
   const handleInitialPlay = async () => {
     const video = videoRef.current;
     if (video) {
+      // Auto fullscreen trên mobile TRƯỚC khi play (quan trọng!)
+      console.log(
+        "handleInitialPlay called, fullscreen:",
+        fullscreen,
+        "width:",
+        window.innerWidth
+      );
+      console.log("Triggering auto fullscreen from play button");
+      try {
+        await handleAutoFullscreen();
+      } catch (err) {
+        console.log("Fullscreen on play failed:", err);
+      }
+
       video.play();
       setPlaying(true);
       setShowControls(true);
       setHasPlayedOnce(true);
-
-      // Auto fullscreen trên mobile khi bấm play (fallback nếu auto fullscreen bị block)
-      if (isMobile && !fullscreen) {
-        try {
-          await toggleFullscreen();
-        } catch (err) {
-          console.log("Fullscreen on play failed:", err);
-        }
-      }
 
       // Lưu phim vào danh sách đang xem
       const movieData = {
@@ -892,11 +860,29 @@ const VideoPlayer = ({
         lastTapX.current = tapX;
         lastTapY.current = tapY;
 
-        singleTapTimer.current = setTimeout(() => {
+        singleTapTimer.current = setTimeout(async () => {
           // Single tap confirmed
+
+          // Nếu video đang play và chưa fullscreen trên mobile → trigger fullscreen
+          const video = videoRef.current;
+          if (
+            video &&
+            !video.paused &&
+            !fullscreen &&
+            window.innerWidth < 1024
+          ) {
+            console.log("Single tap detected, triggering fullscreen");
+            try {
+              await handleAutoFullscreen();
+              setShowControls(true);
+              return;
+            } catch (err) {
+              console.log("Fullscreen from tap failed:", err);
+            }
+          }
+
           if (showControls) {
             // Control đang hiện → toggle pause/play
-            const video = videoRef.current;
             if (video) {
               if (video.paused) {
                 video.play().catch(console.error);
@@ -1189,6 +1175,16 @@ const VideoPlayer = ({
         playsInline
       />
 
+      {/* Loading indicator - khi video chưa ready */}
+      {!videoReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-20">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+            <p className="text-white text-lg font-medium">Đang tải...</p>
+          </div>
+        </div>
+      )}
+
       {/* Initial play button - CHỈ hiện lần đầu vào, chưa play bao giờ */}
       {videoReady && !hasPlayedOnce && (
         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black/50 via-black/60 to-black/70 backdrop-blur-sm z-20 animate-fadeIn">
@@ -1285,7 +1281,7 @@ const VideoPlayer = ({
               ? "justify-end px-[6%]"
               : centerOverlay === "backward"
               ? "justify-start px-[6%]"
-              : "justify-center"
+              : "justify-center lg:block hidden"
           }`}
         >
           <div
@@ -1349,6 +1345,181 @@ const VideoPlayer = ({
             {centerOverlay === "unmute" && (
               <Volume2 size={isMobile ? 40 : 80} strokeWidth={2.5} />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Netflix-style controls */}
+      {isMobile && videoReady && hasPlayedOnce && showControls && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+          {/* Left side - Volume control */}
+          <div
+            className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-auto"
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+          >
+            <div className="flex flex-col items-center gap-3 rounded-full px-2 py-4">
+              <Volume2
+                size={18}
+                className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              />
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={volume}
+                onChange={handleVolume}
+                className="h-28 w-1 cursor-pointer accent-white"
+                style={{
+                  writingMode: "bt-lr",
+                  WebkitAppearance: "slider-vertical",
+                  appearance: "slider-vertical",
+                }}
+                aria-label="Âm lượng"
+              />
+              <span className="text-white text-xs font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                {Math.round(volume * 100)}
+              </span>
+            </div>
+          </div>
+
+          {/* Center - Play/Pause & Seek buttons */}
+          <div
+            className="flex items-center justify-center gap-16 pointer-events-auto"
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+          >
+            {/* Backward 10s button */}
+            <button
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleSeek10s(-10);
+              }}
+              className="rounded-full p-4 active:scale-90 transition-all"
+              aria-label="Tua lại 10 giây"
+            >
+              <div className="flex items-center flex-row-reverse gap-2">
+                <RotateCcw
+                  size={48}
+                  className="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </button>
+
+            {/* Play/Pause button */}
+            <button
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                const video = videoRef.current;
+                if (video) {
+                  if (video.paused) {
+                    video.play().catch(console.error);
+                    showCenterOverlay("play");
+                  } else {
+                    video.pause();
+                    showCenterOverlay("pause");
+                  }
+                }
+              }}
+              className="rounded-full p-5 active:scale-90 transition-all"
+              aria-label={playing ? "Tạm dừng" : "Phát"}
+            >
+              {playing ? (
+                <Pause
+                  size={46}
+                  className="text-white fill-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+                  strokeWidth={2.5}
+                />
+              ) : (
+                <Play
+                  size={46}
+                  className="text-white fill-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+                  strokeWidth={2.5}
+                />
+              )}
+            </button>
+
+            {/* Forward 10s button */}
+            <button
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                handleSeek10s(10);
+              }}
+              className="rounded-full p-4 active:scale-90 transition-all"
+              aria-label="Tua tới 10 giây"
+            >
+              <div className="flex items-center gap-2">
+                <RotateCw
+                  size={48}
+                  className="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </button>
+          </div>
+
+          {/* Right side - Brightness control */}
+          <div
+            className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto"
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+            onTouchMove={(e) => {
+              e.stopPropagation();
+              resetInactivityTimer();
+            }}
+          >
+            <div className="flex flex-col items-center gap-3 rounded-full px-2 py-4">
+              <Sun
+                size={18}
+                className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+              />
+              <input
+                type="range"
+                min={20}
+                max={200}
+                step={5}
+                value={brightness}
+                onChange={(e) => setBrightness(Number(e.target.value))}
+                className="h-28 w-1 cursor-pointer accent-yellow-400"
+                style={{
+                  writingMode: "bt-lr",
+                  WebkitAppearance: "slider-vertical",
+                  appearance: "slider-vertical",
+                }}
+                aria-label="Độ sáng"
+              />
+              <span className="text-white text-xs font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                {Math.round(brightness)}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -1546,8 +1717,8 @@ const VideoPlayer = ({
           </div>
 
           {/* Buttons */}
-          <div className="flex items-center justify-between px-2 lg:px-3">
-            <div className="flex items-center space-x-1 lg:space-x-4 flex-wrap">
+          <div className="flex items-center justify-between px-2 lg:px-3 pt-4 lg:pt-0">
+            <div className="hidden lg:flex items-center space-x-1 lg:space-x-4 flex-wrap">
               {/* Play */}
               <button
                 onClick={(e) => {
@@ -1567,7 +1738,7 @@ const VideoPlayer = ({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none hidden lg:block"
                 aria-label={playing ? "Dừng" : "Phát"}
               >
                 {playing ? (
@@ -1593,7 +1764,7 @@ const VideoPlayer = ({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none hidden lg:block"
                 aria-label="Quay lại 10 giây"
               >
                 <RotateCcw size={isMobile ? 30 : 34} />
@@ -1615,7 +1786,7 @@ const VideoPlayer = ({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none hidden lg:block"
                 aria-label="Tiến 10 giây"
               >
                 <RotateCw size={isMobile ? 30 : 34} />
@@ -1674,14 +1845,14 @@ const VideoPlayer = ({
               {"Tập " + movie.episodes[svr].server_data[episode].name}
             </span>
 
-            <div className="flex items-center space-x-1 lg:space-x-4">
+            <div className="flex items-center justify-around w-full lg:w-auto lg:justify-start space-x-1 lg:space-x-4">
               {/* Next episode */}
               {movie.episodes[svr].server_data.length > 0 &&
                 parseInt(episode) <
                   movie.episodes[svr].server_data.length - 1 && (
                   <div className="relative group/episodes">
                     <button
-                      className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
+                      className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none flex items-center space-x-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         if (onNavigateToNextEpisode) {
@@ -1700,6 +1871,7 @@ const VideoPlayer = ({
                       aria-label="Xem tập tiếp theo"
                     >
                       <SkipForward size={isMobile ? 30 : 34} />
+                      <span className="lg:hidden">Tập tiếp theo</span>
                     </button>
                     <div
                       className="hidden lg:block absolute -translate-x-1/2 -translate-y-[100%] top-0 left-1/2 bg-[#262626]/95 backdrop-blur text-white text-sm
@@ -1780,12 +1952,13 @@ const VideoPlayer = ({
                       onTouchEnd={(e) => {
                         e.stopPropagation();
                       }}
-                      className={`group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2 outline-none ${
+                      className={`group-hover/episodes:scale-125 transition-all ease-linear duration-100 p-2 outline-none flex items-center space-x-2 ${
                         showEpisodes && isMobile ? "text-red-500" : ""
                       }`}
                       aria-label="Danh sách tập"
                     >
                       <ListVideo size={isMobile ? 30 : 34} />
+                      <span className="lg:hidden">Danh sách tập</span>
                     </button>
                     <Episodes
                       onClose={() => {
@@ -1814,10 +1987,11 @@ const VideoPlayer = ({
                     onTouchEnd={(e) => {
                       e.stopPropagation();
                     }}
-                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative outline-none"
+                    className="hover:scale-125 transition-all ease-linear duration-100 p-2 group/tooltip relative outline-none flex items-center space-x-2"
                     aria-label="Tốc độ phát"
                   >
                     <Gauge size={isMobile ? 30 : 34} />
+                    <span className="lg:hidden">Tốc độ ({playbackRate}x)</span>
                   </button>
                   <div
                     className={`absolute bottom-12 right-1/2 bg-black/90 backdrop-blur text-white rounded-md p-1 text-xs lg:text-sm
@@ -1928,7 +2102,7 @@ const VideoPlayer = ({
                 onTouchEnd={(e) => {
                   e.stopPropagation();
                 }}
-                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none"
+                className="hover:scale-125 transition-all ease-linear duration-100 group/tooltip relative p-2 outline-none hidden lg:block"
                 aria-label={fullscreen ? "Thu nhỏ" : "Phóng to"}
               >
                 {fullscreen ? (

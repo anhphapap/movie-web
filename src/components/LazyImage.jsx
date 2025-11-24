@@ -7,6 +7,7 @@ const LazyImage = ({
   quality = 70,
   aspect = "cover",
   className = "",
+  mode = "text",
   priority = false,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 80vw, (max-width: 1440px) 60vw, 50vw",
 }) => {
@@ -75,14 +76,42 @@ const LazyImage = ({
   return (
     <div className="relative w-full h-full overflow-hidden flex sm:block items-center justify-center">
       {error ? (
-        // Fallback khi không load được ảnh
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-zinc-900 to-zinc-800 flex items-end justify-center p-2">
-          <h3 className="text-white font-semibold text-sm line-clamp-2 text-center uppercase">
+        <div
+          className={`absolute inset-0 bg-gradient-to-t from-black via-zinc-900 to-zinc-800 flex items-center justify-center p-2 transition-all duration-500 ease-out
+    ${
+      !priority
+        ? loaded
+          ? "opacity-0"
+          : "opacity-100"
+        : loaded
+        ? "opacity-0"
+        : "opacity-100"
+    }`}
+        >
+          <h3 className="text-white font-semibold text-sm line-clamp-3 text-center uppercase text-pretty">
             {alt}
           </h3>
         </div>
       ) : (
         <>
+          {mode === "text" && (
+            <div
+              className={`absolute inset-0 bg-gradient-to-t from-black via-zinc-900 to-zinc-800 flex items-center justify-center p-2 transition-all duration-500 ease-out
+    ${
+      !priority
+        ? loaded
+          ? "opacity-0"
+          : "opacity-100"
+        : loaded
+        ? "opacity-0"
+        : "opacity-100"
+    }`}
+            >
+              <h3 className="text-white font-semibold text-sm line-clamp-3 text-center uppercase text-pretty">
+                {alt}
+              </h3>
+            </div>
+          )}
           {priority && (
             <link
               rel="preload"
@@ -91,23 +120,25 @@ const LazyImage = ({
               imageSrcSet={srcSet}
             />
           )}
-          <img
-            src={blurImage}
-            alt={`${alt} blurred`}
-            onError={() => setError(true)}
-            className={`absolute top-0 left-0 w-full h-full object-${aspect} 
-    scale-90 blur-lg brightness-90 
+          {mode === "blur" && (
+            <img
+              src={blurImage}
+              alt={`${alt} blurred`}
+              onError={() => setError(true)}
+              className={`absolute top-0 left-0 w-full h-full object-${aspect} 
+     blur-lg
     transition-all duration-500 ease-out
     ${
       !priority
         ? loaded
           ? "opacity-0 scale-100"
-          : "opacity-100 scale-95"
+          : "opacity-100 "
         : loaded
         ? "opacity-0"
         : "opacity-100"
     }`}
-          />
+            />
+          )}
           <img
             src={fullImage}
             srcSet={srcSet}
@@ -123,7 +154,7 @@ const LazyImage = ({
       !priority
         ? loaded
           ? "opacity-100 scale-100"
-          : "opacity-0 scale-95"
+          : "opacity-0 scale-[.98]"
         : loaded
         ? "opacity-100"
         : "opacity-0"
