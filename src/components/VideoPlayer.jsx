@@ -203,6 +203,27 @@ const VideoPlayer = ({
     setPipSupported(document.pictureInPictureEnabled);
   }, []);
 
+  // Auto fullscreen trên mobile khi có resumeData (user click "Xem tiếp")
+  useEffect(() => {
+    if (!isMobile || !videoReady || fullscreen) return;
+
+    // Nếu có resumeData hoặc shouldAutoPlay → trigger auto fullscreen
+    if (resumeData || shouldAutoPlay) {
+      console.log("Triggering auto fullscreen from resumeData/shouldAutoPlay");
+
+      const timer = setTimeout(async () => {
+        try {
+          await handleAutoFullscreen();
+          console.log("Auto fullscreen completed");
+        } catch (err) {
+          console.log("Auto fullscreen failed:", err);
+        }
+      }, 300); // Delay nhỏ để đảm bảo video đã sẵn sàng
+
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, videoReady, resumeData, shouldAutoPlay, fullscreen]);
+
   // Setup HLS
   useEffect(() => {
     const video = videoRef.current;
@@ -1385,7 +1406,7 @@ const VideoPlayer = ({
               ? "justify-end px-[6%]"
               : centerOverlay === "backward"
               ? "justify-start px-[6%]"
-              : "justify-center lg:block hidden"
+              : "justify-center lg:flex hidden"
           }`}
         >
           <div
@@ -1461,15 +1482,18 @@ const VideoPlayer = ({
             className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-auto"
             onTouchStart={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
+              setShowControls(true);
             }}
             onTouchEnd={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              resetControlsTimer(true);
             }}
             onTouchMove={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
             }}
           >
             <div className="flex flex-col items-center gap-3 rounded-full px-2 py-4">
@@ -1503,15 +1527,18 @@ const VideoPlayer = ({
             className="flex items-center justify-center gap-16 pointer-events-auto"
             onTouchStart={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
+              setShowControls(true);
             }}
             onTouchEnd={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              resetControlsTimer(true);
             }}
             onTouchMove={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
             }}
           >
             {/* Backward 10s button */}
@@ -1589,15 +1616,18 @@ const VideoPlayer = ({
             className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto"
             onTouchStart={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
+              setShowControls(true);
             }}
             onTouchEnd={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              resetControlsTimer(true);
             }}
             onTouchMove={(e) => {
               e.stopPropagation();
-              resetInactivityTimer();
+              clearTimeout(inactivityTimer.current);
+              clearTimeout(controlsTimerRef.current);
             }}
           >
             <div className="flex flex-col items-center gap-3 rounded-full px-2 py-4">
@@ -1704,7 +1734,7 @@ const VideoPlayer = ({
 
       {videoReady && hasPlayedOnce && (
         <div
-          className={`absolute top-0 left-0 w-full bg-gradient-to-b from-black/30 to-transparent transition-opacity duration-300 ${
+          className={`absolute top-0 left-0 w-full flex items-center justify-between bg-gradient-to-b from-black/30 to-transparent transition-opacity duration-300 ${
             showControls || showEpisodes ? "opacity-100" : "opacity-0"
           }`}
         >
@@ -1722,6 +1752,13 @@ const VideoPlayer = ({
             }}
             className={`hover:scale-125 transition-all ease-linear duration-100 p-4 lg:p-6 text-white z-50 pointer-events-auto active:scale-95`}
           >
+            <ArrowLeft size={isMobile ? 30 : 34} />
+          </button>
+          <span className="lg:hidden block ml-4 text-sm text-white font-semibold truncate">
+            {movie.name} -{" "}
+            {"Tập " + movie.episodes[svr].server_data[episode].name}
+          </span>
+          <button className="hover:scale-125 transition-all opacity-0 ease-linear duration-100 p-4 lg:p-6 text-white z-50 pointer-events-auto active:scale-95">
             <ArrowLeft size={isMobile ? 30 : 34} />
           </button>
         </div>
