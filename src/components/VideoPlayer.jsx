@@ -134,8 +134,9 @@ const VideoPlayer = ({
     }
 
     const container = containerRef.current;
-    if (!container) {
-      console.log("No container ref, skipping auto fullscreen");
+    const video = videoRef.current;
+    if (!container || !video) {
+      console.log("No container/video ref, skipping auto fullscreen");
       return;
     }
 
@@ -153,7 +154,22 @@ const VideoPlayer = ({
       if (!isFullscreen) {
         console.log("Requesting fullscreen...");
 
-        // Request fullscreen
+        // iOS Safari: Try video element fullscreen first (works better)
+        if (
+          video.webkitEnterFullscreen &&
+          typeof video.webkitEnterFullscreen === "function"
+        ) {
+          try {
+            video.webkitEnterFullscreen();
+            console.log("iOS video fullscreen entered");
+            setFullscreen(true);
+            return;
+          } catch (err) {
+            console.log("iOS video fullscreen failed, trying container:", err);
+          }
+        }
+
+        // Standard fullscreen API
         if (container.requestFullscreen) {
           await container.requestFullscreen();
         } else if (container.webkitRequestFullscreen) {
@@ -675,7 +691,8 @@ const VideoPlayer = ({
 
   const toggleFullscreen = async () => {
     const container = containerRef.current;
-    if (!container) return;
+    const video = videoRef.current;
+    if (!container || !video) return;
 
     try {
       // Check if already in fullscreen
@@ -687,12 +704,21 @@ const VideoPlayer = ({
       );
 
       if (!isFullscreen) {
-        // Lock orientation TRƯỚC khi vào fullscreen (quan trọng cho mobile)
-        if (screen.orientation && screen.orientation.lock) {
+        console.log("Entering fullscreen...");
+
+        // iOS Safari: Try video element fullscreen first (works better on mobile)
+        if (
+          isMobile &&
+          video.webkitEnterFullscreen &&
+          typeof video.webkitEnterFullscreen === "function"
+        ) {
           try {
-            await screen.orientation.lock("landscape");
+            video.webkitEnterFullscreen();
+            console.log("iOS video fullscreen entered");
+            setFullscreen(true);
+            return;
           } catch (err) {
-            console.log("Orientation lock failed:", err);
+            console.log("iOS video fullscreen failed, trying container:", err);
           }
         }
 
@@ -710,8 +736,46 @@ const VideoPlayer = ({
           await container.msRequestFullscreen();
         }
 
+        console.log("Fullscreen entered successfully");
         setFullscreen(true);
+
+        // Lock orientation SAU khi vào fullscreen (iOS requirement)
+        if (screen.orientation && screen.orientation.lock) {
+          try {
+            await screen.orientation.lock("landscape");
+            console.log("Orientation locked to landscape");
+          } catch (err) {
+            console.log("Orientation lock failed:", err);
+          }
+        }
       } else {
+        console.log("Exiting fullscreen...");
+
+        // Unlock orientation TRƯỚC khi thoát fullscreen
+        if (screen.orientation && screen.orientation.unlock) {
+          try {
+            screen.orientation.unlock();
+            console.log("Orientation unlocked");
+          } catch (err) {
+            console.log("Orientation unlock failed:", err);
+          }
+        }
+
+        // iOS Safari: Exit video fullscreen
+        if (
+          video.webkitExitFullscreen &&
+          typeof video.webkitExitFullscreen === "function"
+        ) {
+          try {
+            video.webkitExitFullscreen();
+            console.log("iOS video fullscreen exited");
+            setFullscreen(false);
+            return;
+          } catch (err) {
+            console.log("iOS exit fullscreen failed:", err);
+          }
+        }
+
         // Exit fullscreen
         if (document.exitFullscreen) {
           await document.exitFullscreen();
@@ -723,16 +787,8 @@ const VideoPlayer = ({
           await document.msExitFullscreen();
         }
 
+        console.log("Fullscreen exited successfully");
         setFullscreen(false);
-
-        // Unlock orientation sau khi thoát fullscreen
-        if (screen.orientation && screen.orientation.unlock) {
-          try {
-            screen.orientation.unlock();
-          } catch (err) {
-            console.log("Orientation unlock failed:", err);
-          }
-        }
       }
     } catch (error) {
       console.error("Fullscreen error:", error);
@@ -1011,6 +1067,8 @@ const VideoPlayer = ({
 
   // Sync fullscreen state với browser events (quan trọng cho mobile)
   useEffect(() => {
+    const video = videoRef.current;
+
     const handleFullscreenChange = () => {
       const isFullscreen = !!(
         document.fullscreenElement ||
@@ -1024,8 +1082,37 @@ const VideoPlayer = ({
       if (!isFullscreen && screen.orientation && screen.orientation.unlock) {
         try {
           screen.orientation.unlock();
+          console.log("Orientation unlocked on fullscreen exit");
         } catch (err) {
           console.log("Orientation unlock failed:", err);
+        }
+      }
+    };
+
+    // iOS Safari specific events
+    const handleIOSFullscreenBegin = () => {
+      console.log("iOS fullscreen begin");
+      setFullscreen(true);
+
+      // Try to lock orientation on iOS
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch((err) => {
+          console.log("iOS orientation lock failed:", err);
+        });
+      }
+    };
+
+    const handleIOSFullscreenEnd = () => {
+      console.log("iOS fullscreen end");
+      setFullscreen(false);
+
+      // Unlock orientation on iOS
+      if (screen.orientation && screen.orientation.unlock) {
+        try {
+          screen.orientation.unlock();
+          console.log("iOS orientation unlocked");
+        } catch (err) {
+          console.log("iOS orientation unlock failed:", err);
         }
       }
     };
@@ -1034,6 +1121,12 @@ const VideoPlayer = ({
     document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
     document.addEventListener("mozfullscreenchange", handleFullscreenChange);
     document.addEventListener("msfullscreenchange", handleFullscreenChange);
+
+    // iOS specific video events
+    if (video) {
+      video.addEventListener("webkitbeginfullscreen", handleIOSFullscreenBegin);
+      video.addEventListener("webkitendfullscreen", handleIOSFullscreenEnd);
+    }
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -1049,6 +1142,17 @@ const VideoPlayer = ({
         "msfullscreenchange",
         handleFullscreenChange
       );
+
+      if (video) {
+        video.removeEventListener(
+          "webkitbeginfullscreen",
+          handleIOSFullscreenBegin
+        );
+        video.removeEventListener(
+          "webkitendfullscreen",
+          handleIOSFullscreenEnd
+        );
+      }
     };
   }, []);
 

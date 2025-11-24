@@ -77,7 +77,7 @@ export default function MovieModal({
     }
   }, [favoriteSlugs, slug]);
 
-  const handlePlayMovie = async (movie) => {
+  const handlePlayMovie = (movie) => {
     // Lưu thông tin resume vào localStorage
     const resumeData = {
       slug: movie.slug,
@@ -89,41 +89,8 @@ export default function MovieModal({
 
     localStorage.setItem("resumeVideo", JSON.stringify(resumeData));
 
-    // Trên mobile, request fullscreen NGAY trước khi navigate
-    if (window.innerWidth < 1024) {
-      try {
-        const docEl = document.documentElement;
-
-        // Request fullscreen trên document
-        if (docEl.requestFullscreen) {
-          await docEl.requestFullscreen();
-        } else if (docEl.webkitRequestFullscreen) {
-          await docEl.webkitRequestFullscreen();
-        } else if (docEl.mozRequestFullScreen) {
-          await docEl.mozRequestFullScreen();
-        } else if (docEl.msRequestFullscreen) {
-          await docEl.msRequestFullscreen();
-        }
-
-        console.log("Fullscreen requested before navigation");
-
-        // Lock orientation
-        if (screen.orientation && screen.orientation.lock) {
-          try {
-            await screen.orientation.lock("landscape");
-          } catch (err) {
-            console.log("Orientation lock failed:", err);
-          }
-        }
-      } catch (err) {
-        console.log("Fullscreen before navigate failed:", err);
-      }
-    }
-
-    // Navigate với delay nhỏ để fullscreen hoàn tất
-    setTimeout(() => {
-      navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
-    }, 100);
+    // Navigate trực tiếp - VideoPlayer sẽ xử lý fullscreen
+    navigate(`/xem-phim/${movie.slug}?svr=${movie.svr}&ep=${movie.episode}`);
   };
 
   useEffect(() => {
