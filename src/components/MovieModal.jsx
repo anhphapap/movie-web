@@ -27,14 +27,13 @@ const customStyles = {
     boxShadow: "2px solid black",
     color: "white",
     padding: 0,
-    overflow: "auto",
+    overflow: "visible",
     border: "none",
     maxHeight: "100vh",
   },
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.75)",
     paddingBottom: "0",
-    overflowY: "auto",
   },
 };
 
@@ -369,8 +368,8 @@ export default function MovieModal({
       ariaHideApp={false}
       className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] mb-8 lg:mb-0"
     >
-      <div className="pb-8 lg:pb-[4vh]">
-        <div className="flex flex-col w-full lg:rounded-lg bg-[#181818]">
+      <div className="pb-0 lg:pb-[4vh]">
+        <div className="flex flex-col w-full lg:rounded-lg bg-[#181818] pb-8 lg:pb-0">
           <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
             <div
               className={`absolute top-0 left-0 w-full h-full object-cover z-10 transition-opacity duration-1000 ease-in-out ${
