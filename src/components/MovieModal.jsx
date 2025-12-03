@@ -366,7 +366,7 @@ export default function MovieModal({
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] mb-8 lg:mb-0"
+      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] mb-8 lg:mb-0 overflow-auto lg:overflow-visible"
     >
       <div className="pb-0 lg:pb-[4vh]">
         <div className="flex flex-col w-full lg:rounded-lg bg-[#181818] pb-8 lg:pb-0">
