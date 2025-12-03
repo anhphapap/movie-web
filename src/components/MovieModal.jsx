@@ -27,13 +27,13 @@ const customStyles = {
     boxShadow: "2px solid black",
     color: "white",
     padding: 0,
-    overflow: "visible",
     border: "none",
     maxHeight: "100vh",
   },
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.75)",
     paddingBottom: "0",
+    overflowY: "auto",
   },
 };
 
