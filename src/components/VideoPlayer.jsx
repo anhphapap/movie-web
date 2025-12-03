@@ -102,6 +102,80 @@ const VideoPlayer = ({
   const isHoveringControlsRef = useRef(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showQualityMenuState, setShowQualityMenuState] = useState(false);
+  const wakeLockRef = useRef(null);
+
+  // Screen Wake Lock - Giữ màn hình luôn sáng khi xem video
+  const requestWakeLock = async () => {
+    try {
+      // Check if Wake Lock API is supported
+      if ("wakeLock" in navigator) {
+        // Request a screen wake lock
+        wakeLockRef.current = await navigator.wakeLock.request("screen");
+        console.log("Wake Lock activated - màn hình sẽ luôn sáng");
+
+        // Listen for wake lock release
+        wakeLockRef.current.addEventListener("release", () => {
+          console.log("Wake Lock released");
+        });
+      } else {
+        console.log("Wake Lock API not supported on this device");
+      }
+    } catch (err) {
+      console.error("Wake Lock request failed:", err);
+    }
+  };
+
+  const releaseWakeLock = async () => {
+    if (wakeLockRef.current !== null) {
+      try {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        console.log("Wake Lock released manually");
+      } catch (err) {
+        console.error("Wake Lock release failed:", err);
+      }
+    }
+  };
+
+  // Manage Wake Lock based on video playing state and fullscreen
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Request wake lock khi video đang play VÀ (ở fullscreen HOẶC trên mobile)
+    if (playing && (fullscreen || isMobile)) {
+      requestWakeLock();
+    } else {
+      // Release wake lock khi video pause hoặc thoát fullscreen (trên desktop)
+      releaseWakeLock();
+    }
+
+    // Cleanup khi component unmount
+    return () => {
+      releaseWakeLock();
+    };
+  }, [playing, fullscreen, isMobile]);
+
+  // Re-request wake lock khi tab/page trở lại visible (mobile thường release wake lock khi tab không active)
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (
+        document.visibilityState === "visible" &&
+        wakeLockRef.current === null &&
+        playing &&
+        (fullscreen || isMobile)
+      ) {
+        console.log("Tab visible again, re-requesting wake lock");
+        await requestWakeLock();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [playing, fullscreen, isMobile]);
 
   // Detect mobile
   useEffect(() => {
@@ -1187,6 +1261,21 @@ const VideoPlayer = ({
       resetControlsTimer(false);
     }
   }, [showEpisodes, resetControlsTimer]);
+
+  // Auto-hide controls sau khi video play (đặc biệt quan trọng khi chuyển tập)
+  useEffect(() => {
+    if (videoReady && hasPlayedOnce && playing) {
+      console.log(
+        "Video is playing, starting auto-hide timer for controls after episode/svr change"
+      );
+      // Delay trước khi start timer
+      const initialDelay = setTimeout(() => {
+        resetControlsTimer(false);
+      }, 1500); // 1.5s sau khi video play mới bắt đầu timer ẩn
+
+      return () => clearTimeout(initialDelay);
+    }
+  }, [videoReady, hasPlayedOnce, playing, episode, svr, resetControlsTimer]);
 
   // Keyboard shortcuts
   useEffect(() => {
