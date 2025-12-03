@@ -27,12 +27,14 @@ const customStyles = {
     boxShadow: "2px solid black",
     color: "white",
     padding: 0,
-    overflow: "visible",
+    overflow: "auto",
     border: "none",
+    maxHeight: "100vh",
   },
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.75)",
-    paddingBottom: "8vh",
+    paddingBottom: "0",
+    overflowY: "auto",
   },
 };
 
@@ -340,7 +342,7 @@ export default function MovieModal({
         onRequestClose={onClose}
         style={customStyles}
         ariaHideApp={false}
-        className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none lg:bottom-auto lg:!top-[5%] min-h-screen !bg-[#181818]"
+        className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none lg:bottom-auto lg:!top-[5%] !bg-[#181818]"
       >
         <button
           className="aspect-square w-7 rounded-full bg-[#181818] absolute right-3 top-3 z-10 flex items-center justify-center"
@@ -348,7 +350,7 @@ export default function MovieModal({
         >
           <FontAwesomeIcon icon="fa-solid fa-xmark" />
         </button>
-        <div className="h-screen flex items-center justify-center">
+        <div className="h-[50vh] flex items-center justify-center">
           <FontAwesomeIcon
             icon="fa-solid fa-spinner"
             size="2xl"
@@ -365,9 +367,9 @@ export default function MovieModal({
       onRequestClose={onClose}
       style={customStyles}
       ariaHideApp={false}
-      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] !mb-0"
+      className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none !top-0 lg:!top-[4%] mb-8 lg:mb-0"
     >
-      <div className="lg:pb-[4vh]">
+      <div className="pb-8 lg:pb-[4vh]">
         <div className="flex flex-col w-full lg:rounded-lg bg-[#181818]">
           <div className="aspect-video bg-cover bg-center w-full relative lg:rounded-t-lg lg:overflow-hidden">
             <div
