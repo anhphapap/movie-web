@@ -22,10 +22,8 @@ const FullWatchPage = () => {
   const { setCinema } = useCinema();
 
   const handleNavigateToNextEpisode = () => {
-    // Delay việc set flag để tránh race condition
-    setTimeout(() => {
-      shouldAutoPlayRef.current = true;
-    }, 50);
+    // Set flag TRƯỚC khi navigate để VideoPlayer nhận được
+    shouldAutoPlayRef.current = true;
     navigate(`/xem-phim/${movieSlug}?svr=${svr}&ep=${parseInt(ep) + 1}`);
   };
 
@@ -48,15 +46,19 @@ const FullWatchPage = () => {
     }
   }, [movieSlug]);
 
-  // Reset autoplay flag after navigation
+  // Reset autoplay flag khi ep thay đổi và sau khi video đã play
   useEffect(() => {
+    // Chỉ reset khi đang trong chế độ autoplay
     if (shouldAutoPlayRef.current) {
-      // Reset after a short delay to ensure video has loaded
-      setTimeout(() => {
+      // Reset sau khi video đã load và play (3s là đủ)
+      const timer = setTimeout(() => {
         shouldAutoPlayRef.current = false;
-      }, 1000);
+        console.log("shouldAutoPlay reset to false");
+      }, 3000);
+
+      return () => clearTimeout(timer);
     }
-  }, [ep]);
+  }, [ep, svr]);
 
   // Clear resume data sau khi video đã seek xong
   useEffect(() => {

@@ -341,7 +341,7 @@ export default function MovieModal({
         onRequestClose={onClose}
         style={customStyles}
         ariaHideApp={false}
-        className="w-full lg:w-[94%] xl:w-[70%] 2xl:w-[50%] text-xs lg:text-lg outline-none lg:bottom-auto lg:!top-[5%] !bg-[#181818]"
+        className="w-full lg:w-[94%] xl:w-[70%] !h-screen flex items-center justify-center 2xl:w-[50%] text-xs lg:text-lg outline-none lg:bottom-auto lg:!top-[5%] !bg-[#181818]"
       >
         <button
           className="aspect-square w-7 rounded-full bg-[#181818] absolute right-3 top-3 z-10 flex items-center justify-center"
@@ -349,7 +349,7 @@ export default function MovieModal({
         >
           <FontAwesomeIcon icon="fa-solid fa-xmark" />
         </button>
-        <div className="h-[50vh] flex items-center justify-center">
+        <div className="h-screen lg:h-[50vh] flex items-center justify-center">
           <FontAwesomeIcon
             icon="fa-solid fa-spinner"
             size="2xl"

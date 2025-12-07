@@ -314,7 +314,9 @@ const VideoPlayer = ({
     setShowControls(false);
     setIsBuffering(false);
     setBuffered(0);
-    // Không reset hasPlayedOnce nếu đang auto play
+    setProgress(0);
+    setDuration(0);
+    // Reset hasPlayedOnce CHỈ nếu KHÔNG có shouldAutoPlay
     if (!shouldAutoPlay) {
       setHasPlayedOnce(false);
     }
@@ -349,9 +351,8 @@ const VideoPlayer = ({
       hls.on(Hls.Events.MANIFEST_LOADED, () => {
         setVideoReady(true);
 
-        // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
-        // Không auto-play nếu là lần đầu xem -> hiện button play
-        if (shouldAutoPlay && resumeData) {
+        // Auto-play nếu shouldAutoPlay (chuyển tập hoặc tiếp tục xem)
+        if (shouldAutoPlay) {
           // Giảm timeout để giữ user gesture context
           setTimeout(async () => {
             if (video && hlsRef.current === hls) {
@@ -397,9 +398,8 @@ const VideoPlayer = ({
       const handleCanPlay = () => {
         setVideoReady(true);
 
-        // CHỈ auto-play nếu có resume data (đang tiếp tục xem)
-        // Không auto-play nếu là lần đầu xem -> hiện button play
-        if (shouldAutoPlay && resumeData) {
+        // Auto-play nếu shouldAutoPlay (chuyển tập hoặc tiếp tục xem)
+        if (shouldAutoPlay) {
           // Giảm timeout để giữ user gesture context
           setTimeout(async () => {
             if (video) {
@@ -441,23 +441,18 @@ const VideoPlayer = ({
     // Chỉ seek nếu video đã sẵn sàng và có resume data với currentTime > 0
     if (resumeData.currentTime > 0) {
       // Delay để đảm bảo video đã load xong
-      setTimeout(() => {
+      const seekTimer = setTimeout(() => {
         if (video && hlsRef.current) {
           // Kiểm tra cả video và HLS instance
           video.currentTime = resumeData.currentTime;
           setProgress(resumeData.currentTime);
-
-          // Chỉ play nếu video đang pause và không có shouldAutoPlay
-          if (video.paused && !shouldAutoPlay) {
-            video.play().catch(console.error);
-            setPlaying(true);
-            setShowControls(true);
-            setHasPlayedOnce(true);
-          }
+          console.log("Resume video at:", resumeData.currentTime);
         }
-      }, 800); // Tăng delay để tránh conflict
+      }, 800); // Delay để HLS load xong
+
+      return () => clearTimeout(seekTimer);
     }
-  }, [resumeData, videoReady, shouldAutoPlay]); // ❌ Bỏ playing khỏi dependency
+  }, [resumeData, videoReady]); // ❌ Bỏ playing và shouldAutoPlay khỏi dependency
 
   // Monitor buffering
   useEffect(() => {
@@ -1265,13 +1260,16 @@ const VideoPlayer = ({
   // Auto-hide controls sau khi video play (đặc biệt quan trọng khi chuyển tập)
   useEffect(() => {
     if (videoReady && hasPlayedOnce && playing) {
-      console.log(
-        "Video is playing, starting auto-hide timer for controls after episode/svr change"
-      );
+      console.log("Video is playing, starting auto-hide timer for controls", {
+        episode,
+        svr,
+        shouldAutoPlay,
+      });
       // Delay trước khi start timer
       const initialDelay = setTimeout(() => {
-        resetControlsTimer(false);
-      }, 1500); // 1.5s sau khi video play mới bắt đầu timer ẩn
+        // Start timer để ẩn controls
+        resetControlsTimer(true); // Force start timer
+      }, 2000); // 2s sau khi video play mới bắt đầu timer ẩn
 
       return () => clearTimeout(initialDelay);
     }
