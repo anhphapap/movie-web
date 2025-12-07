@@ -13,7 +13,13 @@ export async function fetchTrending(type = "movie", timeWindow = "day") {
 
     const tmdbRes = await fetch(
       `${baseURL}/api/tmdb/trending?type=${type}&time=${timeWindow}`,
-      { cache: "force-cache" }
+      {
+        cache: "no-cache", // Đổi từ force-cache → no-cache để luôn lấy data mới
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      }
     );
 
     const { results = [] } = await tmdbRes.json();

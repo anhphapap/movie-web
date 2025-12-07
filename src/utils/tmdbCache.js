@@ -1,6 +1,6 @@
 import { fetchTrending } from "./fetchTrending";
 
-const TTL = 1000 * 60 * 30; // 30 phút
+const TTL = 1000 * 60 * 10; // 10 phút - giảm từ 30 phút để cập nhật nhanh hơn
 
 export async function warmTmdbCache() {
   await Promise.all([
@@ -15,33 +15,92 @@ export async function getTmdbCached(type = "movie", timeWindow = "day") {
   const cachedTime = sessionStorage.getItem(`${key}_time`);
 
   // Chỉ dùng cache nếu còn hạn VÀ dữ liệu không rỗng
-  if (cached && cachedTime && Date.now() - cachedTime < TTL) {
+  if (cached && cachedTime && Date.now() - parseInt(cachedTime) < TTL) {
     try {
       const parsedCache = JSON.parse(cached);
       // Kiểm tra cache có dữ liệu hợp lệ không
       if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+        console.log(
+          `✅ Using cached TMDB data for ${type} (${parsedCache.length} items)`
+        );
         return parsedCache;
       } else {
+        console.warn(`⚠️ Invalid cache for ${type}, clearing...`);
         sessionStorage.removeItem(key);
         sessionStorage.removeItem(`${key}_time`);
       }
     } catch (err) {
+      console.error(`❌ Error parsing cache for ${type}:`, err);
       sessionStorage.removeItem(key);
       sessionStorage.removeItem(`${key}_time`);
     }
+  } else if (cachedTime) {
+    console.log(`🔄 Cache expired for ${type}, fetching fresh data...`);
   }
 
   // Fetch fresh data
+  console.log(`🌐 Fetching fresh TMDB data for ${type}...`);
   const fresh = await fetchTrending(type, timeWindow);
 
   // Chỉ cache nếu có dữ liệu hợp lệ
   if (Array.isArray(fresh) && fresh.length > 0) {
     sessionStorage.setItem(key, JSON.stringify(fresh));
-    sessionStorage.setItem(`${key}_time`, Date.now());
+    sessionStorage.setItem(`${key}_time`, Date.now().toString());
     sessionStorage.setItem("selected_movie", Math.floor(Math.random() * 10));
+    console.log(`💾 Cached ${fresh.length} items for ${type}`);
   } else {
     console.warn(`⚠️ No valid data to cache for ${type}`);
   }
 
   return fresh;
+}
+
+// Helper function để force clear cache (dùng khi cần refresh thủ công)
+export function clearTmdbCache() {
+  ["tmdb_movie_day", "tmdb_tv_day"].forEach((key) => {
+    sessionStorage.removeItem(key);
+    sessionStorage.removeItem(`${key}_time`);
+  });
+  console.log("🗑️ TMDB cache cleared");
+}
+
+// Debug function để xem cache status
+export function getTmdbCacheInfo() {
+  const keys = ["tmdb_movie_day", "tmdb_tv_day"];
+  const info = {};
+
+  keys.forEach((key) => {
+    const cached = sessionStorage.getItem(key);
+    const cachedTime = sessionStorage.getItem(`${key}_time`);
+
+    if (cached && cachedTime) {
+      const age = Date.now() - parseInt(cachedTime);
+      const ageMinutes = Math.floor(age / 1000 / 60);
+      const remaining = TTL - age;
+      const remainingMinutes = Math.floor(remaining / 1000 / 60);
+      const data = JSON.parse(cached);
+
+      info[key] = {
+        itemCount: data.length,
+        ageMinutes: ageMinutes,
+        remainingMinutes: Math.max(0, remainingMinutes),
+        expired: age >= TTL,
+        cachedAt: new Date(parseInt(cachedTime)).toLocaleString("vi-VN"),
+      };
+    } else {
+      info[key] = { status: "No cache" };
+    }
+  });
+
+  console.table(info);
+  return info;
+}
+
+// Thêm vào window object để dễ debug từ console
+if (typeof window !== "undefined") {
+  window.clearTmdbCache = clearTmdbCache;
+  window.getTmdbCacheInfo = getTmdbCacheInfo;
+  console.log(
+    "💡 Debug commands available: window.clearTmdbCache(), window.getTmdbCacheInfo()"
+  );
 }
