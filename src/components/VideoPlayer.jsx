@@ -1008,9 +1008,9 @@ const VideoPlayer = ({
 
         singleTapTimer.current = setTimeout(async () => {
           // Single tap confirmed
+          const video = videoRef.current;
 
           // Nếu video đang play và chưa fullscreen trên mobile → trigger fullscreen
-          const video = videoRef.current;
           if (
             video &&
             !video.paused &&
@@ -1027,20 +1027,15 @@ const VideoPlayer = ({
             }
           }
 
+          // ✅ LOGIC MỚI: Tap vào vùng trống → CHỈ toggle controls (không play/pause)
+          // Play/pause chỉ qua nút bấm ở giữa màn
           if (showControls) {
-            // Control đang hiện → toggle pause/play
-            if (video) {
-              if (video.paused) {
-                video.play().catch(console.error);
-                showCenterOverlay("play");
-              } else {
-                video.pause();
-                showCenterOverlay("pause");
-              }
-            }
+            // Control đang hiện → ẩn đi
+            setShowControls(false);
           } else {
-            // Control chưa hiện → hiện control
+            // Control chưa hiện → hiện ra
             setShowControls(true);
+            resetControlsTimer(true); // Start timer để tự ẩn sau 3s
           }
         }, 300);
       }
@@ -2193,6 +2188,15 @@ const VideoPlayer = ({
                         setShowEpisodes(false);
                         setShowControls(true);
                         resetControlsTimer(false);
+                      }}
+                      onEpisodeChange={(newSvr, newEp) => {
+                        // Trigger shouldAutoPlay khi chuyển tập từ Episodes
+                        console.log("Episode changed from Episodes:", {
+                          newSvr,
+                          newEp,
+                        });
+                        // Set hasPlayedOnce để không hiện nút play lớn
+                        setHasPlayedOnce(true);
                       }}
                       show={showEpisodes}
                       name={movie.name}

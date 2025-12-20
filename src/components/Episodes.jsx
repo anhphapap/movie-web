@@ -11,6 +11,7 @@ const Episodes = ({
   svr,
   poster_url,
   slug,
+  onEpisodeChange, // Callback để notify khi chuyển tập
 }) => {
   const [showServer, setShowServer] = useState(parseInt(svr));
   const [showEpisode, setShowEpisode] = useState(parseInt(episode));
@@ -142,6 +143,13 @@ const Episodes = ({
                             className="absolute bottom-0 right-0 w-full h-full flex items-center justify-center rounded-sm cursor-pointer opacity-70 group-hover/Episodes:opacity-100  transition-all ease-linear duration-100"
                             onClick={(e) => {
                               e.stopPropagation();
+                              // Notify parent để trigger shouldAutoPlay
+                              if (onEpisodeChange) {
+                                onEpisodeChange(
+                                  showServer,
+                                  showEpisodes * 100 + index
+                                );
+                              }
                               navigate(
                                 `/xem-phim/${slug}?svr=${showServer}&ep=${
                                   showEpisodes * 100 + index

@@ -18,6 +18,8 @@ const FullWatchPage = () => {
   const [resumeData, setResumeData] = useState(null);
   const autoEpisodes = true;
   const shouldAutoPlayRef = useRef(false);
+  const prevEpRef = useRef(ep);
+  const prevSvrRef = useRef(svr);
   const navigate = useNavigate();
   const { setCinema } = useCinema();
 
@@ -57,6 +59,24 @@ const FullWatchPage = () => {
       }, 3000);
 
       return () => clearTimeout(timer);
+    }
+  }, [ep, svr]);
+
+  // Detect khi ep/svr thay đổi (user click Episodes) → set shouldAutoPlay
+  useEffect(() => {
+    // Skip lần đầu mount
+    if (prevEpRef.current === ep && prevSvrRef.current === svr) {
+      return;
+    }
+
+    // Nếu ep hoặc svr thay đổi → user đã click chuyển tập
+    if (prevEpRef.current !== ep || prevSvrRef.current !== svr) {
+      console.log("Episode/Server changed, setting shouldAutoPlay to true");
+      shouldAutoPlayRef.current = true;
+
+      // Update refs
+      prevEpRef.current = ep;
+      prevSvrRef.current = svr;
     }
   }, [ep, svr]);
 
