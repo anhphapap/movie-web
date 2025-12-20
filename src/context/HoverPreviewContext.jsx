@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
 } from "react";
+import { useLocation } from "react-router-dom";
 
 const HoverPreviewContext = createContext();
 
@@ -14,6 +15,7 @@ export const HoverPreviewProvider = ({ children }) => {
   const [hovered, setHovered] = useState(null);
   const timer = useRef(null);
   const lastPayload = useRef(null);
+  const location = useLocation();
 
   const clear = () => {
     if (timer.current) {
@@ -39,6 +41,13 @@ export const HoverPreviewProvider = ({ children }) => {
       lastPayload.current = null;
     }, leaveDelay);
   }, []);
+
+  // ✅ Force clear preview khi location thay đổi (navigate)
+  useEffect(() => {
+    clear();
+    setHovered(null);
+    lastPayload.current = null;
+  }, [location.pathname, location.search]);
 
   useEffect(() => clear, []);
 
