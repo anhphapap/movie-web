@@ -7,10 +7,15 @@ const CACHE_TTL = 1000 * 60 * 10; // 10 phút - giảm từ 6 giờ để cập 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Cache-Control, Pragma, Expires"
+  );
+
+  res.setHeader("Vary", "Origin");
 
   if (req.method === "OPTIONS") {
-    return res.status(200).end(); // Preflight OK
+    return res.status(200).end();
   }
   try {
     const { type = "movie", time = "day" } = req.query;
